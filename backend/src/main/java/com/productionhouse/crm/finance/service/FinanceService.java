@@ -2,14 +2,12 @@ package com.productionhouse.crm.finance.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.productionhouse.crm.finance.model.Budget;
-import com.productionhouse.crm.finance.model.BudgetResponse;
 import com.productionhouse.crm.finance.model.Expense;
 import com.productionhouse.crm.finance.model.ExpenseStatus;
 import com.productionhouse.crm.finance.repository.BudgetRepository;
@@ -100,39 +98,6 @@ public class FinanceService {
 
 	public List<Expense> getAllExpensesList() {
 		return expenseRepository.findAll();
-	}
-
-	public BudgetResponse getGlobalFinancialDashboardMetrics() {
-		List<Budget> budgets = budgetRepository.findAll();
-		List<Expense> approvedExpenses = expenseRepository.findAll().stream()
-				.filter(e -> e.getStatus() == ExpenseStatus.APPROVED).toList();
-
-		BigDecimal totalAllocated = budgets.stream().map(Budget::getTotalAllocated).reduce(BigDecimal.ZERO,
-				BigDecimal::add);
-
-		BigDecimal totalSpent = budgets.stream().map(Budget::getTotalSpent).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-		BigDecimal remainingRunway = totalAllocated.subtract(totalSpent);
-
-		double burnRate = 0.0;
-		if (totalAllocated.compareTo(BigDecimal.ZERO) > 0) {
-			burnRate = totalSpent.divide(totalAllocated, 4, java.math.RoundingMode.HALF_UP)
-					.multiply(new BigDecimal("100")).doubleValue();
-		}
-
-		java.util.Map<String, BigDecimal> distribution = approvedExpenses.stream()
-				.collect(Collectors.groupingBy(Expense::getCategory,
-						java.util.stream.Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
-
-		BudgetResponse dashboard = new BudgetResponse();
-		dashboard.setTotalAllocated(totalAllocated);
-		dashboard.setTotalSpent(totalSpent);
-		dashboard.setGlobalBurnRate(burnRate);
-		dashboard.setRemainingRunway(remainingRunway);
-		dashboard.setProjectBudgets(budgets);
-		dashboard.setCategoryCostDistribution(distribution);
-
-		return dashboard;
 	}
 
 }
