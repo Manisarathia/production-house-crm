@@ -1,17 +1,46 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Clapperboard, LayoutDashboard, Users, Building2, Settings, Truck, Wallet, Receipt, Bell, Search, Menu, X, ChevronDown } from 'lucide-react';
+import { Clapperboard, Film, LayoutDashboard, Users, Building2, Settings, Truck, Wallet, Receipt, Bell, Search, Menu, X, ChevronDown, Layers } from 'lucide-react';
 
 const groups = [
  { label: 'WORKSPACE', items: [{to:'/',label:'Dashboard',Icon:LayoutDashboard},{to:'/team',label:'Team & User Roles',Icon:Users},{to:'/departments',label:'Departments',Icon:Building2}] },
+ {
+   label: 'PROJECTS & PRODUCTION',
+   items: [
+     {to:'/projects',label:'Projects & Productions',Icon:Clapperboard},
+     {to:'/movies-series',label:'Movies & Web Series',Icon:Film},
+     {to:'/cast-crew',label:'Cast & Crew Management',Icon:Users},
+     {to:'/episodes-scenes',label:'Episodes & Scenes',Icon:Layers}
+   ]
+ },
  { label: 'FINANCE & RESOURCES', items: [{to:'/vendors-equipment',label:'Vendors & Equipment',Icon:Truck},{to:'/budget-expenses',label:'Budget & Expenses',Icon:Wallet},{to:'/invoices-payments',label:'Invoices & Payments',Icon:Receipt}] },
  { label: 'PREFERENCES', items: [{to:'/settings',label:'Settings',Icon:Settings}] }
 ];
-const titles = {'/':'Overview','/team':'Team & User Roles','/departments':'Departments','/settings':'Settings','/vendors-equipment':'Vendors & Equipment','/budget-expenses':'Budget & Expenses','/invoices-payments':'Invoices & Payments'};
+
+const titles = {
+  '/':'Overview',
+  '/projects':'Projects & Productions',
+  '/movies-series':'Movies & Web Series',
+  '/cast-crew':'Cast & Crew Management',
+  '/episodes-scenes':'Episodes & Scenes',
+  '/team':'Team & User Roles',
+  '/departments':'Departments',
+  '/settings':'Settings',
+  '/vendors-equipment':'Vendors & Equipment',
+  '/budget-expenses':'Budget & Expenses',
+  '/invoices-payments':'Invoices & Payments'
+};
+
 export default function MainLayout(){
  const [open,setOpen]=useState(false); const loc=useLocation(); const navigate=useNavigate();
- const logout=()=>{localStorage.removeItem('loopstream-auth');localStorage.removeItem('loopstream-user');navigate('/login',{replace:true});};
+ const logout=()=>{
+   localStorage.removeItem('frameflow-auth');
+   localStorage.removeItem('frameflow-user');
+   localStorage.removeItem('loopstream-auth');
+   localStorage.removeItem('loopstream-user');
+   navigate('/login',{replace:true});
+ };
  return <div className="app-shell">
   {open && <button className="mobile-overlay" aria-label="Close navigation" onClick={()=>setOpen(false)} />}
   <aside className={`sidebar ${open?'sidebar-open':''}`}>
