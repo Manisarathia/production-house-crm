@@ -31,121 +31,123 @@ import com.productionhouse.crm.finance.service.InvoiceService;
 @CrossOrigin(origins = "*")
 public class InvoicePaymentController {
 
-    @Autowired
-    private InvoiceService invoiceService;
-    
-    @Autowired
-    private InvoiceRepository invoiceRepository;
+	@Autowired
+	private InvoiceService invoiceService;
 
-    @Autowired
-    private PaymentRepository paymentRepository;
-    
-    @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<Invoice>> getInvoicesByProject(@PathVariable String projectId) {
-        List<Invoice> invoices = invoiceService.findByProjectId(projectId);
-        return ResponseEntity.ok(invoices);
-    }
-    
-    @GetMapping
-    @Transactional
-    public ResponseEntity<List<InvoiceResponse>> getAllInvoices() {
-        List<Invoice> baseEntities = invoiceService.findAll();
-        LocalDate today = LocalDate.now();
-        boolean needsDatabaseUpdate = false;
-        for (Invoice invoice : baseEntities) {
-            if ((invoice.getStatus() == PaymentStatus.UNPAID || invoice.getStatus() == PaymentStatus.PARTIAL) 
-                    && invoice.getDueDate().isBefore(today)) {
-                
-                invoice.setStatus(PaymentStatus.OVERDUE);
-                needsDatabaseUpdate = true;
-            }
-        }
-        if (needsDatabaseUpdate) {
-        	invoiceRepository.saveAll(baseEntities);
-        	invoiceRepository.flush();
-        }
-        List<InvoiceResponse> detailedInvoices = invoiceRepository.findAllInvoicesWithProjectNames();
-        return ResponseEntity.ok(detailedInvoices);
-    }
+	@Autowired
+	private InvoiceRepository invoiceRepository;
 
-    @PostMapping
-    @Transactional
-    public ResponseEntity<?> generateInvoice(@RequestBody Map<String, Object> payload) {
-        try {
-            if (!payload.containsKey("projectId") || !payload.containsKey("issuedTo") || !payload.containsKey("amountDue")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Missing mandatory billing fields."));
-            }
+	@Autowired
+	private PaymentRepository paymentRepository;
 
-            Invoice invoice = new Invoice();
-            invoice.setProjectId((String) payload.get("projectId"));
-            invoice.setIssuedTo((String) payload.get("issuedTo"));
-            
-            BigDecimal amountDue = new BigDecimal(payload.get("amountDue").toString());
-            invoice.setAmountDue(amountDue);
+	@GetMapping("/project/{projectId}")
+	public ResponseEntity<List<Invoice>> getInvoicesByProject(@PathVariable String projectId) {
+		List<Invoice> invoices = invoiceService.findByProjectId(projectId);
+		return ResponseEntity.ok(invoices);
+	}
 
-            long currentCount = invoiceService.count();
-            int currentYear = LocalDate.now().getYear();
-            String generatedInvoiceNum = "INV-" + currentYear + "-" + String.format("%03d", currentCount + 42);
-            invoice.setInvoiceNumber(generatedInvoiceNum);
+	@GetMapping
+	@Transactional
+	public ResponseEntity<List<InvoiceResponse>> getAllInvoices() {
+		List<Invoice> baseEntities = invoiceService.findAll();
+		LocalDate today = LocalDate.now();
+		boolean needsDatabaseUpdate = false;
+		for (Invoice invoice : baseEntities) {
+			if ((invoice.getStatus() == PaymentStatus.UNPAID || invoice.getStatus() == PaymentStatus.PARTIAL)
+					&& invoice.getDueDate().isBefore(today)) {
 
-            invoice.setInvoiceNumber(generatedInvoiceNum);
+				invoice.setStatus(PaymentStatus.OVERDUE);
+				needsDatabaseUpdate = true;
+			}
+		}
+		if (needsDatabaseUpdate) {
+			invoiceRepository.saveAll(baseEntities);
+			invoiceRepository.flush();
+		}
+		List<InvoiceResponse> detailedInvoices = invoiceRepository.findAllInvoicesWithProjectNames();
+		return ResponseEntity.ok(detailedInvoices);
+	}
 
-            if (payload.containsKey("dueDate") && payload.get("dueDate") != null) {
-                invoice.setDueDate(LocalDate.parse((String) payload.get("dueDate")));
-            } else {
-                invoice.setDueDate(LocalDate.now().plusDays(14));
-            }
-            invoice.setStatus(PaymentStatus.UNPAID);
+	@PostMapping
+	@Transactional
+	public ResponseEntity<?> generateInvoice(@RequestBody Map<String, Object> payload) {
+		try {
+			if (!payload.containsKey("projectId") || !payload.containsKey("issuedTo")
+					|| !payload.containsKey("amountDue")) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Missing mandatory billing fields."));
+			}
 
-            Invoice savedInvoice = invoiceService.save(invoice);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedInvoice);
+			Invoice invoice = new Invoice();
+			invoice.setProjectId((String) payload.get("projectId"));
+			invoice.setIssuedTo((String) payload.get("issuedTo"));
 
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failure processing invoice registration stream: " + e.getMessage()));
-        }
-    }
+			BigDecimal amountDue = new BigDecimal(payload.get("amountDue").toString());
+			invoice.setAmountDue(amountDue);
 
-    @PostMapping("/{invoiceId}/payments")
-    @Transactional
-    public ResponseEntity<?> processPayment(@PathVariable String invoiceId, @RequestBody Map<String, Object> payload) {
-        try {
-            Optional<Invoice> invoiceOpt = invoiceService.findById(invoiceId);
-            if (invoiceOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Target billing ledger item not found."));
-            }
+			long currentCount = invoiceService.count();
+			int currentYear = LocalDate.now().getYear();
+			String generatedInvoiceNum = "INV-" + currentYear + "-" + String.format("%03d", currentCount + 42);
+			invoice.setInvoiceNumber(generatedInvoiceNum);
 
-            Invoice invoice = invoiceOpt.get();
-            if (invoice.getStatus() == PaymentStatus.PAID) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Payment operation declined: Invoice is already fully paid."));
-            }
+			invoice.setInvoiceNumber(generatedInvoiceNum);
 
-            BigDecimal amountPaid = new BigDecimal(payload.get("amountPaid").toString());
-            String method = payload.containsKey("method") ? (String) payload.get("method") : "Bank Transfer";
+			if (payload.containsKey("dueDate") && payload.get("dueDate") != null) {
+				invoice.setDueDate(LocalDate.parse((String) payload.get("dueDate")));
+			} else {
+				invoice.setDueDate(LocalDate.now().plusDays(14));
+			}
+			invoice.setStatus(PaymentStatus.UNPAID);
 
-            Payment payment = new Payment();
-            payment.setInvoice(invoice);
-            payment.setAmountPaid(amountPaid);
-            payment.setMethod(method);
-            paymentRepository.save(payment);
+			Invoice savedInvoice = invoiceService.save(invoice);
+			return ResponseEntity.status(HttpStatus.CREATED).body(savedInvoice);
 
-            BigDecimal totalPaidSoFar = invoice.getPayments().stream()
-                    .map(Payment::getAmountPaid)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .add(amountPaid);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Failure processing invoice registration stream: " + e.getMessage()));
+		}
+	}
 
-            if (totalPaidSoFar.compareTo(invoice.getAmountDue()) >= 0) {
-                invoice.setStatus(PaymentStatus.PAID);
-            } else if (totalPaidSoFar.compareTo(BigDecimal.ZERO) > 0) {
-                invoice.setStatus(PaymentStatus.PARTIAL);
-            }
+	@PostMapping("/{invoiceId}/payments")
+	@Transactional
+	public ResponseEntity<?> processPayment(@PathVariable String invoiceId, @RequestBody Map<String, Object> payload) {
+		try {
+			Optional<Invoice> invoiceOpt = invoiceService.findById(invoiceId);
+			if (invoiceOpt.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+						.body(Map.of("error", "Target billing ledger item not found."));
+			}
 
-            invoiceService.save(invoice);
-            return ResponseEntity.ok(Map.of("message", "Payment ledger updated successfully.", "status", invoice.getStatus()));
+			Invoice invoice = invoiceOpt.get();
+			if (invoice.getStatus() == PaymentStatus.PAID) {
+				return ResponseEntity.badRequest()
+						.body(Map.of("error", "Payment operation declined: Invoice is already fully paid."));
+			}
 
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failure recording receipt payment path: " + e.getMessage()));
-        }
-    }
+			BigDecimal amountPaid = new BigDecimal(payload.get("amountPaid").toString());
+			String method = payload.containsKey("method") ? (String) payload.get("method") : "Bank Transfer";
+
+			Payment payment = new Payment();
+			payment.setInvoice(invoice);
+			payment.setAmountPaid(amountPaid);
+			payment.setMethod(method);
+			paymentRepository.save(payment);
+
+			BigDecimal totalPaidSoFar = invoice.getPayments().stream().map(Payment::getAmountPaid)
+					.reduce(BigDecimal.ZERO, BigDecimal::add).add(amountPaid);
+
+			if (totalPaidSoFar.compareTo(invoice.getAmountDue()) >= 0) {
+				invoice.setStatus(PaymentStatus.PAID);
+			} else if (totalPaidSoFar.compareTo(BigDecimal.ZERO) > 0) {
+				invoice.setStatus(PaymentStatus.PARTIAL);
+			}
+
+			invoiceService.save(invoice);
+			return ResponseEntity
+					.ok(Map.of("message", "Payment ledger updated successfully.", "status", invoice.getStatus()));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Failure recording receipt payment path: " + e.getMessage()));
+		}
+	}
 }
