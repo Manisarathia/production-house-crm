@@ -77,8 +77,17 @@ public class RoleAndAdminInitializer implements ApplicationRunner {
     }
 
     private void seedRole(String name, String description, Set<Permission> permissions) {
-        if (!roleRepository.existsByNameIgnoreCase(name)) {
+        Role existing = roleRepository.findByNameIgnoreCase(name).orElse(null);
+        if (existing == null) {
             roleRepository.save(new Role(name, description, permissions));
+            return;
+        }
+
+        // Permission enums can grow as modules are added. Reconcile the seeded
+        // administrator role on startup so an existing installation receives
+        // new system permissions without replacing any custom permissions.
+        if ("ADMIN".equalsIgnoreCase(name) && existing.getPermissions().addAll(permissions)) {
+            roleRepository.save(existing);
         }
     }
 }

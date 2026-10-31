@@ -1,0 +1,1 @@
+package com.productionhouse.crm.mediahouse.postproduction.repository;import com.productionhouse.crm.mediahouse.postproduction.entity.PostProductionTask;import org.springframework.data.jpa.repository.JpaRepository;public interface PostProductionTaskRepository extends JpaRepository<PostProductionTask,Long>{}

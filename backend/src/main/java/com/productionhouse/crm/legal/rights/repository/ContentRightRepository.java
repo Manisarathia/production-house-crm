@@ -1,0 +1,1 @@
+package com.productionhouse.crm.legal.rights.repository;import com.productionhouse.crm.legal.rights.entity.ContentRight;import org.springframework.data.jpa.repository.JpaRepository;public interface ContentRightRepository extends JpaRepository<ContentRight,Long>{}
