@@ -1,0 +1,15 @@
+.progress { min-width: 140px; }
+.progress__head { display: flex;
+     justify-content: space-between;
+      gap: 8px; font-size: 13px;
+       color: var(--ink-soft); margin-bottom: 4px; }
+
+.progress__head strong { color: var(--ink); }
+
+.progress__track { height: 6px;
+     border-radius: 99px; 
+     background: #2b2b2b; overflow: hidden; }
+
+.progress__fill { height: 100%;
+     border-radius: 99px; 
+     background: var(--accent); transition: width 400ms ease; }

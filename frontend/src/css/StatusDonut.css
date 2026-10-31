@@ -1,0 +1,182 @@
+.status-donut {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: min(100%, 460px);
+  padding: 18px 20px;
+  margin: -4px 0 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+.status-donut__chart {
+  position: relative;
+  width: 122px;
+  flex: 0 0 122px;
+}
+
+.status-donut svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.status-donut__track {
+  fill: none;
+  stroke: #292929;
+  stroke-width: 5;
+}
+
+.status-donut__segments {
+  fill: none;
+  stroke-width: 5;
+}
+
+.status-donut__segment {
+  fill: none;
+  cursor: pointer;
+  transform-origin: 21px 21px;
+  animation: donut-enter 720ms cubic-bezier(.2, .8, .2, 1) both;
+  transition: stroke-width 180ms ease, filter 180ms ease;
+}
+
+.status-donut__segment:focus-visible {
+  outline: none;
+  stroke-width: 7;
+  filter: brightness(1.2);
+}
+
+.status-donut__segment.is-hovered {
+  stroke-width: 7;
+  filter: brightness(1.15);
+}
+
+.status-donut__segment--good {
+  stroke: var(--good);
+}
+
+.status-donut__segment--warn {
+  stroke: var(--warn);
+}
+
+.status-donut__segment--bad {
+  stroke: var(--bad);
+}
+
+.status-donut__segment--neutral {
+  stroke: var(--accent);
+}
+
+.status-donut__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.status-donut__center strong {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  color: var(--ink);
+}
+
+.status-donut__center span {
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.status-donut__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-donut__title {
+  margin-bottom: 10px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+.status-donut__legend {
+  display: grid;
+  gap: 6px;
+}
+
+.status-donut__legend-item {
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  border-radius: 5px;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.status-donut__legend-item:hover,
+.status-donut__legend-item.is-active {
+  color: var(--ink);
+  background: var(--surface-raised);
+  transform: translateX(2px);
+}
+
+.status-donut__legend-item strong {
+  color: inherit;
+  font-size: 13px;
+}
+
+.status-donut__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.status-donut__legend-item--good .status-donut__dot {
+  background: var(--good);
+}
+
+.status-donut__legend-item--warn .status-donut__dot {
+  background: var(--warn);
+}
+
+.status-donut__legend-item--bad .status-donut__dot {
+  background: var(--bad);
+}
+
+.status-donut__legend-item--neutral .status-donut__dot {
+  background: var(--accent);
+}
+
+@keyframes donut-enter {
+  from {
+    opacity: 0;
+    transform: scale(.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-donut__segment {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-donut {
+    width: 100%;
+  }
+}
