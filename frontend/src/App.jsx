@@ -13,6 +13,9 @@ import Settings from './pages/Settings.jsx';
 import VendorsEquipment from './pages/VendorsEquipment.jsx';
 import BudgetExpenses from './pages/BudgetExpenses.jsx';
 import InvoicesPayments from './pages/InvoicesPayments.jsx';
+import PostProductionMedia from './pages/PostProductionMedia.jsx';
+import SingerDubbing from './pages/SingerDubbing.jsx';
+import ContractsRights from './pages/ContractsRights.jsx';
 import './app.css';
 
 function ProtectedLayout() {
@@ -31,6 +34,9 @@ export default function App() {
         <Route path="/movies-series" element={<MoviesWebSeries />} />
         <Route path="/cast-crew" element={<CastCrewManagement />} />
         <Route path="/episodes-scenes" element={<EpisodesScenes />} />
+        <Route path="/post-production-media" element={<PostProductionMedia />} />
+        <Route path="/singer-dubbing" element={<SingerDubbing />} />
+        <Route path="/contracts-rights" element={<ContractsRights />} />
         <Route path="/team" element={<TeamUsers />} />
         <Route path="/departments" element={<Departments />} />
         <Route path="/settings" element={<Settings />} />

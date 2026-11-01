@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Clapperboard, Film, LayoutDashboard, Users, Building2, Settings, Truck, Wallet, Receipt, Bell, Search, Menu, X, ChevronDown, Layers } from 'lucide-react';
+import { Clapperboard, Film, LayoutDashboard, Users, Building2, Settings, Truck, Wallet, Receipt, Bell, Search, Menu, X, ChevronDown, Layers, HardDrive, Mic, Scale } from 'lucide-react';
 
 const groups = [
  { label: 'WORKSPACE', items: [{to:'/',label:'Dashboard',Icon:LayoutDashboard},{to:'/team',label:'Team & User Roles',Icon:Users},{to:'/departments',label:'Departments',Icon:Building2}] },
@@ -14,6 +14,14 @@ const groups = [
      {to:'/episodes-scenes',label:'Episodes & Scenes',Icon:Layers}
    ]
  },
+ {
+   label: 'MEDIA, AUDIO & LEGAL',
+   items: [
+     {to:'/post-production-media',label:'Post-Production & Media',Icon:HardDrive},
+     {to:'/singer-dubbing',label:'Singer & Dubbing',Icon:Mic},
+     {to:'/contracts-rights',label:'Contracts & Rights',Icon:Scale}
+   ]
+ },
  { label: 'FINANCE & RESOURCES', items: [{to:'/vendors-equipment',label:'Vendors & Equipment',Icon:Truck},{to:'/budget-expenses',label:'Budget & Expenses',Icon:Wallet},{to:'/invoices-payments',label:'Invoices & Payments',Icon:Receipt}] },
  { label: 'PREFERENCES', items: [{to:'/settings',label:'Settings',Icon:Settings}] }
 ];
@@ -24,6 +32,9 @@ const titles = {
   '/movies-series':'Movies & Web Series',
   '/cast-crew':'Cast & Crew Management',
   '/episodes-scenes':'Episodes & Scenes',
+  '/post-production-media':'Post-Production & Media',
+  '/singer-dubbing':'Singer & Dubbing',
+  '/contracts-rights':'Contracts & Rights',
   '/team':'Team & User Roles',
   '/departments':'Departments',
   '/settings':'Settings',
