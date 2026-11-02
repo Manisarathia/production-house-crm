@@ -722,16 +722,16 @@ export default function ProjectsProductions() {
 
         {/* Card Grid View */}
         {viewMode === 'grid' && (
-          <div className="production-grid">
+          <div className="production-grid " >
             {filteredProjects.map(p => {
               const tone = getStatusTone(p.status);
               const spentPct = p.budget > 0 ? Math.min(100, Math.round((p.spent / p.budget) * 100)) : 0;
               const isKids = p.platform === 'LoopKids';
 
               return (
-                <div className="prod-card" key={p.id}>
+                <div className="prod-card" key={p.id}  >
                   {/* Poster Banner */}
-                  <div className="prod-card-poster-wrap">
+                  <div className="prod-card-poster-wrap" >
                     <img
                       src={getMoviePoster(p.name, p.poster)}
                       alt={p.name}

@@ -1,92 +1,295 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, ReceiptText, X, Download } from 'lucide-react';
 
-const initial = [
-  { id: 'INV-2026-041', vendor: 'CineGear Rentals', project: 'The Last Monsoon', amount: 185000, due: 'Nov 02, 2026', status: 'Due' },
-  { id: 'INV-2026-040', vendor: 'Lightbox Studios', project: 'City of Echoes', amount: 92000, due: 'Oct 30, 2026', status: 'Pending' },
-  { id: 'INV-2026-039', vendor: 'SoundWave Pro', project: 'Beyond The Frame', amount: 67500, due: 'Oct 20, 2026', status: 'Paid' },
-  { id: 'INV-2026-038', vendor: 'Metro Transport', project: 'The Last Monsoon', amount: 34000, due: 'Oct 18, 2026', status: 'Overdue' },
-];
+const API_BASE_URL = 'http://localhost:8080/api/finance/invoices';
+
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 export default function InvoicesPayments() {
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
   const [show, setShow] = useState(false);
-  const [vendor, setVendor] = useState('');
-  const [amount, setAmount] = useState('');
-  const [project, setProject] = useState('The Last Monsoon');
+  const [loading, setLoading] = useState(false);
 
-  function add(e) {
-    e.preventDefault();
-    const nextNumber = 42 + items.length - initial.length;
-    setItems([{ id: `INV-2026-${String(nextNumber).padStart(3, '0')}`, vendor, project, amount: Number(amount), due: 'Nov 15, 2026', status: 'Pending' }, ...items]);
-    setShow(false);
-    setVendor('');
-    setAmount('');
+  const [issuedTo, setIssuedTo] = useState('');
+  const [amountDue, setAmountDue] = useState('');
+  const [projectId, setProjectId] = useState('ALL');
+
+
+  const fetchInvoices = async () => {
+  try {
+    const response = await fetch(API_BASE_URL); 
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Live API Data Array payload:", data); // Check your browser inspector console!
+      setItems(data);
+    } else {
+      console.error("Failed to query invoice logs matrix from server.");
+    }
+  } catch (error) {
+    console.error("Network interface connection failure fetching invoices:", error);
   }
+};
 
-  function markPaid(id) {
-    setItems((current) => current.map((item) => item.id === id ? { ...item, status: 'Paid' } : item));
+
+  useEffect(() => {
+    const synchronizeInvoicesGrid = async () => {
+      setLoading(true);
+      await fetchInvoices();
+      setLoading(false);
+    };
+    synchronizeInvoicesGrid();
+  }, []);
+
+  async function addInvoice(e) {
+  e.preventDefault();
+  
+  const currentYear = new Date().getFullYear();
+  const generatedInvoiceNum = `INV-${currentYear}-${String(items.length + 42).padStart(3, '0')}`;
+
+  // Use a local constant for the payload calculation to avoid stale states
+  const targetProject = projectId === 'ALL' ? 'proj-uuid-101' : projectId;
+
+  const payload = {
+    projectId: targetProject, // Resolves structural tracking conflicts
+    invoiceNumber: generatedInvoiceNum,
+    issuedTo: issuedTo,
+    amountDue: parseFloat(amountDue),
+    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    status: 'UNPAID'
+  };
+
+  try {
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      setIssuedTo('');
+      setAmountDue('');
+      setShow(false);
+      
+      setProjectId('ALL'); 
+      
+      await fetchInvoices(); 
+    } else {
+      alert("Failed to submit billing invoice payload to database.");
+    }
+  } catch (error) {
+    console.error("Failure processing invoice registration stream:", error);
+  }
+}
+
+  async function processPayment(invoiceId, totalValueAmount) {
+    const payload = {
+      amountPaid: parseFloat(totalValueAmount),
+      method: 'Bank Transfer'
+    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/${invoiceId}/payments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        await fetchInvoices();
+      } else {
+        alert("Payment workflow operation declined by backend context rule checks.");
+      }
+    } catch (error) {
+      console.error("Failure recording receipt payment execution path:", error);
+    }
   }
 
   function exportCsv() {
     const rows = [
-      ['Invoice', 'Vendor', 'Project', 'Amount', 'Due date', 'Status'],
-      ...items.map((item) => [item.id, item.vendor, item.project, item.amount, item.due, item.status]),
+      ['Invoice ID', 'Vendor', 'Project', 'Amount Due', 'Due Date', 'Status'],
+      ...items.map((item) => [item.invoiceNumber, item.issuedTo, item.projectName || 'General Production', item.amountDue, item.dueDate, item.status]),
     ];
-    const csv = rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const csvContent = rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'invoices.csv';
+    link.download = `invoice_register_project_${projectId}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
 
-  const list = items.filter((item) => `${item.id}${item.vendor}${item.project}${item.status}`.toLowerCase().includes(q.toLowerCase()));
-  const pending = items.filter((item) => item.status !== 'Paid').reduce((total, item) => total + item.amount, 0);
+  const list = items.filter((item) =>
+    (`${item.invoiceNumber || ''}${item.issuedTo || ''}${item.projectName || ''}${item.status || ''}`)
+      .toLowerCase().includes(q.toLowerCase())
+  );
+
+  const outstandingBalance = items
+    .filter((item) => item.status !== 'PAID')
+    .reduce((total, item) => total + Number(item.amountDue), 0);
+
+  const paidThisMonthAmount = items
+    .filter((item) => item.status === 'PAID')
+    .reduce((total, item) => total + Number(item.amountDue), 0);
+
+  const overdueInvoicesCount = items.filter((item) => item.status === 'OVERDUE').length;
 
   return (
     <>
       <div className="page-heading">
-        <div><div className="eyebrow">FINANCE &amp; RESOURCES</div><h1>Invoices &amp; Payments</h1><p>Generate invoices, monitor payment status and keep vendors paid on time.</p></div>
-        <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={18} /> Create invoice</button>
+        <div>
+          <div className="eyebrow">FINANCE &amp; RESOURCES</div>
+          <h1>Invoices &amp; Payments</h1>
+          <p>Generate invoices, monitor real-time payment status frameworks, and keep vendors paid on time.</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShow(true)}>
+          <Plus size={18} /> Create invoice
+        </button>
       </div>
 
       <div className="mini-stats">
-        <div className="mini-stat"><span>Total invoices</span><strong>{items.length + 38}</strong></div>
-        <div className="mini-stat"><span>Outstanding balance</span><strong>{fmt(pending)}</strong></div>
-        <div className="mini-stat"><span>Paid this month</span><strong>₹12.4L</strong></div>
-        <div className="mini-stat"><span>Overdue invoices</span><strong>{items.filter((item) => item.status === 'Overdue').length}</strong></div>
+        <div className="mini-stat">
+          <span>Total invoices</span>
+          <strong>{loading ? '...' : items.length}</strong>
+        </div>
+        <div className="mini-stat">
+          <span>Outstanding balance</span>
+          <strong>{loading ? '...' : fmt(outstandingBalance)}</strong>
+        </div>
+        <div className="mini-stat">
+          <span>Paid this lifecycle</span>
+          <strong>{loading ? '...' : fmt(paidThisMonthAmount)}</strong>
+        </div>
+        <div className="mini-stat">
+          <span>Overdue invoices</span>
+          <strong>{loading ? '...' : overdueInvoicesCount}</strong>
+        </div>
       </div>
 
       <div className="panel page-panel">
         <div className="panel-head">
-          <div><h2>Invoice register</h2><p>All vendor invoices and their current payment status.</p></div>
+          <div>
+            <h2>Invoice register</h2>
+            <p>All system tracking vendor invoices and their structural real-time payment status.</p>
+          </div>
           <div className="inline-actions">
-            <label className="table-search"><Search size={16} /><input placeholder="Search invoices..." value={q} onChange={(e) => setQ(e.target.value)} /></label>
-            <button className="btn btn-light" onClick={exportCsv}><Download size={16} /> Export</button>
+            <label className="table-search">
+              <Search size={16} />
+              <input
+                placeholder="Search invoices..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </label>
+            <button className="btn btn-light" onClick={exportCsv}>
+              <Download size={16} /> Export
+            </button>
           </div>
         </div>
-        <div className="table-wrap"><table><thead><tr><th>INVOICE ID</th><th>VENDOR</th><th>PROJECT</th><th>AMOUNT</th><th>DUE DATE</th><th>STATUS</th><th>ACTION</th></tr></thead>
-          <tbody>{list.map((item) => <tr key={item.id}>
-            <td><strong className="invoice-id">{item.id}</strong></td><td>{item.vendor}</td><td>{item.project}</td><td><strong>{fmt(item.amount)}</strong></td><td>{item.due}</td>
-            <td><span className={`status-pill ${item.status === 'Paid' ? 'green' : item.status === 'Overdue' ? 'red' : 'orange'}`}>{item.status}</span></td>
-            <td>{item.status !== 'Paid' ? <button className="approve-btn" onClick={() => markPaid(item.id)}>Mark paid</button> : <span className="muted">Completed</span>}</td>
-          </tr>)}</tbody>
-        </table></div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>INVOICE ID</th>
+                <th>VENDOR </th>
+                <th>PROJECT </th>
+                <th>AMOUNT DUE</th>
+                <th>DUE DATE</th>
+                <th>STATUS</th>
+                <th> ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan="7" style={{ textAlign: 'center', color: '#666' }}>Synchronizing system ledgers...</td></tr>
+              ) : list.length === 0 ? (
+                <tr><td colSpan="7" style={{ textAlign: 'center', color: '#999' }}>No ledger items match the active evaluation filters.</td></tr>
+              ) : (
+                list.map((item) => (
+                  <tr key={item.id}>
+                    <td><strong className="invoice-id">{item.invoiceNumber || 'INV-TEMP'}</strong></td>
+                    <td>{item.issuedTo}</td>
+                    <td><strong>{item.projectName || 'General Production'}</strong></td>
+                    <td><strong>{fmt(item.amountDue)}</strong></td>
+                    <td>{item.dueDate}</td>
+                    <td>
+                      <span className={`status-pill ${item.status === 'PAID' ? 'green' : item.status === 'OVERDUE' ? 'red' : 'orange'}`}>
+                        {item.status ? item.status.toLowerCase() : 'unpaid'}
+                      </span>
+                    </td>
+                    <td>
+                      {item.status !== 'PAID' ? (
+                        <button className="approve-btn" onClick={() => processPayment(item.id, item.amountDue)}>
+                          Mark paid
+                        </button>
+                      ) : (
+                        <span className="muted">Completed Track</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {show && <div className="modal-backdrop" onClick={() => setShow(false)}>
-        <form className="modal-card" onSubmit={add} onClick={(e) => e.stopPropagation()}>
-          <div className="modal-head"><div><h2>Create invoice</h2><p>Register a vendor invoice for tracking.</p></div><button type="button" className="icon-button" onClick={() => setShow(false)}><X size={18} /></button></div>
-          <label>Vendor name<input required value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder="Vendor or supplier" /></label>
-          <label>Project<select value={project} onChange={(e) => setProject(e.target.value)}><option>The Last Monsoon</option><option>City of Echoes</option><option>Beyond The Frame</option></select></label>
-          <label>Invoice amount (INR)<input type="number" min="1" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="50000" /></label>
-          <div className="modal-actions"><button type="button" className="btn btn-light" onClick={() => setShow(false)}>Cancel</button><button className="btn btn-primary"><ReceiptText size={16} /> Create invoice</button></div>
-        </form>
-      </div>}
+      {/* INPUT FORM MODAL: REGISTER INVOICE */}
+      {show && (
+        <div className="modal-backdrop" onClick={() => setShow(false)}>
+          <form className="modal-card" onSubmit={addInvoice} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div>
+                <h2>Create invoice log entry</h2>
+                <p>Register a vendor supplier invoice into core data tracking layers.</p>
+              </div>
+              <button type="button" className="icon-button" onClick={() => setShow(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <label>
+              Vendor name / Recipient Entity
+              <input
+                required
+                value={issuedTo}
+                onChange={(e) => setIssuedTo(e.target.value)}
+                placeholder="Vendor or supplier company name"
+              />
+            </label>
+
+            <label>
+              Associated Production Project
+              <select
+                value={projectId === 'ALL' ? 'proj-uuid-101' : projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+              >
+                <option value="proj-uuid-101">The Last Monsoon (ID: 101)</option>
+                <option value="proj-uuid-102">City of Echoes (ID: 102)</option>
+                <option value="proj-uuid-103">Beyond The Frame (ID: 103)</option>
+              </select>
+            </label>
+
+            <label>
+              Invoice amount due (INR)
+              <input
+                type="number"
+                min="1"
+                required
+                value={amountDue}
+                onChange={(e) => setAmountDue(e.target.value)}
+                placeholder="e.g., 75000"
+              />
+            </label>
+
+            <div className="modal-actions">
+              <button type="button" className="btn btn-light" onClick={() => setShow(false)}>Cancel</button>
+              <button type="submit" className="btn btn-primary"><ReceiptText size={16} /> Create invoice</button>
+            </div>
+          </form>
+        </div>
+      )}
     </>
   );
 }
+

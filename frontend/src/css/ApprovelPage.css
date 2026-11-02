@@ -1,0 +1,37 @@
+.stages {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.stages__step {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: var(--surface-raised);
+  white-space: nowrap;
+}
+
+.stages__step--done {
+  color: #60d8a4;
+  border-color: #1f5a43;
+  background: #153b2c;
+}
+
+.stages__step--current {
+  color: #ffad82;
+  border-color: var(--accent);
+  background: #40251a;
+  font-weight: 600;
+}
+
+.stages__step--rejected {
+  color: #ff9b89;
+  border-color: #65342d;
+  background: #452522;
+}

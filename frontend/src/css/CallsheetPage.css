@@ -1,0 +1,18 @@
+.sheet__details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 0 0 18px;
+}
+.sheet__details dt { font-size: 13px; color: var(--ink-soft); }
+.sheet__details dd { margin: 0; font-weight: 500; }
+
+.sheet h3 { font-size: 15px; margin: 14px 0 4px; }
+.sheet__text { white-space: pre-line; }
+
+@media print {
+  body * { visibility: hidden; }
+  #print-area,
+  #print-area * { visibility: visible; }
+  #print-area { position: absolute; inset: 0; padding: 24px; }
+}

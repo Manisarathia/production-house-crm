@@ -2,4 +2,350 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17243b;background:#f6f8fc;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}body{margin:0;min-width:320px;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}a{color:inherit;text-decoration:none}
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: dark;
+
+  /* Theme color palette */
+  --bg: #101010;
+  --surface: #181818;
+  --surface-raised: #202020;
+  --surface-hover: #262626;
+
+  --line: #2d2d2d;
+  --line-strong: #3d3d3d;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
+
+  --accent: #e3652e;
+  --accent-hover: #f07842;
+  --accent-soft: rgba(227, 101, 46, 0.15);
+
+  --ink: #f4f0eb;
+  --ink-soft: #a7a09a;
+  --ink-faint: #6e6863;
+
+  --good: #60d8a4;
+  --good-bg: #153b2c;
+  --warn: #f0b978;
+  --warn-bg: #402d1d;
+  --bad: #ff9b89;
+  --bad-bg: #452522;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================================
+   Global Unified Buttons & Controls
+========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn--primary,
+.btn-primary {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 2px 8px rgba(227, 101, 46, 0.25);
+}
+
+.btn--primary:hover,
+.btn-primary:hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+.btn--ghost,
+.btn-light {
+  background: #242424 !important;
+  color: var(--ink) !important;
+  border-color: #383838 !important;
+}
+
+.btn--ghost:hover,
+.btn-light:hover {
+  background: #2d2d2d !important;
+  border-color: #4a4a4a !important;
+}
+
+.btn--link {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #ffad82 !important;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn--link:hover {
+  background: rgba(227, 101, 46, 0.15) !important;
+  color: var(--accent-hover) !important;
+}
+
+.btn--link.btn--danger,
+.btn--danger,
+.btn-danger {
+  color: var(--bad) !important;
+}
+
+.btn--link.btn--danger:hover,
+.btn--danger:hover,
+.btn-danger:hover {
+  background: rgba(255, 155, 137, 0.15) !important;
+  color: #ffa3a3 !important;
+}
+
+/* State messaging (loading / empty) */
+.state {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin: 12px 0;
+}
+
+/* Feedback alerts */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.alert--error {
+  background: #381a17;
+  border: 1px solid #5a2620;
+  color: #ff9b89;
+}
+
+/* =========================================================
+   Unified Dark Theme Overrides for Workspace Panels
+========================================================= */
+
+.panel,
+.stat-card,
+.mini-stat,
+.department-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+.page-heading h1,
+.panel-head h2,
+.settings-title h2,
+.stat-bottom > div:first-child strong,
+.deadline-copy strong,
+.project-name strong,
+.activity-copy strong,
+.modal-head h2 {
+  color: var(--ink) !important;
+}
+
+.page-heading p,
+.panel-head p,
+.eyebrow,
+.stat-title,
+.stat-bottom > div:first-child span,
+.deadline-copy span,
+.project-name span,
+.activity-copy span,
+.footer-label {
+  color: var(--ink-soft) !important;
+}
+
+.table-wrap {
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+}
+
+.table-wrap table th {
+  background: var(--surface-raised) !important;
+  color: var(--ink-soft) !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.table-wrap table td {
+  color: var(--ink) !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.table-wrap table tbody tr:hover {
+  background: var(--surface-hover) !important;
+}
+
+.table-search,
+.global-search {
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink-soft) !important;
+}
+
+.table-search input,
+.global-search input {
+  color: var(--ink) !important;
+  background: transparent !important;
+}
+
+.table-search input::placeholder,
+.global-search input::placeholder {
+  color: var(--ink-soft) !important;
+}
+
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.78) !important;
+}
+
+.modal-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--line-strong) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-card label {
+  color: var(--ink-soft) !important;
+}
+
+.modal-card input,
+.modal-card select,
+.modal-card textarea,
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--line-strong) !important;
+  color: var(--ink) !important;
+}
+
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus,
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  border-color: var(--accent) !important;
+}
+
+.text-link,
+.full-width-link {
+  color: #ffad82 !important;
+}
+
+.more-button {
+  color: var(--ink-soft) !important;
+}
+
+.more-button:hover {
+  background: var(--surface-raised) !important;
+  color: var(--accent) !important;
+}
+
+.bar-chart {
+  border-bottom: 1px solid var(--line) !important;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 37px,
+    rgba(255, 255, 255, 0.03) 38px,
+    rgba(255, 255, 255, 0.03) 39px
+  ) !important;
+}
+
+.bar-remaining {
+  background: #2b2b2b !important;
+}
+
+.bar-progress {
+  background: var(--accent) !important;
+}
+
+.settings-tab {
+  color: var(--ink-soft) !important;
+}
+
+.settings-tab:hover {
+  background: var(--surface-raised) !important;
+  color: var(--ink) !important;
+}
+
+.settings-tab.selected {
+  background: #3a2117 !important;
+  color: #ffad82 !important;
+  font-weight: 700 !important;
+}
+
+.settings-section,
+.settings-title {
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.input-prefix {
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--line-strong) !important;
+}
+
+.input-prefix span {
+  color: var(--ink-soft) !important;
+  border-right: 1px solid var(--line) !important;
+}

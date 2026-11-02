@@ -1,0 +1,9 @@
+.delivery-overview {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.delivery-overview .status-donut { margin: 0; }
+.delivery-overview .progress { flex: 1 1 220px; max-width: 360px; }
