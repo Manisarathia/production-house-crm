@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, ReceiptText, X, Download } from 'lucide-react';
 
 const PROJECTS_API = 'http://localhost:8080/api/production/projects';
+const VENDORS_API = 'http://localhost:8080/api/finance/vendors';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/invoices';
 
@@ -9,6 +10,23 @@ const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 export default function InvoicesPayments() {
   const [projects, setProjects] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [vendorLoadError, setVendorLoadError] = useState('');
+  useEffect(() => {
+    fetch(VENDORS_API)
+      .then(async response => {
+        if (!response.ok) throw new Error('Vendors API returned ' + response.status);
+        return response.json();
+      })
+      .then(data => {
+        setVendors(Array.isArray(data) ? data : []);
+        setVendorLoadError('');
+      })
+      .catch(error => {
+        console.error('Unable to load vendors:', error);
+        setVendorLoadError('Unable to load vendors / suppliers');
+      });
+  }, []);
   const [projectLoadError, setProjectLoadError] = useState('');
   useEffect(() => {
     fetch(PROJECTS_API).then(async r => {
@@ -268,12 +286,11 @@ export default function InvoicesPayments() {
 
             <label>
               Vendor name / Recipient Entity
-              <input
-                required
-                value={issuedTo}
-                onChange={(e) => setIssuedTo(e.target.value)}
-                placeholder="Vendor or supplier company name"
-              />
+              <select required value={issuedTo} onChange={(e) => setIssuedTo(e.target.value)}>
+                <option value="">-- Select Vendor / Supplier --</option>
+                {vendors.map(v => <option key={v.id} value={v.name}>{v.name}</option>)}
+              </select>
+              {vendorLoadError && <p role="alert">{vendorLoadError}</p>}
             </label>
 
             <label>

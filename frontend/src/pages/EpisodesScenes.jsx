@@ -48,17 +48,14 @@ export default function EpisodesScenes() {
   };
   useEffect(() => { reload(); }, []);
 
-  // Active view tab: 'episodes' (Series / Episode breakdown) or 'stripboard' (Master scene stripboard)
   const [activeTab, setActiveTab] = useState('episodes');
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [settingFilter, setSettingFilter] = useState('ALL'); // 'ALL' | 'INT' | 'EXT'
+  const [settingFilter, setSettingFilter] = useState('ALL'); 
 
-  // Expanded episodes in breakdown view
   const [expandedEpisodes, setExpandedEpisodes] = useState({ 'EP-401': true, 'EP-403': true });
 
-  // Modals
   const [createEpisodeModalOpen, setCreateEpisodeModalOpen] = useState(false);
   const [editEpisodeModalItem, setEditEpisodeModalItem] = useState(null);
   const [deleteTargetEpisode, setDeleteTargetEpisode] = useState(null);
@@ -68,7 +65,6 @@ export default function EpisodesScenes() {
   const [detailModalScene, setDetailModalScene] = useState(null);
   const [deleteTargetScene, setDeleteTargetScene] = useState(null);
 
-  // Forms State
   const initialEpisodeForm = {
     project: projects[0]?.name || '',
     mediaItemId: '',
@@ -76,8 +72,8 @@ export default function EpisodesScenes() {
     title: '',
     runtime: '50 mins',
     status: 'Script Locked',
-    director: 'Vikramaditya Motwane',
-    writer: 'Varun Grover',
+    director: '',
+    writer: '',
     targetAirDate: '',
     synopsis: '',
     scenesCount: 20,
@@ -104,7 +100,6 @@ export default function EpisodesScenes() {
   const [episodeForm, setEpisodeForm] = useState(initialEpisodeForm);
   const [sceneForm, setSceneForm] = useState(initialSceneForm);
 
-  // Toggle episode accordion
   const toggleEpisodeExpand = (id) => {
     setExpandedEpisodes(prev => ({
       ...prev,
@@ -112,7 +107,6 @@ export default function EpisodesScenes() {
     }));
   };
 
-  // Filtered Episodes
   const filteredEpisodes = useMemo(() => {
     return episodes.filter(ep => {
       const matchSearch =
@@ -130,7 +124,6 @@ export default function EpisodesScenes() {
     });
   }, [episodes, searchQuery, projectFilter, statusFilter]);
 
-  // Filtered Scenes
   const filteredScenes = useMemo(() => {
     return scenes.filter(sc => {
       const matchSearch =
@@ -151,14 +144,12 @@ export default function EpisodesScenes() {
     });
   }, [scenes, searchQuery, projectFilter, statusFilter, settingFilter]);
 
-  // Summary Metrics
   const totalEpisodesCount = episodes.length;
   const totalScenesCount = scenes.length;
   const completedScenesCount = scenes.filter(s => s.status === 'Shot / Done').length;
   const inProgressScenesCount = scenes.filter(s => s.status === 'In Progress').length;
   const percentShot = totalScenesCount ? Math.round((completedScenesCount / totalScenesCount) * 100) : 0;
 
-  // Open Create Episode
   const handleOpenCreateEpisode = () => {
     setEpisodeForm({
       ...initialEpisodeForm,
@@ -169,7 +160,6 @@ export default function EpisodesScenes() {
     setCreateEpisodeModalOpen(true);
   };
 
-  // Open Edit Episode
   const handleOpenEditEpisode = (ep) => {
     setEpisodeForm({
       project: ep.project,
@@ -188,7 +178,6 @@ export default function EpisodesScenes() {
     setEditEpisodeModalItem(ep);
   };
 
-  // Submit Create Episode
   const handleCreateEpisodeSubmit = async (e) => {
     try {
     e.preventDefault();
@@ -207,7 +196,6 @@ export default function EpisodesScenes() {
     } catch (error) { setApiError(error.message); }
   };
 
-  // Submit Edit Episode
   const handleEditEpisodeSubmit = async (e) => {
     try {
     e.preventDefault();
@@ -226,7 +214,6 @@ export default function EpisodesScenes() {
     } catch (error) { setApiError(error.message); }
   };
 
-  // Confirm Delete Episode
   const handleConfirmDeleteEpisode = async () => {
     try {
     if (!deleteTargetEpisode) return;
@@ -237,7 +224,6 @@ export default function EpisodesScenes() {
     } catch (error) { setApiError(error.message); }
   };
 
-  // Open Create Scene (optionally pre-selected for an episode)
   const handleOpenCreateScene = (targetEpisode = null) => {
     setSceneForm({
       ...initialSceneForm,
@@ -249,7 +235,6 @@ export default function EpisodesScenes() {
     setCreateSceneModalOpen(true);
   };
 
-  // Open Edit Scene
   const handleOpenEditScene = (sc) => {
     setSceneForm({
       project: sc.project,
@@ -270,7 +255,6 @@ export default function EpisodesScenes() {
     setEditSceneModalItem(sc);
   };
 
-  // Submit Create Scene
   const handleCreateSceneSubmit = async (e) => {
     try {
     e.preventDefault();
@@ -279,7 +263,6 @@ export default function EpisodesScenes() {
     await create('scenes', sceneForm);
     await reload();
 
-    // If linked to an episode, update episode scene counter
     if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
       const ep = episodes.find(e => e.id === sceneForm.episodeId);
       if (ep) {
@@ -297,7 +280,6 @@ export default function EpisodesScenes() {
     } catch (error) { setApiError(error.message); }
   };
 
-  // Submit Edit Scene
   const handleEditSceneSubmit = async (e) => {
     try {
     e.preventDefault();
@@ -313,7 +295,6 @@ export default function EpisodesScenes() {
     } catch (error) { setApiError(error.message); }
   };
 
-  // Confirm Delete Scene
   const handleConfirmDeleteScene = async () => {
     try {
     if (!deleteTargetScene) return;
@@ -360,7 +341,6 @@ export default function EpisodesScenes() {
   return (
     <>
       {apiError && <div role="alert" style={{ padding: 12, color: '#fff', background: '#792c2c' }}>{apiError}</div>}
-      {/* Premium Cinematic Hover & Interaction Styles for Episodes & Scenes */}
       <style>{`
         /* Smooth Scrolling & Refined Scrollbars */
         html {
@@ -557,7 +537,6 @@ export default function EpisodesScenes() {
         </div>
       </div>
 
-      {/* KPI Mini-Stats */}
       <div className="mini-stats">
         <div className="mini-stat">
           <span>Episodes Tracked</span>
@@ -577,7 +556,6 @@ export default function EpisodesScenes() {
         </div>
       </div>
 
-      {/* Main Panel */}
       <div className="panel page-panel">
         <div className="panel-head" style={{ flexWrap: 'wrap', gap: '14px' }}>
           <div>
@@ -590,7 +568,6 @@ export default function EpisodesScenes() {
           </div>
 
           <div className="inline-actions" style={{ flexWrap: 'wrap' }}>
-            {/* Main Tabs Segmented */}
             <div className="segmented">
               <button
                 type="button"
@@ -608,7 +585,6 @@ export default function EpisodesScenes() {
               </button>
             </div>
 
-            {/* Search */}
             <label className="table-search">
               <Search size={16} />
               <input
@@ -621,7 +597,6 @@ export default function EpisodesScenes() {
           </div>
         </div>
 
-        {/* Filters Row */}
         <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>

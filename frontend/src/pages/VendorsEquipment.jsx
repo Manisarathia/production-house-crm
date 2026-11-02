@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Truck, Package, X, Calendar } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/vendors';
+const PROJECTS_API_URL = 'http://localhost:8080/api/production/projects';
 
 export default function VendorsEquipment() {
     const [vendors, setVendors] = useState([]);
@@ -18,8 +19,12 @@ export default function VendorsEquipment() {
     const [eqName, setEqName] = useState('');
     const [dailyRate, setDailyRate] = useState('');
     const [selectedVendorId, setSelectedVendorId] = useState('');
+    const [vendorsLoading, setVendorsLoading] = useState(false);
+    const [vendorLoadError, setVendorLoadError] = useState('');
     const [selectedEquipment, setSelectedEquipment] = useState(null);
-    const [rentProjectId, setRentProjectId] = useState('proj-uuid-101');
+    const [rentProjectId, setRentProjectId] = useState('');
+    const [projects, setProjects] = useState([]);
+    const [projectsLoading, setProjectsLoading] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [rentError, setRentError] = useState('');
@@ -27,17 +32,22 @@ export default function VendorsEquipment() {
 
 
     const fetchVendors = async () => {
+        setVendorsLoading(true);
+        setVendorLoadError('');
         try {
             const response = await fetch(API_BASE_URL);
-            if (response.ok) {
-                const data = await response.json();
-                setVendors(data);
-                if (data.length > 0 && !selectedVendorId) {
-                    setSelectedVendorId(data[0].id);
-                }
-            }
+            if (!response.ok) throw new Error(`Vendors API returned ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Invalid vendors response');
+            setVendors(data);
+            setSelectedVendorId(current => data.some(v => v.id === current) ? current : '');
         } catch (error) {
-            console.error("Network connectivity issue fetching vendors:", error);
+            console.error('Error loading registered vendors:', error);
+            setVendors([]);
+            setSelectedVendorId('');
+            setVendorLoadError('Unable to load registered vendors. Check backend connection or login.');
+        } finally {
+            setVendorsLoading(false);
         }
     };
 
@@ -117,6 +127,26 @@ export default function VendorsEquipment() {
         }
     }
 
+    async function fetchProjects() {
+        setProjectsLoading(true);
+        setRentError('');
+        try {
+            const response = await fetch(PROJECTS_API_URL);
+            if (!response.ok) throw new Error(`Projects API returned ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Invalid projects response');
+            setProjects(data);
+            setRentProjectId(current => data.some(p => p.id === current) ? current : '');
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            setProjects([]);
+            setRentProjectId('');
+            setRentError('Unable to load projects from backend. Please check your connection or login.');
+        } finally {
+            setProjectsLoading(false);
+        }
+    }
+
     async function handleRentEquipment(e) {
         e.preventDefault();
         setRentError('');
@@ -142,8 +172,25 @@ export default function VendorsEquipment() {
                 setEndDate('');
                 setRentError('');
             } else {
-                const errorPayload = await response.json();
-                setRentError(errorPayload.message || 'Date selection metrics validation failed.');
+                const rawError = await response.text();
+                let serverMessage = rawError;
+                try {
+                    const parsed = JSON.parse(rawError);
+                    serverMessage = parsed.message || parsed.error || rawError;
+                } catch (_) { /* Keep plain-text error if it is not JSON. */ }
+
+                const conflict = /double.book|already (reserved|booked)|overlap/i.test(serverMessage);
+                if (conflict || response.status === 409) {
+                    setRentError('This equipment is already booked for the selected dates. Please choose different dates or another equipment.');
+                } else if (response.status === 401 || response.status === 403) {
+                    setRentError('Your session has expired or access is denied. Please log in again.');
+                } else if (response.status >= 500) {
+                    setRentError('Booking could not be completed. Please check the dates and try again, or contact support.');
+                } else {
+                    setRentError(serverMessage && serverMessage.length < 200
+                        ? serverMessage
+                        : 'Booking failed. Please review your selection and try again.');
+                }
             }
         } catch (error) {
             console.error("Booking connection failure:", error);
@@ -236,7 +283,7 @@ export default function VendorsEquipment() {
                     <h1>Vendors & Equipment</h1>
                 </div>
                 <div className="heading-actions" style={{ display: 'flex', gap: '10px' }}>
-                    <button style={{ background: "#e3652e" }} className="btn btn-light" onClick={() => setShowEq(true)}><Plus size={18} /> Add equipment</button>
+                    <button style={{ background: "#e3652e" }} className="btn btn-light" onClick={() => { setSelectedVendorId(''); setShowEq(true); fetchVendors(); }}><Plus size={18} /> Add equipment</button>
                     <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={18} /> Add vendor</button>
                 </div>
             </div>
@@ -340,7 +387,9 @@ export default function VendorsEquipment() {
                                     onClick={() => {
                                         if (x.status === 'AVAILABLE') {
                                             setSelectedEquipment(x);
+                                            setRentProjectId('');
                                             setShowRentModal(true);
+                                            fetchProjects();
                                         }
                                     }}
                                     style={{ cursor: x.status === 'AVAILABLE' ? 'pointer' : 'not-allowed', flex: 1 }}
@@ -452,13 +501,14 @@ export default function VendorsEquipment() {
                         </div>
                         <label>
                             Select Supplier Vendor
-                            <select value={selectedVendorId} onChange={e => setSelectedVendorId(e.target.value)} required>
-                                <option value="" disabled>-- Choose a Supplier --</option>
+                            <select value={selectedVendorId} onChange={e => setSelectedVendorId(e.target.value)} required disabled={vendorsLoading || vendors.length === 0}>
+                                <option value="">{vendorsLoading ? 'Loading suppliers...' : vendors.length === 0 ? 'No registered suppliers available' : '-- Choose a Supplier --'}</option>
                                 {vendors.map(v => (
                                     <option key={v.id} value={v.id}>{v.name}</option>
                                 ))}
                             </select>
                         </label>
+                        {vendorLoadError && <p role="alert" style={{ color: '#ff8989', fontSize: '12px' }}>{vendorLoadError}</p>}
                         <label>
                             Equipment Name / Model
                             <input required value={eqName} onChange={e => setEqName(e.target.value)} placeholder="e.g. Arri Alexa Mini LF" />
@@ -469,7 +519,7 @@ export default function VendorsEquipment() {
                         </label>
                         <div className="modal-actions">
                             <button type="button" className="btn btn-light" onClick={() => setShowEq(false)}>Cancel</button>
-                            <button type="submit" className="btn btn-primary">Save asset</button>
+                            <button type="submit" className="btn btn-primary" disabled={vendorsLoading || !selectedVendorId}>Save asset</button>
                         </div>
                     </form>
                 </div>
@@ -495,10 +545,11 @@ export default function VendorsEquipment() {
 
                         <label>
                             Target Project Allocation
-                            <select value={rentProjectId} onChange={e => setRentProjectId(e.target.value)}>
-                                <option value="proj-uuid-101">The Last Monsoon</option>
-                                <option value="proj-uuid-102">City of Echoes</option>
-                                <option value="proj-uuid-103">Beyond The Frame</option>
+                            <select required value={rentProjectId} onChange={e => setRentProjectId(e.target.value)} disabled={projectsLoading || projects.length === 0}>
+                                <option value="">{projectsLoading ? 'Loading projects...' : projects.length === 0 ? 'No projects available' : '-- Select Project --'}</option>
+                                {projects.map(project => (
+                                    <option key={project.id} value={project.id}>{project.title}</option>
+                                ))}
                             </select>
                         </label>
 
@@ -518,7 +569,7 @@ export default function VendorsEquipment() {
 
                         <div className="modal-actions">
                             <button type="button" className="btn btn-light" onClick={() => setShowRentModal(false)}>Cancel</button>
-                            <button type="submit" className="btn btn-primary"><Calendar size={15} /> Confirm Booking</button>
+                            <button type="submit" className="btn btn-primary" disabled={projectsLoading || !rentProjectId}><Calendar size={15} /> Confirm Booking</button>
                         </div>
                     </form>
                 </div>

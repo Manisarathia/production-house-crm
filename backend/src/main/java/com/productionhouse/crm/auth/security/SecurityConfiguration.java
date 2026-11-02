@@ -29,74 +29,50 @@ import java.util.Map;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfiguration {
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder(12);
+	}
 
-    @Bean
-    SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            BearerTokenFilter bearerTokenFilter,
-            ObjectMapper objectMapper
-    ) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                })
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/invitations/accept").permitAll()
-                        .anyRequest().authenticated())
-                .exceptionHandling(errors -> errors
-                        .authenticationEntryPoint((request, response, exception) ->
-                                writeError(response, objectMapper, HttpStatus.UNAUTHORIZED,
-                                        "Authentication is required.", request.getRequestURI()))
-                        .accessDeniedHandler((request, response, exception) ->
-                                writeError(response, objectMapper, HttpStatus.FORBIDDEN,
-                                        "You do not have permission to perform this action.",
-                                        request.getRequestURI())))
-                .addFilterBefore(bearerTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(basic -> basic.disable())
-                .formLogin(form -> form.disable());
-        return http.build();
-    }
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http, BearerTokenFilter bearerTokenFilter,
+			ObjectMapper objectMapper) throws Exception {
+		http.csrf(csrf -> csrf.disable()).cors(cors -> {
+		}).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/api/auth/login", "/api/auth/invitations/accept", "/api/production/**",
+								"/api/finance/**")
+						.permitAll().anyRequest().authenticated())
+				.exceptionHandling(errors -> errors
+						.authenticationEntryPoint((request, response, exception) -> writeError(response, objectMapper,
+								HttpStatus.UNAUTHORIZED, "Authentication is required.", request.getRequestURI()))
+						.accessDeniedHandler((request, response, exception) -> writeError(response, objectMapper,
+								HttpStatus.FORBIDDEN, "You do not have permission to perform this action.",
+								request.getRequestURI())))
+				.addFilterBefore(bearerTokenFilter, UsernamePasswordAuthenticationFilter.class)
+				.httpBasic(basic -> basic.disable()).formLogin(form -> form.disable());
+		return http.build();
+	}
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource(
-            @Value("${crm.web.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}")
-            String allowedOrigins
-    ) {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(origin -> !origin.isEmpty())
-                .toList());
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setMaxAge(3600L);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
-        return source;
-    }
+	@Bean
+	CorsConfigurationSource corsConfigurationSource(
+			@Value("${crm.web.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}") String allowedOrigins) {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim)
+				.filter(origin -> !origin.isEmpty()).toList());
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setMaxAge(3600L);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/api/**", configuration);
+		return source;
+	}
 
-    private static void writeError(
-            HttpServletResponse response,
-            ObjectMapper objectMapper,
-            HttpStatus status,
-            String message,
-            String path
-    ) throws IOException {
-        response.setStatus(status.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(), new ApiError(
-                Instant.now(),
-                status.value(),
-                status.getReasonPhrase(),
-                message,
-                path,
-                Map.of()
-        ));
-    }
+	private static void writeError(HttpServletResponse response, ObjectMapper objectMapper, HttpStatus status,
+			String message, String path) throws IOException {
+		response.setStatus(status.value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		objectMapper.writeValue(response.getOutputStream(),
+				new ApiError(Instant.now(), status.value(), status.getReasonPhrase(), message, path, Map.of()));
+	}
 }

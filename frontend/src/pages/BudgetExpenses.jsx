@@ -48,16 +48,22 @@ export default function BudgetExpenses() {
     };
 
     const fetchBudgetDetails = async () => {
+        if (projects.length === 0) {
+            setTotalAllocated(0);
+            setTotalSpent(0);
+            return;
+        }
         try {
-            const response = await fetch(`${API_BASE_URL}/project/${projectId}`);
-            if (response.status === 404) { setTotalAllocated(0); setTotalSpent(0); return; }
-            if (response.ok) {
-                const data = await response.json();
-                setTotalAllocated(Number(data.totalAllocated || 0));
-                setTotalSpent(Number(data.totalSpent));
-            }
+            const budgets = await Promise.all(projects.map(async (project) => {
+                const response = await fetch(`${API_BASE_URL}/project/${project.id}`);
+                if (response.status === 404) return null;
+                if (!response.ok) throw new Error(`Budget API returned ${response.status} for ${project.id}`);
+                return response.json();
+            }));
+            setTotalAllocated(budgets.reduce((sum, budget) => sum + Number(budget?.totalAllocated || 0), 0));
+            setTotalSpent(budgets.reduce((sum, budget) => sum + Number(budget?.totalSpent || 0), 0));
         } catch (error) {
-            console.error("Network issue retrieving project budget boundaries profile:", error);
+            console.error('Unable to reload saved project budgets:', error);
         }
     };
 
@@ -65,11 +71,14 @@ export default function BudgetExpenses() {
         const syncDataGrid = async () => {
             setLoading(true);
             await fetchExpenses();
-            if (projectId) await fetchBudgetDetails();
             setLoading(false);
         };
         syncDataGrid();
-    }, [projectId]);
+    }, []);
+
+    useEffect(() => {
+        fetchBudgetDetails();
+    }, [projects]);
 
     async function submitExpense(e) {
         e.preventDefault();
@@ -116,7 +125,7 @@ export default function BudgetExpenses() {
 
             if (response.ok) {
                 await fetchExpenses();
-                if (projectId) await fetchBudgetDetails();
+                await fetchBudgetDetails();
             } else {
                 alert("Status transaction execution failed.");
             }
