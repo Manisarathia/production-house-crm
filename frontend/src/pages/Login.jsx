@@ -11,6 +11,8 @@ import {
   CircleCheck,
 } from 'lucide-react';
 
+import Login1 from '../assets/Login1.jpg';
+
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('admin@frameflow.com');
@@ -42,7 +44,7 @@ export default function Login() {
   return (
     <main className="login-screen">
       <section className="login-visual">
-        <div className="login-visual-grid" />
+        <img src={Login1} alt="Login Visual" className="login-visual-grid" />
 
         <div className="login-brand">
           <div className="login-brand-icon">
@@ -76,7 +78,7 @@ export default function Login() {
             </span>
           </div>
         </div>
-
+{/* 
         <div className="login-preview-card">
           <div className="preview-screen">
             <div className="preview-screen-top">
@@ -102,7 +104,7 @@ export default function Login() {
             </div>
             <Film size={19} />
           </div>
-        </div>
+        </div> */}
 
         <div className="login-visual-footer">
           <span>BUILT FOR STORYTELLERS</span>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import {
   Clapperboard,
@@ -27,8 +27,14 @@ import {
   Menu,
   X,
   LogOut,
+  HardDrive,
+  Mic,
+  Scale,
 } from 'lucide-react';
 import './MainLayout.css';
+import { notificationApi } from '../api';
+import useResource from '../hooks/useResourse';
+import { notificationDummyData } from '../data/dummyData';
 
 const NAVIGATION_GROUPS = [
   {
@@ -47,6 +53,14 @@ const NAVIGATION_GROUPS = [
       { label: 'Movies & Series', path: '/movies-series', icon: Film },
       { label: 'Cast & Crew', path: '/cast-crew', icon: UserCheck },
       { label: 'Episodes & Scenes', path: '/episodes-scenes', icon: Tv },
+    ],
+  },
+  {
+    title: 'MEDIA, AUDIO & LEGAL',
+    items: [
+      { label: 'Post-Production & Media', path: '/post-production-media', icon: HardDrive },
+      { label: 'Singer & Dubbing', path: '/singer-dubbing', icon: Mic },
+      { label: 'Contracts & Rights', path: '/contracts-rights', icon: Scale },
     ],
   },
   {
@@ -88,6 +102,9 @@ const ROUTE_TITLES = {
   '/movies-series': 'Movies & Web Series',
   '/cast-crew': 'Cast & Crew',
   '/episodes-scenes': 'Episodes & Scenes',
+  '/post-production-media': 'Post-Production & Media',
+  '/singer-dubbing': 'Singer & Dubbing',
+  '/contracts-rights': 'Contracts & Rights',
   '/vendors-equipment': 'Vendors & Equipment',
   '/budget-expenses': 'Budget & Expenses',
   '/invoices-payments': 'Invoices & Payments',
@@ -107,11 +124,23 @@ export default function MainLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { items: notifications, reload: reloadNotifications } = useResource(
+    notificationApi,
+    notificationDummyData
+  );
 
   const userEmail = localStorage.getItem('frameflow-user') || 'admin@frameflow.com';
   const userName = userEmail.includes('@') ? userEmail.split('@')[0] : 'User';
   const userInitials = userName.slice(0, 2).toUpperCase();
   const currentTitle = ROUTE_TITLES[location.pathname] || 'Workspace';
+  const unreadNotificationCount = notifications.filter((notification) => !notification.read).length;
+
+  useEffect(() => {
+    const refreshNotificationCount = () => reloadNotifications();
+    window.addEventListener('notifications:changed', refreshNotificationCount);
+
+    return () => window.removeEventListener('notifications:changed', refreshNotificationCount);
+  }, [reloadNotifications]);
 
   const handleLogout = () => {
     localStorage.removeItem('frameflow-auth');
@@ -204,7 +233,7 @@ export default function MainLayout({ children }) {
           </button>
 
           <div className="breadcrumb">
-            FrameFlow <span>/</span> <strong>{currentTitle}</strong>
+            Studio North <span>/</span> <strong>{currentTitle}</strong>
           </div>
 
           <div className="top-actions">
@@ -218,10 +247,10 @@ export default function MainLayout({ children }) {
               type="button"
               className="icon-button notification"
               onClick={() => navigate('/notifications')}
-              aria-label="Notifications"
+              aria-label={`Notifications${unreadNotificationCount ? ` (${unreadNotificationCount} unread)` : ''}`}
             >
               <Bell size={18} />
-              <i />
+              {unreadNotificationCount > 0 && <span className="notification-count">{unreadNotificationCount}</span>}
             </button>
 
             <div className="top-avatar" title={userName}>

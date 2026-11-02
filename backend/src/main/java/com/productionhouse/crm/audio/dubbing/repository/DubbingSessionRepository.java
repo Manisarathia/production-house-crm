@@ -1,0 +1,1 @@
+package com.productionhouse.crm.audio.dubbing.repository;import com.productionhouse.crm.audio.dubbing.entity.DubbingSession;import org.springframework.data.jpa.repository.JpaRepository;public interface DubbingSessionRepository extends JpaRepository<DubbingSession,Long>{}

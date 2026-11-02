@@ -799,7 +799,7 @@ tbody tr:hover {
 .mini-stat strong {
     font-size: 22px;
     letter-spacing: -.5px;
-    color: #1c2940
+    color: #f57600
 }
 
 .page-panel {
@@ -1269,7 +1269,8 @@ tbody tr:hover {
     display: block
 }
 
-.expense-title strong {
+.expense-title strong,
+.mini-stat strong {
     font-size: 10px;
     color: #344258
 }
@@ -1583,7 +1584,8 @@ body {
 .panel-head p,
 .settings-title p,
 .deadline-copy span,
-.muted {
+.muted,
+.mini-stat span {
     color: #a7a09a
 }
 

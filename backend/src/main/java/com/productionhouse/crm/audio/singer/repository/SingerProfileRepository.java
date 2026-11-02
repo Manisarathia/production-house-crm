@@ -1,0 +1,1 @@
+package com.productionhouse.crm.audio.singer.repository;import com.productionhouse.crm.audio.singer.entity.SingerProfile;import org.springframework.data.jpa.repository.JpaRepository;public interface SingerProfileRepository extends JpaRepository<SingerProfile,Long>{}

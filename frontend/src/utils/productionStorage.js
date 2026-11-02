@@ -1106,3 +1106,7 @@ export function deleteScene(id) {
   saveScenes(updated);
   return updated;
 }
+
+// Re-export Media, Audio & Legal Management storage services
+export * from './mediaAudioLegalStorage.js';
+

@@ -13,6 +13,10 @@ import MoviesWebSeries from './pages/MoviesWebSeries';
 import CastCrewManagement from './pages/CastCrewManagement';
 import EpisodesScenes from './pages/EpisodesScenes';
 
+import PostProductionMedia from './pages/PostProductionMedia.jsx';
+import SingerDubbing from './pages/SingerDubbing.jsx';
+import ContractsRights from './pages/ContractsRights.jsx';
+
 import VendorsEquipment from './pages/VendorsEquipment';
 import BudgetExpenses from './pages/BudgetExpenses';
 import InvoicesPayments from './pages/InvoicesPayments';
@@ -60,6 +64,11 @@ export default function App() {
         <Route path="/movies-series" element={<MoviesWebSeries />} />
         <Route path="/cast-crew" element={<CastCrewManagement />} />
         <Route path="/episodes-scenes" element={<EpisodesScenes />} />
+
+
+        <Route path="/post-production-media" element={<PostProductionMedia />} />
+        <Route path="/singer-dubbing" element={<SingerDubbing />} />
+        <Route path="/contracts-rights" element={<ContractsRights />} />
 
         <Route path="/vendors-equipment" element={<VendorsEquipment />} />
         <Route path="/budget-expenses" element={<BudgetExpenses />} />

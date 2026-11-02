@@ -77,7 +77,7 @@ export default function Dashboard() {
             <span className="live-dot" /> TODAY &middot; PRODUCTION OVERVIEW
           </div>
           <h1>
-            Good morning, Jaison <span className="wave">&#10022;</span>
+            <span className='text-2xl text-orange-400'>L</span>oopstream DashBoard 
           </h1>
           <p>Here is what is happening across your production house today.</p>
         </div>

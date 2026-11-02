@@ -1,0 +1,1 @@
+package com.productionhouse.crm.mediahouse.media.repository;import com.productionhouse.crm.mediahouse.media.entity.MediaAsset;import org.springframework.data.jpa.repository.JpaRepository;public interface MediaAssetRepository extends JpaRepository<MediaAsset,Long>{}

@@ -539,8 +539,8 @@ export default function ProjectsProductions() {
         .page-heading h1 { font-size: 29px !important; }
         .page-heading p { font-size: 13.5px !important; }
         .eyebrow { font-size: 10.5px !important; letter-spacing: 1.4px !important; }
-        .mini-stat span { font-size: 11.5px !important; }
-        .mini-stat strong { font-size: 24px !important; }
+        .mini-stat span { font-size: 11.5px !important; color: #a7a09a; }
+        .mini-stat strong { font-size: 24px !important; color: #f4f0eb; }
         .panel-head h2 { font-size: 16px !important; }
         .panel-head p { font-size: 12px !important; }
         .segmented button { font-size: 11px !important; padding: 7px 11px !important; }
@@ -722,16 +722,16 @@ export default function ProjectsProductions() {
 
         {/* Card Grid View */}
         {viewMode === 'grid' && (
-          <div className="production-grid">
+          <div className="production-grid " >
             {filteredProjects.map(p => {
               const tone = getStatusTone(p.status);
               const spentPct = p.budget > 0 ? Math.min(100, Math.round((p.spent / p.budget) * 100)) : 0;
               const isKids = p.platform === 'LoopKids';
 
               return (
-                <div className="prod-card" key={p.id}>
+                <div className="prod-card" key={p.id}  >
                   {/* Poster Banner */}
-                  <div className="prod-card-poster-wrap">
+                  <div className="prod-card-poster-wrap" >
                     <img
                       src={getMoviePoster(p.name, p.poster)}
                       alt={p.name}

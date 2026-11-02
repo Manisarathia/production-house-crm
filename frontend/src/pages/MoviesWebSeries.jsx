@@ -535,8 +535,8 @@ export default function MoviesWebSeries() {
         .page-heading h1 { font-size: 29px !important; }
         .page-heading p { font-size: 13.5px !important; }
         .eyebrow { font-size: 10.5px !important; letter-spacing: 1.4px !important; }
-        .mini-stat span { font-size: 11.5px !important; }
-        .mini-stat strong { font-size: 24px !important; }
+        .mini-stat span { font-size: 11.5px !important; color: #a7a09a; }
+        .mini-stat strong { font-size: 24px !important; color: #f4f0eb; }
         .panel-head h2 { font-size: 16px !important; }
         .panel-head p { font-size: 12px !important; }
         .segmented button { font-size: 11px !important; padding: 7px 11px !important; }

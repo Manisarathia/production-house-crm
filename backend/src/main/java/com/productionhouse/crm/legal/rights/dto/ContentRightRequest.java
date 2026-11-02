@@ -1,0 +1,3 @@
+package com.productionhouse.crm.legal.rights.dto;
+import jakarta.validation.constraints.*;import java.time.LocalDate;
+public record ContentRightRequest(@NotBlank @Size(max=200) String name,@Size(max=2000) String description,@Size(max=120) String projectRef,@NotBlank @Size(max=80) String rightsType,@NotNull @Positive Long mediaId,@Positive Long contractId,@NotBlank @Size(max=120) String territory,@NotBlank @Size(max=500) String platforms,@Size(max=500) String languages,boolean exclusive,@NotNull LocalDate startsAt,@NotNull LocalDate endsAt,@Size(max=2000) String restrictions,@NotBlank @Size(max=40) String status,Boolean active){}
