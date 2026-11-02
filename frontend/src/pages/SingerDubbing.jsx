@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Mic,
   Headphones,
@@ -23,8 +23,19 @@ import {
   Sparkles,
   Music,
   Disc3,
-  FileAudio
+  FileAudio,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
+import {
+  singerApi,
+  dubbingApi,
+  extractPageItems,
+  normalizeSingerStatusToBackend,
+  normalizeSingerStatusToFrontend,
+  normalizeDubbingStatusToBackend,
+  normalizeDubbingStatusToFrontend
+} from '../api/mediaAudioLegalApi.js';
 import {
   getStoredProjects,
   formatCurrency,
@@ -50,6 +61,83 @@ export default function SingerDubbing() {
   // Data states
   const [singers, setSingers] = useState(() => getStoredSingers());
   const [dubbingSessions, setDubbingSessions] = useState(() => getStoredDubbing());
+
+  // Live API States
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const fetchBackendData = async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const [singersRes, dubbingRes] = await Promise.allSettled([
+        singerApi.list({ size: 100 }),
+        dubbingApi.list({ size: 100 })
+      ]);
+
+      if (singersRes.status === 'fulfilled' && singersRes.value) {
+        const items = extractPageItems(singersRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            songTitle: item.biography || item.songTitle || (item.name ? item.name + ' - Theme Track' : 'Original Soundtrack'),
+            singerName: item.name || item.singerName || 'Lead Vocalist',
+            vocalType: item.voiceType || item.vocalType || 'Lead Vocalist (Playback)',
+            language: item.languages || item.language || 'Hindi',
+            project: item.voiceRange || item.project || 'The Last Monsoon',
+            musicDirector: item.musicDirector || 'Pritam Chakraborty',
+            lyricist: item.lyricist || 'Amitabh Bhattacharya',
+            duration: item.duration || '4 mins 20 secs',
+            recordingStudio: item.recordingStudio || 'YRF Studios (Studio A), Mumbai',
+            recordingStatus: normalizeSingerStatusToFrontend(item.status) === 'Active' ? 'Mastered & Mixed' : 'In Studio',
+            fee: item.fee || 1500000,
+            platform: item.platform || 'LoopNexus',
+            image: item.image || getSingerImage(item.id)
+          }));
+          setSingers(mapped);
+        }
+      }
+
+      if (dubbingRes.status === 'fulfilled' && dubbingRes.value) {
+        const items = extractPageItems(dubbingRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            characterName: item.name || item.characterName || 'Lead Character',
+            project: item.projectRef || item.project || 'The Last Monsoon',
+            targetLanguage: item.language || item.targetLanguage || 'Tamil',
+            voiceArtist: item.singerName || item.voiceArtist || 'Voice Artist',
+            dubbingDirector: item.dubbingDirector || 'Sound Lab Director',
+            studioFacility: item.studio || item.studioFacility || 'Sound & Vision India, Andheri',
+            sessionDate: item.scheduledAt ? item.scheduledAt.slice(0, 10) : (item.sessionDate || new Date().toISOString().split('T')[0]),
+            sessionTime: item.sessionTime || '10:00 AM - 02:00 PM',
+            reelsOrEpisodes: item.notes || item.reelsOrEpisodes || 'Episodes 1 to 4',
+            status: normalizeDubbingStatusToFrontend(item.status),
+            lipsyncQuality: item.lipsyncQuality || 'Passed Sync Check',
+            platform: item.platform || 'LoopNexus',
+            image: item.image || getDubbingImage(item.id)
+          }));
+          setDubbingSessions(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn('Backend fetch error in SingerDubbing:', err);
+      setApiError(err.message || 'Could not connect to live backend.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBackendData();
+  }, []);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,18 +280,81 @@ export default function SingerDubbing() {
   };
 
   // Submit Create
-  const handleCreateSubmit = (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (activeTab === 'singers') {
-      if (!singerFormData.songTitle.trim()) return;
-      const { all } = createSinger(singerFormData);
-      setSingers(all);
-    } else {
-      if (!dubbingFormData.characterName.trim()) return;
-      const { all } = createDubbing(dubbingFormData);
-      setDubbingSessions(all);
+    setIsSubmitting(true);
+    try {
+      if (activeTab === 'singers') {
+        if (!singerFormData.songTitle.trim()) return;
+        const payload = {
+          name: singerFormData.singerName.trim() || singerFormData.songTitle.trim(),
+          email: ((singerFormData.singerName || 'singer').toLowerCase().replace(/[^a-z0-9]/g, '') + '@loopstream.media'),
+          phone: '+91 98200 12345',
+          languages: singerFormData.language || 'Hindi',
+          voiceType: singerFormData.vocalType || 'Lead Vocalist',
+          voiceRange: singerFormData.project || 'The Last Monsoon',
+          biography: singerFormData.songTitle || 'Original Soundtrack',
+          status: 'ACTIVE',
+          active: true
+        };
+
+        try {
+          const created = await singerApi.create(payload);
+          const mappedNew = {
+            ...singerFormData,
+            id: created.id,
+            singerName: created.name || singerFormData.singerName,
+            image: getSingerImage(created.id)
+          };
+          setSingers(prev => [mappedNew, ...prev]);
+          showToast('Singer profile and track registered on backend successfully!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createSinger(singerFormData);
+          setSingers(all);
+          showToast('Track saved locally.', 'info');
+        }
+      } else {
+        if (!dubbingFormData.characterName.trim()) return;
+        const scheduledAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T10:00:00';
+        const endsAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T14:00:00';
+        const singerRefId = typeof singers[0]?.id === 'number' ? singers[0].id : 1;
+
+        const payload = {
+          name: dubbingFormData.characterName.trim(),
+          projectRef: dubbingFormData.project,
+          singerId: singerRefId,
+          mediaId: null,
+          scheduledAt: scheduledAt,
+          endsAt: endsAt,
+          studio: dubbingFormData.studioFacility || 'Sound & Vision India, Andheri',
+          language: dubbingFormData.targetLanguage || 'Tamil',
+          status: normalizeDubbingStatusToBackend(dubbingFormData.status),
+          notes: dubbingFormData.reelsOrEpisodes || '',
+          active: true
+        };
+
+        try {
+          const created = await dubbingApi.create(payload);
+          const mappedNew = {
+            ...dubbingFormData,
+            id: created.id,
+            characterName: created.name || dubbingFormData.characterName,
+            image: getDubbingImage(created.id)
+          };
+          setDubbingSessions(prev => [mappedNew, ...prev]);
+          showToast('Dubbing session scheduled on backend successfully!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createDubbing(dubbingFormData);
+          setDubbingSessions(all);
+          showToast('Session saved locally.', 'info');
+        }
+      }
+      setCreateModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
     }
-    setCreateModalOpen(false);
   };
 
   // Open Edit
@@ -248,32 +399,133 @@ export default function SingerDubbing() {
   };
 
   // Submit Edit
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editItem) return;
-    if (activeTab === 'singers') {
-      const updated = updateSinger(editItem.id, singerFormData);
-      setSingers(updated);
-    } else {
-      const updated = updateDubbing(editItem.id, dubbingFormData);
-      setDubbingSessions(updated);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof editItem.id === 'number' || /^\d+$/.test(editItem.id);
+
+      if (activeTab === 'singers') {
+        const payload = {
+          name: singerFormData.singerName.trim() || singerFormData.songTitle.trim(),
+          email: ((singerFormData.singerName || 'singer').toLowerCase().replace(/[^a-z0-9]/g, '') + '@loopstream.media'),
+          phone: '+91 98200 12345',
+          languages: singerFormData.language || 'Hindi',
+          voiceType: singerFormData.vocalType || 'Lead Vocalist',
+          voiceRange: singerFormData.project || 'The Last Monsoon',
+          biography: singerFormData.songTitle || 'Original Soundtrack',
+          status: 'ACTIVE',
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await singerApi.update(editItem.id, payload);
+            setSingers(prev => prev.map(s => (s.id === editItem.id ? { ...s, ...singerFormData } : s)));
+            showToast('Singer record updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating locally:', apiErr);
+            const updated = updateSinger(editItem.id, singerFormData);
+            setSingers(updated);
+            showToast('Record updated locally.', 'info');
+          }
+        } else {
+          const updated = updateSinger(editItem.id, singerFormData);
+          setSingers(updated);
+          showToast('Record updated locally.');
+        }
+      } else {
+        const scheduledAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T10:00:00';
+        const endsAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T14:00:00';
+        const singerRefId = typeof singers[0]?.id === 'number' ? singers[0].id : 1;
+
+        const payload = {
+          name: dubbingFormData.characterName.trim(),
+          projectRef: dubbingFormData.project,
+          singerId: singerRefId,
+          mediaId: null,
+          scheduledAt: scheduledAt,
+          endsAt: endsAt,
+          studio: dubbingFormData.studioFacility || 'Sound & Vision India, Andheri',
+          language: dubbingFormData.targetLanguage || 'Tamil',
+          status: normalizeDubbingStatusToBackend(dubbingFormData.status),
+          notes: dubbingFormData.reelsOrEpisodes || '',
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await dubbingApi.update(editItem.id, payload);
+            setDubbingSessions(prev => prev.map(d => (d.id === editItem.id ? { ...d, ...dubbingFormData } : d)));
+            showToast('Dubbing session updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating locally:', apiErr);
+            const updated = updateDubbing(editItem.id, dubbingFormData);
+            setDubbingSessions(updated);
+            showToast('Session updated locally.', 'info');
+          }
+        } else {
+          const updated = updateDubbing(editItem.id, dubbingFormData);
+          setDubbingSessions(updated);
+          showToast('Session updated locally.');
+        }
+      }
+      setEditItem(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    setEditItem(null);
   };
 
   // Confirm Delete
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    if (activeTab === 'singers') {
-      const updated = deleteSinger(deleteTarget.id);
-      setSingers(updated);
-    } else {
-      const updated = deleteDubbing(deleteTarget.id);
-      setDubbingSessions(updated);
-    }
-    setDeleteTarget(null);
-    if (detailItem && detailItem.id === deleteTarget.id) {
-      setDetailItem(null);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof deleteTarget.id === 'number' || /^\d+$/.test(deleteTarget.id);
+
+      if (activeTab === 'singers') {
+        if (isNumericId) {
+          try {
+            await singerApi.delete(deleteTarget.id);
+            setSingers(prev => prev.filter(s => s.id !== deleteTarget.id));
+            showToast('Singer track deleted from backend.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deleteSinger(deleteTarget.id);
+            setSingers(updated);
+            showToast('Track removed locally.', 'info');
+          }
+        } else {
+          const updated = deleteSinger(deleteTarget.id);
+          setSingers(updated);
+          showToast('Track deleted successfully.');
+        }
+      } else {
+        if (isNumericId) {
+          try {
+            await dubbingApi.delete(deleteTarget.id);
+            setDubbingSessions(prev => prev.filter(d => d.id !== deleteTarget.id));
+            showToast('Dubbing session deleted from backend.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deleteDubbing(deleteTarget.id);
+            setDubbingSessions(updated);
+            showToast('Session removed locally.', 'info');
+          }
+        } else {
+          const updated = deleteDubbing(deleteTarget.id);
+          setDubbingSessions(updated);
+          showToast('Session deleted successfully.');
+        }
+      }
+
+      if (detailItem && detailItem.id === deleteTarget.id) {
+        setDetailItem(null);
+      }
+      setDeleteTarget(null);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -593,6 +845,56 @@ export default function SingerDubbing() {
           <span>Vocalist Budget</span>
           <strong>{formatCurrency(totalMusicSpend)}</strong>
         </div>
+      </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '28px',
+          zIndex: 9999,
+          background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.95)' : 'rgba(34, 197, 94, 0.95)',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '10px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          fontWeight: 600,
+          fontSize: '13px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', marginLeft: '8px' }}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
+      {/* Sync Status / Refresh Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '14px', gap: '10px' }}>
+        <button
+          onClick={fetchBackendData}
+          disabled={loading}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid #2e2e2e',
+            borderRadius: '8px',
+            color: '#a7a09a',
+            padding: '6px 12px',
+            fontSize: '11px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title="Refresh from Spring Boot API"
+        >
+          <RefreshCw size={12} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          {loading ? 'Syncing Spring Boot...' : 'Refresh Live Data'}
+        </button>
       </div>
 
       {/* Main Panel */}

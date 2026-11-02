@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Film,
   HardDrive,
@@ -25,8 +25,19 @@ import {
   Server,
   Cpu,
   MonitorPlay,
-  Database
+  Database,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
+import {
+  postProductionApi,
+  mediaAssetApi,
+  extractPageItems,
+  normalizePostProductionStatusToBackend,
+  normalizePostProductionStatusToFrontend,
+  normalizeMediaStatusToBackend,
+  normalizeMediaStatusToFrontend
+} from '../api/mediaAudioLegalApi.js';
 import {
   getStoredProjects,
   getStoredPostProduction,
@@ -51,6 +62,83 @@ export default function PostProductionMedia() {
   // Data states
   const [postTasks, setPostTasks] = useState(() => getStoredPostProduction());
   const [mediaAssets, setMediaAssets] = useState(() => getStoredMediaAssets());
+
+  // Live API States
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const fetchBackendData = async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const [tasksRes, assetsRes] = await Promise.allSettled([
+        postProductionApi.list({ size: 100 }),
+        mediaAssetApi.list({ size: 100 })
+      ]);
+
+      if (tasksRes.status === 'fulfilled' && tasksRes.value) {
+        const items = extractPageItems(tasksRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            title: item.name || item.title,
+            project: item.projectRef || item.project,
+            stage: item.description || item.stage || 'Color Grading (DI)',
+            status: normalizePostProductionStatusToFrontend(item.status),
+            targetDeliveryDate: item.dueAt || item.targetDeliveryDate || '',
+            supervisor: item.assigneeName || item.supervisor || 'Red Chillies Color',
+            leadArtist: item.assigneeName || item.leadArtist || 'Makarand Surte',
+            facility: item.facility || 'Red Chillies Color Lab, Mumbai',
+            progress: item.progress ?? (item.status === 'COMPLETED' ? 100 : 75),
+            reelsCount: item.reelsCount || '8 Episodes · 16 Reels',
+            qcStatus: item.qcStatus || 'Passed Initial QC',
+            platform: item.platform || 'LoopNexus',
+            tone: item.status === 'COMPLETED' ? 'green' : 'orange',
+            image: item.image || getPostProductionImage(item.id)
+          }));
+          setPostTasks(mapped);
+        }
+      }
+
+      if (assetsRes.status === 'fulfilled' && assetsRes.value) {
+        const items = extractPageItems(assetsRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            title: item.name || item.title,
+            project: item.projectRef || item.project,
+            assetType: item.assetType || 'Master Cut',
+            status: normalizeMediaStatusToFrontend(item.status),
+            storageLocation: item.storageReference || item.storageLocation || 'Loop Cloud Vault',
+            codecFormat: item.format || item.codecFormat || 'Apple ProRes 4444 XQ',
+            fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : (item.fileSize || '150.0 GB'),
+            duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : (item.duration || '8h 24m'),
+            resolution: item.resolution || '4K UHD (3840x2160)',
+            platform: item.platform || 'LoopNexus',
+            uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : (item.uploadDate || new Date().toISOString().split('T')[0]),
+            image: item.image || getMediaAssetImage(item.id)
+          }));
+          setMediaAssets(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn('Backend fetch error in PostProductionMedia:', err);
+      setApiError(err.message || 'Could not connect to live backend.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBackendData();
+  }, []);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -207,18 +295,80 @@ export default function PostProductionMedia() {
   };
 
   // Submit Create
-  const handleCreateSubmit = (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (activeTab === 'pipeline') {
-      if (!taskFormData.title.trim()) return;
-      const { all } = createPostProduction(taskFormData);
-      setPostTasks(all);
-    } else {
-      if (!assetFormData.title.trim()) return;
-      const { all } = createMediaAsset(assetFormData);
-      setMediaAssets(all);
+    setIsSubmitting(true);
+    try {
+      if (activeTab === 'pipeline') {
+        if (!taskFormData.title.trim()) return;
+        const backendStatus = normalizePostProductionStatusToBackend(taskFormData.status);
+        const payload = {
+          name: taskFormData.title.trim(),
+          description: taskFormData.stage || taskFormData.title,
+          projectRef: taskFormData.project,
+          status: backendStatus,
+          priority: 'Normal',
+          dueAt: taskFormData.targetDeliveryDate || null,
+          startedAt: new Date().toISOString().split('T')[0],
+          completedAt: backendStatus === 'COMPLETED' ? (taskFormData.targetDeliveryDate || new Date().toISOString().split('T')[0]) : null,
+          notes: taskFormData.notes || '',
+          active: true
+        };
+
+        try {
+          const created = await postProductionApi.create(payload);
+          const mappedNew = {
+            ...taskFormData,
+            id: created.id,
+            title: created.name || taskFormData.title,
+            image: getPostProductionImage(created.id)
+          };
+          setPostTasks(prev => [mappedNew, ...prev]);
+          showToast('Post-production milestone created successfully on backend!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createPostProduction(taskFormData);
+          setPostTasks(all);
+          showToast('Milestone saved locally.', 'info');
+        }
+      } else {
+        if (!assetFormData.title.trim()) return;
+        const backendStatus = normalizeMediaStatusToBackend(assetFormData.status);
+        const payload = {
+          name: assetFormData.title.trim(),
+          description: assetFormData.assetType || assetFormData.title,
+          projectRef: assetFormData.project,
+          assetType: (assetFormData.assetType || 'MASTER_VIDEO').toUpperCase().replace(/\s+/g, '_'),
+          status: backendStatus,
+          storageReference: assetFormData.storageLocation || 's3://loopstream-vault/',
+          format: assetFormData.codecFormat || 'ProRes 4444',
+          sizeBytes: 150000000000,
+          durationSeconds: 3600,
+          notes: assetFormData.checksum || '',
+          active: true
+        };
+
+        try {
+          const created = await mediaAssetApi.create(payload);
+          const mappedNew = {
+            ...assetFormData,
+            id: created.id,
+            title: created.name || assetFormData.title,
+            image: getMediaAssetImage(created.id)
+          };
+          setMediaAssets(prev => [mappedNew, ...prev]);
+          showToast('Media asset ingested into backend vault successfully!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createMediaAsset(assetFormData);
+          setMediaAssets(all);
+          showToast('Media asset saved locally.', 'info');
+        }
+      }
+      setCreateModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
     }
-    setCreateModalOpen(false);
   };
 
   // Open Edit
@@ -263,32 +413,132 @@ export default function PostProductionMedia() {
   };
 
   // Submit Edit
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editItem) return;
-    if (activeTab === 'pipeline') {
-      const updated = updatePostProduction(editItem.id, taskFormData);
-      setPostTasks(updated);
-    } else {
-      const updated = updateMediaAsset(editItem.id, assetFormData);
-      setMediaAssets(updated);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof editItem.id === 'number' || /^\d+$/.test(editItem.id);
+
+      if (activeTab === 'pipeline') {
+        const backendStatus = normalizePostProductionStatusToBackend(taskFormData.status);
+        const payload = {
+          name: taskFormData.title.trim(),
+          description: taskFormData.stage || taskFormData.title,
+          projectRef: taskFormData.project,
+          status: backendStatus,
+          priority: 'Normal',
+          dueAt: taskFormData.targetDeliveryDate || null,
+          startedAt: editItem.startedAt || new Date().toISOString().split('T')[0],
+          completedAt: backendStatus === 'COMPLETED' ? (taskFormData.targetDeliveryDate || new Date().toISOString().split('T')[0]) : null,
+          notes: taskFormData.notes || '',
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await postProductionApi.update(editItem.id, payload);
+            setPostTasks(prev => prev.map(t => (t.id === editItem.id ? { ...t, ...taskFormData } : t)));
+            showToast('Post-production milestone updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating local state:', apiErr);
+            const updated = updatePostProduction(editItem.id, taskFormData);
+            setPostTasks(updated);
+            showToast('Milestone updated locally.', 'info');
+          }
+        } else {
+          const updated = updatePostProduction(editItem.id, taskFormData);
+          setPostTasks(updated);
+          showToast('Milestone updated locally.');
+        }
+      } else {
+        const backendStatus = normalizeMediaStatusToBackend(assetFormData.status);
+        const payload = {
+          name: assetFormData.title.trim(),
+          description: assetFormData.assetType || assetFormData.title,
+          projectRef: assetFormData.project,
+          assetType: (assetFormData.assetType || 'MASTER_VIDEO').toUpperCase().replace(/\s+/g, '_'),
+          status: backendStatus,
+          storageReference: assetFormData.storageLocation || 's3://loopstream-vault/',
+          format: assetFormData.codecFormat || 'ProRes 4444',
+          sizeBytes: 150000000000,
+          durationSeconds: 3600,
+          notes: assetFormData.checksum || '',
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await mediaAssetApi.update(editItem.id, payload);
+            setMediaAssets(prev => prev.map(a => (a.id === editItem.id ? { ...a, ...assetFormData } : a)));
+            showToast('Media asset updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating local state:', apiErr);
+            const updated = updateMediaAsset(editItem.id, assetFormData);
+            setMediaAssets(updated);
+            showToast('Media asset updated locally.', 'info');
+          }
+        } else {
+          const updated = updateMediaAsset(editItem.id, assetFormData);
+          setMediaAssets(updated);
+          showToast('Media asset updated locally.');
+        }
+      }
+      setEditItem(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    setEditItem(null);
   };
 
   // Confirm Delete
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    if (activeTab === 'pipeline') {
-      const updated = deletePostProduction(deleteTarget.id);
-      setPostTasks(updated);
-    } else {
-      const updated = deleteMediaAsset(deleteTarget.id);
-      setMediaAssets(updated);
-    }
-    setDeleteTarget(null);
-    if (detailItem && detailItem.id === deleteTarget.id) {
-      setDetailItem(null);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof deleteTarget.id === 'number' || /^\d+$/.test(deleteTarget.id);
+
+      if (activeTab === 'pipeline') {
+        if (isNumericId) {
+          try {
+            await postProductionApi.delete(deleteTarget.id);
+            setPostTasks(prev => prev.filter(t => t.id !== deleteTarget.id));
+            showToast('Post-production milestone deleted from backend.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deletePostProduction(deleteTarget.id);
+            setPostTasks(updated);
+            showToast('Milestone removed locally.', 'info');
+          }
+        } else {
+          const updated = deletePostProduction(deleteTarget.id);
+          setPostTasks(updated);
+          showToast('Milestone deleted successfully.');
+        }
+      } else {
+        if (isNumericId) {
+          try {
+            await mediaAssetApi.delete(deleteTarget.id);
+            setMediaAssets(prev => prev.filter(a => a.id !== deleteTarget.id));
+            showToast('Media asset deleted from backend vault.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deleteMediaAsset(deleteTarget.id);
+            setMediaAssets(updated);
+            showToast('Media asset removed locally.', 'info');
+          }
+        } else {
+          const updated = deleteMediaAsset(deleteTarget.id);
+          setMediaAssets(updated);
+          showToast('Media asset deleted successfully.');
+        }
+      }
+
+      if (detailItem && detailItem.id === deleteTarget.id) {
+        setDetailItem(null);
+      }
+      setDeleteTarget(null);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -608,6 +858,56 @@ export default function PostProductionMedia() {
           <span>Vault Storage Used</span>
           <strong>{(totalStorageGB / 1024).toFixed(2)} TB</strong>
         </div>
+      </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '28px',
+          zIndex: 9999,
+          background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.95)' : 'rgba(34, 197, 94, 0.95)',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '10px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          fontWeight: 600,
+          fontSize: '13px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', marginLeft: '8px' }}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
+      {/* Sync Status / Refresh Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '14px', gap: '10px' }}>
+        <button
+          onClick={fetchBackendData}
+          disabled={loading}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid #2e2e2e',
+            borderRadius: '8px',
+            color: '#a7a09a',
+            padding: '6px 12px',
+            fontSize: '11px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title="Refresh from Spring Boot API"
+        >
+          <RefreshCw size={12} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          {loading ? 'Syncing Spring Boot...' : 'Refresh Live Data'}
+        </button>
       </div>
 
       {/* Main Panel */}
