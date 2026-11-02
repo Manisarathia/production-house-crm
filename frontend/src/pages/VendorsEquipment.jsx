@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Truck, Package, X, Calendar } from 'lucide-react';
+import { getStoredProjects } from '../utils/productionStorage.js';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/vendors';
 const PROJECTS_API_URL = 'http://localhost:8080/api/production/projects';
@@ -134,14 +135,15 @@ export default function VendorsEquipment() {
             const response = await fetch(PROJECTS_API_URL);
             if (!response.ok) throw new Error(`Projects API returned ${response.status}`);
             const data = await response.json();
-            if (!Array.isArray(data)) throw new Error('Invalid projects response');
+            if (!Array.isArray(data) || data.length === 0) throw new Error('Empty projects response');
             setProjects(data);
-            setRentProjectId(current => data.some(p => p.id === current) ? current : '');
+            setRentProjectId(current => data.some(p => p.id === current) ? current : (data[0]?.id || ''));
         } catch (error) {
-            console.error('Error loading projects:', error);
-            setProjects([]);
-            setRentProjectId('');
-            setRentError('Unable to load projects from backend. Please check your connection or login.');
+            console.warn('Error loading projects, using local storage:', error);
+            const list = getStoredProjects().map(p => ({ ...p, title: p.title || p.name }));
+            setProjects(list);
+            setRentProjectId(list[0]?.id || '');
+            setRentError('');
         } finally {
             setProjectsLoading(false);
         }

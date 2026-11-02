@@ -14,6 +14,12 @@ import {
   Trash2,
   Image as ImageIcon
 } from 'lucide-react';
+import {
+  getStoredProjects,
+  createProject,
+  updateProject,
+  deleteProject
+} from '../utils/productionStorage.js';
 
 const API_BASE_URL = 'http://localhost:8080/api/production/projects';
 
@@ -44,28 +50,50 @@ export default function ProjectsProductions() {
 
   const [formData, setFormData] = useState(initialFormState);
 
+  const loadFromStorage = () => {
+    const data = getStoredProjects();
+    const mapped = data.map(item => ({
+      id: item.id,
+      name: item.name || item.title || 'Untitled Production',
+      type: item.type === 'Feature Film' ? 'MOVIE' : item.type === 'Web Series' ? 'SERIES' : 'DOCUMENTARY',
+      status: item.stage ? item.stage.replace('_', ' ') : (item.status || 'PRE PRODUCTION'),
+      stage: item.stage || 'PRE_PRODUCTION',
+      startDate: item.startDate,
+      endDate: item.targetDeliveryDate || item.endDate,
+      posterUrl: item.posterUrl || '',
+      code: item.code || (item.id ? `PRJ-${String(item.id).substring(0, 4).toUpperCase()}` : 'PRJ-TEMP'),
+      progress: item.progress || (item.stage === 'RELEASED' ? 100 : item.stage === 'POST_PRODUCTION' ? 80 : item.stage === 'PRODUCTION' ? 50 : 15)
+    }));
+    setProjects(mapped);
+  };
+
   const fetchProjectsFromServer = async () => {
     setLoading(true);
     try {
       const response = await fetch(API_BASE_URL);
       if (response.ok) {
         const data = await response.json();
-        const mapped = data.map(item => ({
-          id: item.id,
-          name: item.title || 'Untitled Production',
-          type: item.type || 'MOVIE',
-          status: item.stage ? item.stage.replace('_', ' ') : 'PRE PRODUCTION',
-          stage: item.stage || 'PRE_PRODUCTION',
-          startDate: item.startDate,
-          endDate: item.endDate,
-          posterUrl: item.posterUrl || '',
-          code: item.id ? `PRJ-${item.id.substring(0, 4).toUpperCase()}` : 'PRJ-TEMP',
-          progress: item.stage === 'RELEASED' ? 100 : item.stage === 'POST_PRODUCTION' ? 80 : item.stage === 'PRODUCTION' ? 50 : 15
-        }));
-        setProjects(mapped);
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(item => ({
+            id: item.id,
+            name: item.title || item.name || 'Untitled Production',
+            type: item.type || 'MOVIE',
+            status: item.stage ? item.stage.replace('_', ' ') : 'PRE PRODUCTION',
+            stage: item.stage || 'PRE_PRODUCTION',
+            startDate: item.startDate,
+            endDate: item.endDate,
+            posterUrl: item.posterUrl || '',
+            code: item.code || (item.id ? `PRJ-${String(item.id).substring(0, 4).toUpperCase()}` : 'PRJ-TEMP'),
+            progress: item.progress || (item.stage === 'RELEASED' ? 100 : item.stage === 'POST_PRODUCTION' ? 80 : item.stage === 'PRODUCTION' ? 50 : 15)
+          }));
+          setProjects(mapped);
+          return;
+        }
       }
+      loadFromStorage();
     } catch (error) {
-      console.error("Failed to connect to backend context:", error);
+      console.warn("Failed to connect to backend context, loading from local storage:", error);
+      loadFromStorage();
     } finally {
       setLoading(false);
     }
@@ -123,14 +151,24 @@ export default function ProjectsProductions() {
       if (response.ok) {
         setCreateModalOpen(false);
         await fetchProjectsFromServer();
-      } else {
-        alert("Server validation failure. Check Spring Boot logs.");
+        return;
       }
     } catch (error) {
-      console.error("Network exception on submission:", error);
+      console.warn("Backend unavailable, saving project to local storage:", error);
     }
-  };
 
+    createProject({
+      name: formData.name,
+      type: formData.type === 'MOVIE' ? 'Feature Film' : formData.type === 'SERIES' ? 'Web Series' : 'Documentary',
+      stage: formData.stage.replace('_', ' '),
+      status: formData.stage.replace('_', ' '),
+      startDate: formData.startDate,
+      targetDeliveryDate: formData.endDate,
+      posterUrl: formData.posterUrl
+    });
+    setCreateModalOpen(false);
+    loadFromStorage();
+  };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -161,16 +199,25 @@ export default function ProjectsProductions() {
       if (response.ok) {
         setEditModalProject(null);
         await fetchProjectsFromServer(); 
-      } else {
-        const errorData = await response.json();
-        setValidationError(errorData.message || "Server rejected update validation layout.");
+        return;
       }
     } catch (error) {
-      console.error("Update request processing failed.", error);
+      console.warn("Backend unavailable, updating project in local storage:", error);
     }
+
+    updateProject(editModalProject.id, {
+      name: formData.name,
+      type: formData.type === 'MOVIE' ? 'Feature Film' : formData.type === 'SERIES' ? 'Web Series' : 'Documentary',
+      stage: formData.stage.replace('_', ' '),
+      status: formData.stage.replace('_', ' '),
+      startDate: formData.startDate,
+      targetDeliveryDate: formData.endDate,
+      posterUrl: formData.posterUrl
+    });
+    setEditModalProject(null);
+    loadFromStorage();
   };
 
- 
 const handleDeleteProject = (id) => {
     const project = projects.find(item => item.id === id);
     if (!project) return;
@@ -190,36 +237,20 @@ const handleDeleteProject = (id) => {
       { method: "DELETE" }
     );
 
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      if (response.status === 409) {
-        setDeleteError(
-          result.error ||
-          "Project deletion failed because a linked record could not be removed. No records were deleted."
-        );
-        return;
-      }
-
-      throw new Error(
-        result.error ||
-        result.message ||
-        `Delete failed (HTTP ${response.status})`
-      );
+    if (response.ok) {
+      setDeleteTargetProject(null);
+      await fetchProjectsFromServer();
+      return;
     }
-
-    setDeleteTargetProject(null);
-    await fetchProjectsFromServer();
-
   } catch (error) {
-    setDeleteError(
-      error.message || "Unable to delete this project."
-    );
-  } finally {
-    setDeleting(false);
+    console.warn("Backend unavailable, deleting project from local storage:", error);
   }
-};
 
+  deleteProject(deleteTargetProject.id);
+  setDeleteTargetProject(null);
+  loadFromStorage();
+  setDeleting(false);
+  };
 
   const handleOpenEdit = (project) => {
     setFormData({

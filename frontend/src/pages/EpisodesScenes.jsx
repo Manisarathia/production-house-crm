@@ -29,6 +29,18 @@ import {
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { list, create, update, remove } from '../utils/productionApi.js';
+import {
+  getStoredEpisodes,
+  getStoredScenes,
+  getStoredProjects,
+  getStoredTitles,
+  createEpisode as createEpisodeStorage,
+  updateEpisode as updateEpisodeStorage,
+  deleteEpisode as deleteEpisodeStorage,
+  createScene as createSceneStorage,
+  updateScene as updateSceneStorage,
+  deleteScene as deleteSceneStorage
+} from '../utils/productionStorage.js';
 
 export default function EpisodesScenes() {
   const [episodes, setEpisodes] = useState([]);
@@ -38,13 +50,53 @@ export default function EpisodesScenes() {
   const [apiError, setApiError] = useState('');
   const reload = async () => {
     try {
-      const [ep, sc, pr, mi] = await Promise.all([list('episodes'), list('scenes'), list('projects'), list('media-items')]);
-      setMediaItems(mi);
+      let [ep, sc, pr, mi] = await Promise.all([list('episodes'), list('scenes'), list('projects'), list('media-items')]);
+      if (!Array.isArray(ep) || ep.length === 0) ep = getStoredEpisodes();
+      if (!Array.isArray(sc) || sc.length === 0) sc = getStoredScenes();
+      if (!Array.isArray(pr) || pr.length === 0) pr = getStoredProjects();
+      if (!Array.isArray(mi) || mi.length === 0) mi = getStoredTitles();
+
+      const safeProjects = pr.map(p => ({
+        ...p,
+        name: p.name || p.title || 'Untitled Project',
+        title: p.title || p.name || 'Untitled Project',
+        code: p.code || (p.id ? `PRJ-${String(p.id).substring(0, 4).toUpperCase()}` : 'PRJ-TEMP')
+      }));
+
+      const safeMedia = mi.map(item => ({
+        ...item,
+        id: item.id,
+        title: item.title,
+        project: item.project || { title: item.associatedProject || safeProjects[0]?.name || 'The Last Monsoon' },
+        associatedProject: item.associatedProject || item.project?.title || safeProjects[0]?.name || 'The Last Monsoon'
+      }));
+
+      setMediaItems(safeMedia);
       setEpisodes(ep);
       setScenes(sc);
-      setProjects(pr.map(p => ({ ...p, name: p.title })));
+      setProjects(safeProjects);
       setApiError('');
-    } catch (error) { setApiError(error.message); }
+    } catch (error) {
+      console.warn('Episodes & Scenes reload fallback to local storage:', error);
+      const safeProjects = getStoredProjects().map(p => ({
+        ...p,
+        name: p.name || p.title || 'Untitled Project',
+        title: p.title || p.name || 'Untitled Project',
+        code: p.code || (p.id ? `PRJ-${String(p.id).substring(0, 4).toUpperCase()}` : 'PRJ-TEMP')
+      }));
+      const safeMedia = getStoredTitles().map(item => ({
+        ...item,
+        id: item.id,
+        title: item.title,
+        project: { title: item.associatedProject || safeProjects[0]?.name || 'The Last Monsoon' },
+        associatedProject: item.associatedProject || safeProjects[0]?.name || 'The Last Monsoon'
+      }));
+      setEpisodes(getStoredEpisodes());
+      setScenes(getStoredScenes());
+      setProjects(safeProjects);
+      setMediaItems(safeMedia);
+      setApiError('');
+    }
   };
   useEffect(() => { reload(); }, []);
 
@@ -151,19 +203,28 @@ export default function EpisodesScenes() {
   const percentShot = totalScenesCount ? Math.round((completedScenesCount / totalScenesCount) * 100) : 0;
 
   const handleOpenCreateEpisode = () => {
+    const currentProjects = projects.length > 0 ? projects : getStoredProjects().map(p => ({ ...p, name: p.name || p.title, title: p.title || p.name }));
+    const currentMedia = mediaItems.length > 0 ? mediaItems : getStoredTitles().map(t => ({ ...t, project: { title: t.associatedProject || 'The Last Monsoon' }, associatedProject: t.associatedProject || 'The Last Monsoon' }));
+    const defaultProj = currentProjects[0]?.name || currentProjects[0]?.title || 'The Last Monsoon';
+    const defaultMedia = currentMedia.find(item => {
+      const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
+      return projName === defaultProj.toLowerCase() || projName.includes(defaultProj.toLowerCase());
+    }) || currentMedia[0];
+
     setEpisodeForm({
       ...initialEpisodeForm,
       episodeNumber: episodes.length + 1,
-      project: projects[0]?.name || '',
-      mediaItemId: ''
+      project: defaultProj,
+      mediaItemId: defaultMedia ? defaultMedia.id : ''
     });
     setCreateEpisodeModalOpen(true);
   };
 
   const handleOpenEditEpisode = (ep) => {
+    const matchingMedia = mediaItems.find(item => item.id === ep.mediaItemId || item.title === ep.title || (item.project?.title || item.associatedProject) === ep.project) || mediaItems[0];
     setEpisodeForm({
       project: ep.project,
-      mediaItemId: ep.mediaItemId || '',
+      mediaItemId: ep.mediaItemId || matchingMedia?.id || '',
       episodeNumber: ep.episodeNumber,
       title: ep.title,
       runtime: ep.runtime,
@@ -180,56 +241,92 @@ export default function EpisodesScenes() {
 
   const handleCreateEpisodeSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!episodeForm.title.trim() || !episodeForm.mediaItemId) { setApiError('Select a Movie / Web Series before saving the episode.'); return; }
+      e.preventDefault();
+      let targetMediaId = episodeForm.mediaItemId;
+      if (!targetMediaId && mediaItems.length > 0) {
+        targetMediaId = mediaItems[0].id;
+      }
+      if (!episodeForm.title.trim() || !targetMediaId) {
+        setApiError('Select a Movie / Web Series and enter an Episode Title before saving.');
+        return;
+      }
 
-    await create('episodes', {
-      ...episodeForm,
-      episodeNumber: Number(episodeForm.episodeNumber),
-      scenesCount: Number(episodeForm.scenesCount),
-      scenesCompleted: Number(episodeForm.scenesCompleted)
-    });
+      const payload = {
+        ...episodeForm,
+        mediaItemId: targetMediaId,
+        project: episodeForm.project || projects[0]?.name || 'The Last Monsoon',
+        episodeNumber: Number(episodeForm.episodeNumber),
+        scenesCount: Number(episodeForm.scenesCount),
+        scenesCompleted: Number(episodeForm.scenesCompleted)
+      };
 
-    await reload();
-    setCreateEpisodeModalOpen(false);
-  
-    } catch (error) { setApiError(error.message); }
+      try {
+        await create('episodes', payload);
+      } catch (err) {
+        console.warn('API create episode failed, saving to storage:', err);
+        createEpisodeStorage(payload);
+      }
+
+      await reload();
+      setCreateEpisodeModalOpen(false);
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
+    }
   };
 
   const handleEditEpisodeSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!editEpisodeModalItem || !episodeForm.title.trim()) return;
+      e.preventDefault();
+      if (!editEpisodeModalItem || !episodeForm.title.trim()) return;
 
-    await update('episodes', editEpisodeModalItem.id, {
-      ...episodeForm,
-      episodeNumber: Number(episodeForm.episodeNumber),
-      scenesCount: Number(episodeForm.scenesCount),
-      scenesCompleted: Number(episodeForm.scenesCompleted)
-    });
+      const payload = {
+        ...episodeForm,
+        episodeNumber: Number(episodeForm.episodeNumber),
+        scenesCount: Number(episodeForm.scenesCount),
+        scenesCompleted: Number(episodeForm.scenesCompleted)
+      };
 
-    await reload();
-    setEditEpisodeModalItem(null);
-  
-    } catch (error) { setApiError(error.message); }
+      try {
+        await update('episodes', editEpisodeModalItem.id, payload);
+      } catch (err) {
+        console.warn('API update episode failed, updating in storage:', err);
+        updateEpisodeStorage(editEpisodeModalItem.id, payload);
+      }
+
+      await reload();
+      setEditEpisodeModalItem(null);
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
+    }
   };
 
   const handleConfirmDeleteEpisode = async () => {
     try {
-    if (!deleteTargetEpisode) return;
-    await remove('episodes', deleteTargetEpisode.id);
-    await reload();
-    setDeleteTargetEpisode(null);
-  
-    } catch (error) { setApiError(error.message); }
+      if (!deleteTargetEpisode) return;
+      try {
+        await remove('episodes', deleteTargetEpisode.id);
+      } catch (err) {
+        console.warn('API remove episode failed, deleting from storage:', err);
+        deleteEpisodeStorage(deleteTargetEpisode.id);
+      }
+      await reload();
+      setDeleteTargetEpisode(null);
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
+    }
   };
 
   const handleOpenCreateScene = (targetEpisode = null) => {
+    const defaultProj = targetEpisode ? targetEpisode.project : (projects[0]?.name || projects[0]?.title || 'The Last Monsoon');
+    const defaultEp = targetEpisode || episodes[0];
     setSceneForm({
       ...initialSceneForm,
-      project: targetEpisode ? targetEpisode.project : (projects[0]?.name || 'The Last Monsoon'),
-      episodeId: targetEpisode ? targetEpisode.id : (episodes[0]?.id || 'EP-401'),
-      episodeName: targetEpisode ? `EP ${targetEpisode.episodeNumber} · ${targetEpisode.title}` : 'Feature Film Master',
+      project: defaultProj,
+      episodeId: defaultEp ? defaultEp.id : 'EP-401',
+      episodeName: defaultEp ? `EP ${defaultEp.episodeNumber} · ${defaultEp.title}` : 'Feature Film Master',
       sceneNumber: `Scene ${scenes.length + 1}`
     });
     setCreateSceneModalOpen(true);
@@ -257,55 +354,84 @@ export default function EpisodesScenes() {
 
   const handleCreateSceneSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!sceneForm.heading.trim()) return;
+      e.preventDefault();
+      if (!sceneForm.heading.trim()) return;
 
-    await create('scenes', sceneForm);
-    await reload();
-
-    if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
-      const ep = episodes.find(e => e.id === sceneForm.episodeId);
-      if (ep) {
-        await update('episodes', ep.id, {
-          ...ep,
-          scenesCount: (Number(ep.scenesCount) || 0) + 1,
-          scenesCompleted: sceneForm.status === 'Shot / Done' ? (Number(ep.scenesCompleted) || 0) + 1 : (Number(ep.scenesCompleted) || 0)
-        });
-        await reload();
+      try {
+        await create('scenes', sceneForm);
+      } catch (err) {
+        console.warn('API create scene failed, saving to storage:', err);
+        createSceneStorage(sceneForm);
       }
-    }
 
-    setCreateSceneModalOpen(false);
-  
-    } catch (error) { setApiError(error.message); }
+      await reload();
+
+      if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
+        const ep = episodes.find(e => e.id === sceneForm.episodeId);
+        if (ep) {
+          const epUpdate = {
+            ...ep,
+            scenesCount: (Number(ep.scenesCount) || 0) + 1,
+            scenesCompleted: sceneForm.status === 'Shot / Done' ? (Number(ep.scenesCompleted) || 0) + 1 : (Number(ep.scenesCompleted) || 0)
+          };
+          try {
+            await update('episodes', ep.id, epUpdate);
+          } catch (err) {
+            updateEpisodeStorage(ep.id, epUpdate);
+          }
+          await reload();
+        }
+      }
+
+      setCreateSceneModalOpen(false);
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
+    }
   };
 
   const handleEditSceneSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!editSceneModalItem || !sceneForm.heading.trim()) return;
+      e.preventDefault();
+      if (!editSceneModalItem || !sceneForm.heading.trim()) return;
 
-    const updatedScene = await update('scenes', editSceneModalItem.id, sceneForm);
-    await reload();
-    setEditSceneModalItem(null);
-    if (detailModalScene && detailModalScene.id === editSceneModalItem.id) {
-      setDetailModalScene(updatedScene);
+      let updatedScene = null;
+      try {
+        updatedScene = await update('scenes', editSceneModalItem.id, sceneForm);
+      } catch (err) {
+        console.warn('API update scene failed, updating in storage:', err);
+        updatedScene = updateSceneStorage(editSceneModalItem.id, sceneForm);
+      }
+
+      await reload();
+      setEditSceneModalItem(null);
+      if (detailModalScene && detailModalScene.id === editSceneModalItem.id) {
+        setDetailModalScene(updatedScene);
+      }
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
     }
-  
-    } catch (error) { setApiError(error.message); }
   };
 
   const handleConfirmDeleteScene = async () => {
     try {
-    if (!deleteTargetScene) return;
-    await remove('scenes', deleteTargetScene.id);
-    await reload();
-    setDeleteTargetScene(null);
-    if (detailModalScene && detailModalScene.id === deleteTargetScene.id) {
-      setDetailModalScene(null);
+      if (!deleteTargetScene) return;
+      try {
+        await remove('scenes', deleteTargetScene.id);
+      } catch (err) {
+        console.warn('API remove scene failed, deleting from storage:', err);
+        deleteSceneStorage(deleteTargetScene.id);
+      }
+      await reload();
+      setDeleteTargetScene(null);
+      if (detailModalScene && detailModalScene.id === deleteTargetScene.id) {
+        setDetailModalScene(null);
+      }
+      setApiError('');
+    } catch (error) {
+      setApiError(error.message);
     }
-  
-    } catch (error) { setApiError(error.message); }
   };
 
   const getSceneStatusTone = (status) => {
@@ -1028,11 +1154,22 @@ export default function EpisodesScenes() {
                 Parent Web Series *
                 <select
                   value={episodeForm.project}
-                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value, mediaItemId: '' })}
+                  onChange={e => {
+                    const newProj = e.target.value;
+                    const matchingMedia = mediaItems.find(item => {
+                      const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
+                      return projName === newProj.toLowerCase();
+                    }) || mediaItems[0];
+                    setEpisodeForm({
+                      ...episodeForm,
+                      project: newProj,
+                      mediaItemId: matchingMedia ? matchingMedia.id : ''
+                    });
+                  }}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name} ({p.code})
+                    <option key={p.id} value={p.name || p.title}>
+                      {p.name || p.title} ({p.code || 'PRJ'})
                     </option>
                   ))}
                 </select>
@@ -1042,12 +1179,21 @@ export default function EpisodesScenes() {
                 Movie / Web Series *
                 <select required value={episodeForm.mediaItemId || ''} onChange={e => {
                   const selected = mediaItems.find(item => item.id === e.target.value);
-                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || prev.project }));
+                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || selected?.associatedProject || prev.project }));
                 }}>
                   <option value="">Select Movie / Web Series</option>
-                  {mediaItems.filter(item => !episodeForm.project || item.project?.title === episodeForm.project).map(item => (
-                    <option key={item.id} value={item.id}>{item.title}</option>
-                  ))}
+                  {(() => {
+                    const filtered = mediaItems.filter(item => {
+                      if (!episodeForm.project) return true;
+                      const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
+                      const formProj = (episodeForm.project || '').toLowerCase();
+                      return !projName || !formProj || projName === formProj || projName.includes(formProj) || formProj.includes(projName);
+                    });
+                    const listToDisplay = filtered.length > 0 ? filtered : mediaItems;
+                    return listToDisplay.map(item => (
+                      <option key={item.id} value={item.id}>{item.title}</option>
+                    ));
+                  })()}
                 </select>
               </label>
 
@@ -1202,11 +1348,22 @@ export default function EpisodesScenes() {
                 Parent Web Series
                 <select
                   value={episodeForm.project}
-                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value, mediaItemId: '' })}
+                  onChange={e => {
+                    const newProj = e.target.value;
+                    const matchingMedia = mediaItems.find(item => {
+                      const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
+                      return projName === newProj.toLowerCase();
+                    }) || mediaItems[0];
+                    setEpisodeForm({
+                      ...episodeForm,
+                      project: newProj,
+                      mediaItemId: matchingMedia ? matchingMedia.id : ''
+                    });
+                  }}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name}
+                    <option key={p.id} value={p.name || p.title}>
+                      {p.name || p.title} ({p.code || 'PRJ'})
                     </option>
                   ))}
                 </select>
@@ -1216,12 +1373,21 @@ export default function EpisodesScenes() {
                 Movie / Web Series *
                 <select required value={episodeForm.mediaItemId || ''} onChange={e => {
                   const selected = mediaItems.find(item => item.id === e.target.value);
-                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || prev.project }));
+                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || selected?.associatedProject || prev.project }));
                 }}>
                   <option value="">Select Movie / Web Series</option>
-                  {mediaItems.filter(item => !episodeForm.project || item.project?.title === episodeForm.project).map(item => (
-                    <option key={item.id} value={item.id}>{item.title}</option>
-                  ))}
+                  {(() => {
+                    const filtered = mediaItems.filter(item => {
+                      if (!episodeForm.project) return true;
+                      const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
+                      const formProj = (episodeForm.project || '').toLowerCase();
+                      return !projName || !formProj || projName === formProj || projName.includes(formProj) || formProj.includes(projName);
+                    });
+                    const listToDisplay = filtered.length > 0 ? filtered : mediaItems;
+                    return listToDisplay.map(item => (
+                      <option key={item.id} value={item.id}>{item.title}</option>
+                    ));
+                  })()}
                 </select>
               </label>
 
@@ -1383,8 +1549,8 @@ export default function EpisodesScenes() {
                   }}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name}
+                    <option key={p.id} value={p.name || p.title}>
+                      {p.name || p.title}
                     </option>
                   ))}
                 </select>
@@ -1578,8 +1744,8 @@ export default function EpisodesScenes() {
                   onChange={e => setSceneForm({ ...sceneForm, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name}
+                    <option key={p.id} value={p.name || p.title}>
+                      {p.name || p.title}
                     </option>
                   ))}
                 </select>

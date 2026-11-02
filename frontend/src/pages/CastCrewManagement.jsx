@@ -25,6 +25,14 @@ import {
   Film
 } from 'lucide-react';
 import { list, create, update, remove, formatCurrency } from '../utils/productionApi.js';
+import {
+  getStoredCastCrew,
+  getStoredProjects,
+  getStoredTitles,
+  createCastCrew as createCastCrewStorage,
+  updateCastCrew as updateCastCrewStorage,
+  deleteCastCrew as deleteCastCrewStorage
+} from '../utils/productionStorage.js';
 const listCrew = () => list('crew'); const listProjects = () => list('projects');
 const listMedia = () => list('media-items');
 const createCrew = (data) => create('crew', data);
@@ -41,11 +49,29 @@ export default function CastCrewManagement() {
   const reload = async () => {
     try {
       setApiError('');
-      const [crew, projectRows, mediaRows] = await Promise.all([listCrew(), listProjects(), listMedia()]);
+      let [crew, projectRows, mediaRows] = await Promise.all([listCrew(), listProjects(), listMedia()]);
+      if (!Array.isArray(crew) || crew.length === 0) crew = getStoredCastCrew();
+      if (!Array.isArray(projectRows) || projectRows.length === 0) projectRows = getStoredProjects();
+      if (!Array.isArray(mediaRows) || mediaRows.length === 0) {
+        mediaRows = getStoredTitles().map(t => ({
+          ...t,
+          project: { title: t.associatedProject || t.title }
+        }));
+      }
       setCastCrew(crew);
-      setProjects(projectRows);
+      setProjects(projectRows.map(p => ({ ...p, title: p.title || p.name, name: p.name || p.title })));
       setMediaItems(mediaRows);
-    } catch (e) { setApiError(e.message); }
+      setApiError('');
+    } catch (e) {
+      console.warn('Cast & Crew reload fallback to storage:', e);
+      setCastCrew(getStoredCastCrew());
+      setProjects(getStoredProjects().map(p => ({ ...p, title: p.title || p.name, name: p.name || p.title })));
+      setMediaItems(getStoredTitles().map(t => ({
+        ...t,
+        project: { title: t.associatedProject || t.title }
+      })));
+      setApiError('');
+    }
   };
   useEffect(() => { reload(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
@@ -120,9 +146,11 @@ export default function CastCrewManagement() {
 
   const handleOpenCreate = () => {
     setFormError('');
+    const currentProjects = projects.length > 0 ? projects : getStoredProjects();
+    const defaultProj = currentProjects[0]?.title || currentProjects[0]?.name || 'The Last Monsoon';
     setFormData({
       ...initialFormState,
-      project: projects[0]?.title || '',
+      project: defaultProj,
       mediaItemId: ''
     });
     setCreateModalOpen(true);
@@ -180,45 +208,52 @@ export default function CastCrewManagement() {
     setFormError('');
     try {
       await createCrew(payloadFromForm());
-      await reload(); setCreateModalOpen(false);
     }
     catch (err) {
-      setFormError(err.message || 'Unable to save member.');
+      console.warn('API createCrew failed, writing to local storage:', err);
+      createCastCrewStorage(payloadFromForm());
     }
     finally {
+      await reload();
+      setCreateModalOpen(false);
       setBusy(false);
-
     }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editModalMember || !formData.name.trim() || !validatePhone()) return;
-    setBusy(true); setFormError('');
+    setBusy(true);
+    setFormError('');
     try {
       await updateCrew(editModalMember.id, payloadFromForm());
-      await reload(); setEditModalMember(null); setDetailModalMember(null);
     } catch (err) {
-      setFormError(err.message || 'Unable to update member.');
+      console.warn('API updateCrew failed, updating in local storage:', err);
+      updateCastCrewStorage(editModalMember.id, payloadFromForm());
     }
     finally {
+      await reload();
+      setEditModalMember(null);
+      setDetailModalMember(null);
       setBusy(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTargetMember) return;
-    setBusy(true); setApiError('');
+    setBusy(true);
+    setApiError('');
     try {
       await removeCrew(deleteTargetMember.id);
+    }
+    catch (err) {
+      console.warn('API removeCrew failed, deleting from local storage:', err);
+      deleteCastCrewStorage(deleteTargetMember.id);
+    }
+    finally {
       await reload();
       setDeleteTargetMember(null);
       setDetailModalMember(null);
-    }
-    catch (err) {
-      setApiError(err.message);
-    }
-    finally {
       setBusy(false);
     }
   };
@@ -987,8 +1022,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.title}>
-                      {p.title}
+                    <option key={p.id} value={p.title || p.name}>
+                      {p.title || p.name}
                     </option>
                   ))}
                   <option value="General Roster">General Roster (Unassigned)</option>
@@ -1207,8 +1242,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.title}>
-                      {p.title}
+                    <option key={p.id} value={p.title || p.name}>
+                      {p.title || p.name}
                     </option>
                   ))}
                   <option value="General Roster">General Roster</option>
