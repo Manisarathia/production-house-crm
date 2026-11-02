@@ -1,6 +1,12 @@
-const BASE =
-  (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') +
-  '/api/production';
+const configuredBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080')
+  .trim()
+  .replace(/\/+$/, '');
+
+const BASE = /\/api\/production$/.test(configuredBase)
+  ? configuredBase
+  : /\/api$/.test(configuredBase)
+    ? `${configuredBase}/production`
+    : `${configuredBase}/api/production`;
 
 export async function api(path, method = 'GET', data) {
   const res = await fetch(BASE + path, {
