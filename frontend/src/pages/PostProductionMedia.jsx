@@ -87,7 +87,8 @@ export default function PostProductionMedia() {
       ]);
 
       const items = extractPageItems(tasksRes);
-      const mapped = items.map(item => ({
+      if (items.length > 0) {
+        const mapped = items.map(item => ({
         id: item.id,
         title: item.name || 'Untitled Milestone',
         project: item.projectRef || 'General',
@@ -104,10 +105,14 @@ export default function PostProductionMedia() {
         tone: item.status === 'COMPLETED' ? 'green' : 'orange',
         image: item.image || resolvePostProductionPicture(item)
       }));
-      setPostTasks(mapped);
+        setPostTasks(mapped);
+      } else {
+        setPostTasks(getStoredPostProduction());
+      }
 
       const assetItems = extractPageItems(assetsRes);
-      const mappedAssets = assetItems.map(item => ({
+      if (assetItems.length > 0) {
+        const mappedAssets = assetItems.map(item => ({
         id: item.id,
         title: item.name || 'Master Deliverable',
         project: item.projectRef || 'General',
@@ -122,10 +127,15 @@ export default function PostProductionMedia() {
         uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
         image: item.image || resolveMediaAssetPicture(item)
       }));
-      setMediaAssets(mappedAssets);
+        setMediaAssets(mappedAssets);
+      } else {
+        setMediaAssets(getStoredMediaAssets());
+      }
     } catch (err) {
       console.warn('Backend fetch error in PostProductionMedia:', err);
       setApiError(err.message || 'Could not connect to live backend.');
+      setPostTasks(getStoredPostProduction());
+      setMediaAssets(getStoredMediaAssets());
     } finally {
       setLoading(false);
     }
@@ -349,6 +359,7 @@ export default function PostProductionMedia() {
             image: taskFormData.image || resolvePostProductionPicture(created)
           };
           setPostTasks(prev => [mappedNew, ...prev]);
+          savePostProduction([mappedNew, ...getStoredPostProduction()]);
           showToast('Post-production milestone created successfully on backend!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);
@@ -382,6 +393,7 @@ export default function PostProductionMedia() {
             image: assetFormData.image || resolveMediaAssetPicture(created)
           };
           setMediaAssets(prev => [mappedNew, ...prev]);
+          saveMediaAssets([mappedNew, ...getStoredMediaAssets()]);
           showToast('Media asset ingested into backend vault successfully!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);
