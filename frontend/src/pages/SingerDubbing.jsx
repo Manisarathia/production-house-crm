@@ -571,40 +571,72 @@ export default function SingerDubbing() {
         ::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 6px; }
         ::-webkit-scrollbar-thumb:hover { background: #e3652e; }
 
+        .production-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 22px;
+          align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
         .prod-card, .prod-list-card {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
                       border-color 0.24s ease, 
                       box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .prod-card {
-          overflow: hidden;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          padding: 16px 18px 16px 18px !important;
           padding-top: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.25s ease, 
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          position: relative;
         }
+        .prod-card:hover {
+          transform: translateY(-4px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+        }
+
         .prod-card-poster-wrap {
           position: relative;
           width: calc(100% + 36px);
-          margin: 0 -18px 14px -18px;
-          height: 156px;
+          margin: 0 -18px 0 -18px !important;
+          height: 160px;
           overflow: hidden;
-          background: #111;
+          background: #11100f;
+          border-top-left-radius: 13px;
+          border-top-right-radius: 13px;
         }
         .prod-card-poster-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center 35%;
+          object-position: center 30%;
           transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
-          filter: brightness(0.85) contrast(1.08);
+          filter: brightness(0.86) contrast(1.08);
           display: block;
         }
         .prod-card:hover .prod-card-poster-img {
-          transform: scale(1.08);
+          transform: scale(1.06);
           filter: brightness(1.02) contrast(1.15);
         }
         .prod-card-poster-gradient {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(25,25,25,0.15) 45%, #191919 100%);
+          background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(20,19,18,0.25) 45%, #181716 100%);
           pointer-events: none;
         }
         .prod-card-poster-badges {
@@ -616,6 +648,251 @@ export default function SingerDubbing() {
           justify-content: space-between;
           align-items: center;
           z-index: 2;
+          pointer-events: none;
+        }
+        .prod-card-poster-badges > * {
+          pointer-events: auto;
+        }
+
+        .prod-card-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: 2px;
+        }
+        .prod-card-title-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+        }
+        .prod-card-title-group h3 {
+          margin: 0;
+          font-size: 16px !important;
+          font-weight: 750;
+          color: #f4f0eb;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          transition: color 0.18s ease;
+        }
+        .prod-card:hover .prod-card-title-group h3 {
+          color: #ffffff !important;
+        }
+        .prod-card-title-group span {
+          font-size: 11.5px !important;
+          color: #9c948c;
+          display: block;
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .prod-card-play-btn {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 10px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+          cursor: pointer !important;
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease !important;
+        }
+        .prod-card:hover .prod-card-play-btn {
+          transform: scale(1.08);
+          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.3);
+        }
+
+        .prod-meta-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          align-items: center;
+        }
+        .prod-meta-tags .badge-tag {
+          font-size: 11px !important;
+          font-weight: 600 !important;
+          padding: 4px 10px !important;
+          border-radius: 6px !important;
+          background: #23211f !important;
+          color: #c8c0b8 !important;
+          border: 1px solid #36322e !important;
+          letter-spacing: 0.2px;
+          line-height: 1.4;
+        }
+        .prod-meta-tags .badge-tag.format {
+          background: rgba(187, 160, 255, 0.12) !important;
+          color: #c4b0ff !important;
+          border-color: rgba(187, 160, 255, 0.28) !important;
+        }
+
+        .prod-audio-preview {
+          background: #141312;
+          border: 1px solid #2a2724;
+          border-radius: 9px;
+          padding: 10px 12px;
+        }
+        .prod-audio-preview-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 7px;
+        }
+        .prod-audio-status {
+          font-size: 11px;
+          color: #9e978f;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-weight: 500;
+        }
+        .prod-audio-isrc {
+          font-size: 11px;
+          color: #f07842;
+          font-weight: 700;
+          font-family: monospace;
+          letter-spacing: 0.5px;
+        }
+        .prod-waveform-bars {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          height: 24px;
+        }
+        .waveform-bar {
+          flex: 1;
+          border-radius: 2px;
+          background: #383430;
+          transition: height 0.2s ease, background-color 0.2s ease;
+        }
+        .waveform-bar.active {
+          background: #f07842;
+          box-shadow: 0 0 5px rgba(240, 120, 66, 0.45);
+        }
+
+        .prod-finance-row {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 12px !important;
+          background: #161514 !important;
+          border: 1px solid #292724 !important;
+          border-radius: 9px !important;
+          padding: 10px 13px !important;
+        }
+        .prod-finance-item span {
+          display: block !important;
+          font-size: 10px !important;
+          color: #8c857e !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+          font-weight: 600 !important;
+          margin-bottom: 3px !important;
+        }
+        .prod-finance-item strong {
+          display: block !important;
+          font-size: 13.5px !important;
+          color: #f4f0eb !important;
+          font-weight: 700 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+
+        .prod-card-foot {
+          margin-top: auto !important;
+          padding-top: 13px !important;
+          border-top: 1px solid #2a2724 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
+        }
+        .prod-foot-crew {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          min-width: 0 !important;
+          flex: 1 !important;
+        }
+        .prod-foot-crew .avatar {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 8px !important;
+          background: rgba(112, 213, 226, 0.12) !important;
+          color: #70d5e2 !important;
+          border: 1px solid rgba(112, 213, 226, 0.25) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        }
+        .prod-foot-crew > div:last-child {
+          min-width: 0 !important;
+          flex: 1 !important;
+        }
+        .prod-foot-crew span {
+          display: block !important;
+          font-size: 10px !important;
+          color: #8c857e !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+          font-weight: 600 !important;
+        }
+        .prod-foot-crew strong {
+          display: block !important;
+          font-size: 12.5px !important;
+          color: #f0ece6 !important;
+          font-weight: 600 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+
+        .prod-card-actions {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          flex-shrink: 0 !important;
+        }
+        .prod-card-actions .icon-button {
+          width: 31px !important;
+          height: 31px !important;
+          border-radius: 7px !important;
+          background: #23211f !important;
+          border: 1px solid #36332f !important;
+          color: #a7a09a !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+          cursor: pointer !important;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .prod-card-actions .icon-button:hover {
+          transform: translateY(-2px) scale(1.06) !important;
+        }
+        .prod-card-actions .action-view:hover {
+          background: rgba(112, 213, 226, 0.16) !important;
+          border-color: #70d5e2 !important;
+          color: #70d5e2 !important;
+          box-shadow: 0 0 10px rgba(112, 213, 226, 0.28) !important;
+        }
+        .prod-card-actions .action-edit:hover {
+          background: rgba(240, 120, 66, 0.16) !important;
+          border-color: #f07842 !important;
+          color: #f07842 !important;
+          box-shadow: 0 0 10px rgba(240, 120, 66, 0.28) !important;
+        }
+        .prod-card-actions .action-delete:hover {
+          background: rgba(239, 68, 68, 0.18) !important;
+          border-color: #ef4444 !important;
+          color: #ef4444 !important;
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.32) !important;
         }
 
         .list-poster-thumb {
@@ -688,13 +965,6 @@ export default function SingerDubbing() {
           transform: scale(1.1);
           filter: brightness(1.05) contrast(1.15);
         }
-        .prod-card:hover {
-          transform: translateY(-5px);
-          border-color: #e3652e !important;
-          box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 25px rgba(227, 101, 46, 0.12) !important;
-        }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px);
           border-color: #e3652e !important;
@@ -708,10 +978,6 @@ export default function SingerDubbing() {
         }
         .prod-card .project-icon, .prod-list-card .project-icon {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
-        }
-        .prod-card:hover .prod-card-title-group h3 {
-          color: #ffffff;
-          transition: color 0.18s ease;
         }
         .prod-card:hover .prod-synopsis {
           color: #c4bcb4;
@@ -990,7 +1256,7 @@ export default function SingerDubbing() {
         </div>
 
         {/* Filter Tabs Bar */}
-        <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ padding: '0 0 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {/* Platform Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>
@@ -1080,14 +1346,13 @@ export default function SingerDubbing() {
                     <div className="prod-card-top">
                       <div className="prod-card-title-group">
                         <div
-                          className={`project-icon ${tone}`}
-                          style={{ cursor: 'pointer' }}
+                          className={`project-icon ${tone} prod-card-play-btn`}
                           onClick={() => setPlayingTrackId(isPlaying ? null : s.id)}
                           title={isPlaying ? 'Pause Preview' : 'Play Sound Preview'}
                         >
                           {isPlaying ? <PauseCircle size={20} /> : <PlayCircle size={20} />}
                         </div>
-                        <div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <h3>{s.songTitle}</h3>
                           <span>{s.id} · {s.singerName}</span>
                         </div>
@@ -1102,25 +1367,29 @@ export default function SingerDubbing() {
                     </div>
 
                     {/* Audio Waveform Preview */}
-                    <div style={{ background: '#141414', borderRadius: '8px', padding: '10px 12px', border: '1px solid #262626' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '10.5px', color: '#888' }}>
-                          {isPlaying ? 'Simulated Audio Playing...' : 'Studio Master Track'}
+                    <div className="prod-audio-preview">
+                      <div className="prod-audio-preview-head">
+                        <span className="prod-audio-status">
+                          {isPlaying ? (
+                            <>
+                              <span className="live-dot" style={{ background: '#f07842', boxShadow: '0 0 8px #f07842' }} />
+                              Simulated Audio Playing...
+                            </>
+                          ) : (
+                            'Studio Master Track'
+                          )}
                         </span>
-                        <span style={{ fontSize: '11px', color: '#f07842', fontWeight: 700 }}>
+                        <span className="prod-audio-isrc">
                           {s.isrcCode}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', height: '24px' }}>
+                      <div className="prod-waveform-bars">
                         {[35, 65, 45, 85, 95, 60, 40, 75, 90, 50, 70, 85, 40, 60, 80, 55, 90, 70, 45, 65, 50, 75, 40, 60].map((h, i) => (
                           <div
                             key={i}
+                            className={`waveform-bar ${isPlaying ? 'active' : ''}`}
                             style={{
-                              flex: 1,
-                              height: `${h}%`,
-                              borderRadius: '2px',
-                              background: isPlaying ? '#f07842' : '#3d3d3d',
-                              transition: 'height 0.2s ease, background-color 0.2s ease'
+                              height: `${h}%`
                             }}
                           />
                         ))}
@@ -1142,26 +1411,26 @@ export default function SingerDubbing() {
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px' }}>
-                          <Headphones size={14} />
+                        <div className="avatar avatar-blue">
+                          <Headphones size={15} />
                         </div>
                         <div>
                           <span>Studio Facility</span>
-                          <strong style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <strong title={s.recordingStudio}>
                             {s.recordingStudio}
                           </strong>
                         </div>
                       </div>
 
                       <div className="prod-card-actions">
-                        <button className="icon-button" onClick={() => setDetailItem(s)} title="Inspect Track Details">
-                          <Eye size={16} />
+                        <button className="icon-button action-view" onClick={() => setDetailItem(s)} title="Inspect Track Details">
+                          <Eye size={15} />
                         </button>
-                        <button className="icon-button" onClick={() => handleOpenEdit(s)} title="Edit Track">
-                          <Edit3 size={16} />
+                        <button className="icon-button action-edit" onClick={() => handleOpenEdit(s)} title="Edit Track">
+                          <Edit3 size={15} />
                         </button>
-                        <button className="icon-button" onClick={() => setDeleteTarget(s)} title="Delete Track" style={{ color: '#dc6464' }}>
-                          <Trash2 size={16} />
+                        <button className="icon-button action-delete" onClick={() => setDeleteTarget(s)} title="Delete Track">
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
@@ -1209,10 +1478,10 @@ export default function SingerDubbing() {
                     {/* Card Top */}
                     <div className="prod-card-top">
                       <div className="prod-card-title-group">
-                        <div className={`project-icon ${tone}`}>
-                          <Languages size={20} />
+                        <div className={`project-icon ${tone} prod-card-play-btn`}>
+                          <Languages size={19} />
                         </div>
-                        <div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <h3>{d.characterName}</h3>
                           <span>{d.id} · {d.targetLanguage} Localization</span>
                         </div>
@@ -1227,10 +1496,10 @@ export default function SingerDubbing() {
                     </div>
 
                     {/* Timecode block */}
-                    <div style={{ background: '#141414', borderRadius: '8px', padding: '10px 12px', border: '1px solid #262626' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#888' }}>
-                        <span>Timecode Cue</span>
-                        <strong style={{ color: '#60a5fa', fontFamily: 'monospace' }}>{d.timecode}</strong>
+                    <div className="prod-audio-preview">
+                      <div className="prod-audio-preview-head" style={{ marginBottom: 0 }}>
+                        <span className="prod-audio-status">Timecode Cue</span>
+                        <strong style={{ color: '#60a5fa', fontFamily: 'monospace', fontSize: '12px', letterSpacing: '0.6px' }}>{d.timecode}</strong>
                       </div>
                     </div>
 
@@ -1249,26 +1518,26 @@ export default function SingerDubbing() {
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px' }}>
-                          <Volume2 size={14} />
+                        <div className="avatar avatar-blue">
+                          <Volume2 size={15} />
                         </div>
                         <div>
                           <span>Voice Talent</span>
-                          <strong style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <strong title={d.voiceArtist}>
                             {d.voiceArtist}
                           </strong>
                         </div>
                       </div>
 
                       <div className="prod-card-actions">
-                        <button className="icon-button" onClick={() => setDetailItem(d)} title="Inspect Session Details">
-                          <Eye size={16} />
+                        <button className="icon-button action-view" onClick={() => setDetailItem(d)} title="Inspect Session Details">
+                          <Eye size={15} />
                         </button>
-                        <button className="icon-button" onClick={() => handleOpenEdit(d)} title="Edit Session">
-                          <Edit3 size={16} />
+                        <button className="icon-button action-edit" onClick={() => handleOpenEdit(d)} title="Edit Session">
+                          <Edit3 size={15} />
                         </button>
-                        <button className="icon-button" onClick={() => setDeleteTarget(d)} title="Delete Session" style={{ color: '#dc6464' }}>
-                          <Trash2 size={16} />
+                        <button className="icon-button action-delete" onClick={() => setDeleteTarget(d)} title="Delete Session">
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
@@ -1281,7 +1550,7 @@ export default function SingerDubbing() {
 
         {/* ================= LIST VIEW ================= */}
         {viewMode === 'list' && (
-          <div className="production-list-grid" style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="production-list-grid" style={{ padding: '0 0 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {activeTab === 'singers' ? (
               filteredSingers.map(s => {
                 const tone = getStatusTone(s.recordingStatus);
@@ -1346,14 +1615,14 @@ export default function SingerDubbing() {
                     </div>
 
                     <div className="prod-card-actions" style={{ flexShrink: 0 }}>
-                      <button className="icon-button" onClick={() => setDetailItem(s)} title="Inspect Track Details">
-                        <Eye size={16} />
+                      <button className="icon-button action-view" onClick={() => setDetailItem(s)} title="Inspect Track Details">
+                        <Eye size={15} />
                       </button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(s)} title="Edit Track">
-                        <Edit3 size={16} />
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(s)} title="Edit Track">
+                        <Edit3 size={15} />
                       </button>
-                      <button className="icon-button" onClick={() => setDeleteTarget(s)} title="Delete Track" style={{ color: '#dc6464' }}>
-                        <Trash2 size={16} />
+                      <button className="icon-button action-delete" onClick={() => setDeleteTarget(s)} title="Delete Track">
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </div>
@@ -1423,14 +1692,14 @@ export default function SingerDubbing() {
                     </div>
 
                     <div className="prod-card-actions" style={{ flexShrink: 0 }}>
-                      <button className="icon-button" onClick={() => setDetailItem(d)} title="Inspect Session Details">
-                        <Eye size={16} />
+                      <button className="icon-button action-view" onClick={() => setDetailItem(d)} title="Inspect Session Details">
+                        <Eye size={15} />
                       </button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(d)} title="Edit Session">
-                        <Edit3 size={16} />
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(d)} title="Edit Session">
+                        <Edit3 size={15} />
                       </button>
-                      <button className="icon-button" onClick={() => setDeleteTarget(d)} title="Delete Session" style={{ color: '#dc6464' }}>
-                        <Trash2 size={16} />
+                      <button className="icon-button action-delete" onClick={() => setDeleteTarget(d)} title="Delete Session">
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </div>
@@ -1501,15 +1770,15 @@ export default function SingerDubbing() {
                         </td>
                         <td><span className={`status-pill ${tone}`}>{s.recordingStatus}</span></td>
                         <td>
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                            <button className="icon-button" onClick={() => setDetailItem(s)} title="Inspect Track Details">
-                              <Eye size={16} />
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                            <button className="icon-button action-view" onClick={() => setDetailItem(s)} title="Inspect Track Details">
+                              <Eye size={15} />
                             </button>
-                            <button className="icon-button" onClick={() => handleOpenEdit(s)} title="Edit Track">
-                              <Edit3 size={16} />
+                            <button className="icon-button action-edit" onClick={() => handleOpenEdit(s)} title="Edit Track">
+                              <Edit3 size={15} />
                             </button>
-                            <button className="icon-button" onClick={() => setDeleteTarget(s)} title="Delete Track" style={{ color: '#dc6464' }}>
-                              <Trash2 size={16} />
+                            <button className="icon-button action-delete" onClick={() => setDeleteTarget(s)} title="Delete Track">
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </td>
@@ -1573,15 +1842,15 @@ export default function SingerDubbing() {
                         </td>
                         <td><span className={`status-pill ${tone}`}>{d.status}</span></td>
                         <td>
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                            <button className="icon-button" onClick={() => setDetailItem(d)} title="Inspect Session Details">
-                              <Eye size={16} />
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                            <button className="icon-button action-view" onClick={() => setDetailItem(d)} title="Inspect Session Details">
+                              <Eye size={15} />
                             </button>
-                            <button className="icon-button" onClick={() => handleOpenEdit(d)} title="Edit Session">
-                              <Edit3 size={16} />
+                            <button className="icon-button action-edit" onClick={() => handleOpenEdit(d)} title="Edit Session">
+                              <Edit3 size={15} />
                             </button>
-                            <button className="icon-button" onClick={() => setDeleteTarget(d)} title="Delete Session" style={{ color: '#dc6464' }}>
-                              <Trash2 size={16} />
+                            <button className="icon-button action-delete" onClick={() => setDeleteTarget(d)} title="Delete Session">
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </td>
