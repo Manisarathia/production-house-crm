@@ -17,7 +17,6 @@ public class DashboardController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('DASHBOARD_READ')")
     public DashboardResponse getDashboard() {
         return dashboardService.getDashboard();
     }

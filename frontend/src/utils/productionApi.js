@@ -179,9 +179,7 @@ export async function api(path, method = 'GET', data) {
     if (res.ok) {
       if (res.status === 204) return null;
       const json = await res.json();
-      if (method === 'GET' && Array.isArray(json) && json.length === 0) {
-        return handleLocalStorageFallback(cleanPath, method, data);
-      }
+      
       return json;
     }
 

@@ -14,6 +14,7 @@ import {
   Trash2,
   Image as ImageIcon
 } from 'lucide-react';
+
 import {
   getStoredProjects,
   createProject,
@@ -186,7 +187,7 @@ export default function ProjectsProductions() {
       stage: formData.stage,
       startDate: formData.startDate || null,
       endDate: formData.endDate || null,
-      posterUrl: formData.posterUrl 
+      posterUrl: formData.posterUrl
     };
 
     try {
@@ -198,7 +199,7 @@ export default function ProjectsProductions() {
 
       if (response.ok) {
         setEditModalProject(null);
-        await fetchProjectsFromServer(); 
+        await fetchProjectsFromServer();
         return;
       }
     } catch (error) {
@@ -218,7 +219,7 @@ export default function ProjectsProductions() {
     loadFromStorage();
   };
 
-const handleDeleteProject = (id) => {
+  const handleDeleteProject = (id) => {
     const project = projects.find(item => item.id === id);
     if (!project) return;
     setDeleteError('');
@@ -226,30 +227,30 @@ const handleDeleteProject = (id) => {
   };
 
   const confirmDeleteProject = async () => {
-  if (!deleteTargetProject || deleting) return;
+    if (!deleteTargetProject || deleting) return;
 
-  setDeleting(true);
-  setDeleteError("");
+    setDeleting(true);
+    setDeleteError("");
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/${deleteTargetProject.id}`,
-      { method: "DELETE" }
-    );
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/${deleteTargetProject.id}`,
+        { method: "DELETE" }
+      );
 
-    if (response.ok) {
-      setDeleteTargetProject(null);
-      await fetchProjectsFromServer();
-      return;
+      if (response.ok) {
+        setDeleteTargetProject(null);
+        await fetchProjectsFromServer();
+        return;
+      }
+    } catch (error) {
+      console.warn("Backend unavailable, deleting project from local storage:", error);
     }
-  } catch (error) {
-    console.warn("Backend unavailable, deleting project from local storage:", error);
-  }
 
-  deleteProject(deleteTargetProject.id);
-  setDeleteTargetProject(null);
-  loadFromStorage();
-  setDeleting(false);
+    deleteProject(deleteTargetProject.id);
+    setDeleteTargetProject(null);
+    loadFromStorage();
+    setDeleting(false);
   };
 
   const handleOpenEdit = (project) => {

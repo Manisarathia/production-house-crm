@@ -107,7 +107,7 @@ export default function PostProductionMedia() {
       }));
         setPostTasks(mapped);
       } else {
-        setPostTasks(getStoredPostProduction());
+        setPostTasks([]);
       }
 
       const assetItems = extractPageItems(assetsRes);
@@ -129,7 +129,7 @@ export default function PostProductionMedia() {
       }));
         setMediaAssets(mappedAssets);
       } else {
-        setMediaAssets(getStoredMediaAssets());
+        setMediaAssets([]);
       }
     } catch (err) {
       console.warn('Backend fetch error in PostProductionMedia:', err);
@@ -1659,15 +1659,7 @@ export default function PostProductionMedia() {
               >
                 <Plus size={16} /> {activeTab === 'pipeline' ? 'Create Post Milestone' : 'Ingest Media Asset'}
               </button>
-              <button
-                type="button"
-                className="btn"
-                style={{ background: '#25201d', border: '1px solid #4a3830', color: '#f07842' }}
-                onClick={handleSeedBackend}
-                disabled={isSubmitting}
-              >
-                <Sparkles size={16} /> Seed Initial Records to Backend
-              </button>
+              
             </div>
 
           </div>

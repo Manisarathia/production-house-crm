@@ -30,11 +30,11 @@ public class EpisodeService {
 	}
 
 	private void apply(Episode e, EpisodeRequest r) {
-		if (r.mediaItemId == null || r.mediaItemId.isBlank())
-			throw new IllegalArgumentException("mediaItemId is required");
-		MediaItem mediaItem = mediaItemRepository.findById(r.mediaItemId)
-				.orElseThrow(() -> new IllegalArgumentException("Media Item not found: " + r.mediaItemId));
-		e.setMediaItem(mediaItem);
+		if (r.mediaItemId != null && !r.mediaItemId.trim().isEmpty()) {
+			mediaItemRepository.findById(r.mediaItemId).ifPresent(e::setMediaItem);
+		} else {
+			e.setMediaItem(null);
+		}
 		e.setProject(r.project);
 		e.setEpisodeNumber(r.episodeNumber);
 		e.setTitle(r.title);

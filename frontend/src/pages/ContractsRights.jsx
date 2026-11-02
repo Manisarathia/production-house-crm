@@ -106,7 +106,7 @@ export default function ContractsRights() {
       }));
         setContracts(mapped);
       } else {
-        setContracts(getStoredContracts());
+        setContracts([]);
       }
 
       const rightItems = extractPageItems(rightsRes);
@@ -130,7 +130,7 @@ export default function ContractsRights() {
       }));
         setRights(mappedRights);
       } else {
-        setRights(getStoredContentRights());
+        setRights([]);
       }
     } catch (err) {
       console.warn('Backend fetch error in ContractsRights:', err);

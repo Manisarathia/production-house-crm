@@ -28,6 +28,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useEffect } from 'react';
+
 import { list, create, update, remove } from '../utils/productionApi.js';
 import {
   getStoredEpisodes,
@@ -104,7 +105,7 @@ export default function EpisodesScenes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [settingFilter, setSettingFilter] = useState('ALL'); 
+  const [settingFilter, setSettingFilter] = useState('ALL');
 
   const [expandedEpisodes, setExpandedEpisodes] = useState({ 'EP-401': true, 'EP-403': true });
 
@@ -205,11 +206,11 @@ export default function EpisodesScenes() {
   const handleOpenCreateEpisode = () => {
     const currentProjects = projects.length > 0 ? projects : getStoredProjects().map(p => ({ ...p, name: p.name || p.title, title: p.title || p.name }));
     const currentMedia = mediaItems.length > 0 ? mediaItems : getStoredTitles().map(t => ({ ...t, project: { title: t.associatedProject || 'The Last Monsoon' }, associatedProject: t.associatedProject || 'The Last Monsoon' }));
-    const defaultProj = currentProjects[0]?.name || currentProjects[0]?.title || 'The Last Monsoon';
-    const defaultMedia = currentMedia.find(item => {
+    const defaultProj = (projects.length > 0 ? (projects[0]?.name || projects[0]?.title) : '') || '';
+    const defaultMedia = mediaItems.find(item => {
       const projName = (item.project?.title || item.associatedProject || '').toLowerCase();
       return projName === defaultProj.toLowerCase() || projName.includes(defaultProj.toLowerCase());
-    }) || currentMedia[0];
+    }) || mediaItems[0];
 
     setEpisodeForm({
       ...initialEpisodeForm,
@@ -246,14 +247,14 @@ export default function EpisodesScenes() {
       if (!targetMediaId && mediaItems.length > 0) {
         targetMediaId = mediaItems[0].id;
       }
-      if (!episodeForm.title.trim() || !targetMediaId) {
-        setApiError('Select a Movie / Web Series and enter an Episode Title before saving.');
+      if (!episodeForm.title.trim()) {
+        setApiError('Please enter an Episode Title before saving.');
         return;
       }
 
       const payload = {
         ...episodeForm,
-        mediaItemId: targetMediaId,
+        mediaItemId: targetMediaId || null,
         project: episodeForm.project || projects[0]?.name || 'The Last Monsoon',
         episodeNumber: Number(episodeForm.episodeNumber),
         scenesCount: Number(episodeForm.scenesCount),
@@ -1153,7 +1154,8 @@ export default function EpisodesScenes() {
               <label>
                 Parent Web Series *
                 <select
-                  value={episodeForm.project}
+                  required
+                  value={episodeForm.project || ''}
                   onChange={e => {
                     const newProj = e.target.value;
                     const matchingMedia = mediaItems.find(item => {
@@ -1167,6 +1169,7 @@ export default function EpisodesScenes() {
                     });
                   }}
                 >
+                  <option value="">Select Parent Project / Web Series</option>
                   {projects.map(p => (
                     <option key={p.id} value={p.name || p.title}>
                       {p.name || p.title} ({p.code || 'PRJ'})
@@ -1176,8 +1179,8 @@ export default function EpisodesScenes() {
               </label>
 
               <label>
-                Movie / Web Series *
-                <select required value={episodeForm.mediaItemId || ''} onChange={e => {
+                Movie / Web Series (Optional)
+                <select value={episodeForm.mediaItemId || ''} onChange={e => {
                   const selected = mediaItems.find(item => item.id === e.target.value);
                   setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || selected?.associatedProject || prev.project }));
                 }}>

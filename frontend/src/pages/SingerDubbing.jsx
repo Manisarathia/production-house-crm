@@ -105,7 +105,7 @@ export default function SingerDubbing() {
       }));
         setSingers(mapped);
       } else {
-        setSingers(getStoredSingers());
+        setSingers([]);
       }
 
       const dubbingItems = extractPageItems(dubbingRes);
@@ -128,7 +128,7 @@ export default function SingerDubbing() {
       }));
         setDubbingSessions(mappedDubbing);
       } else {
-        setDubbingSessions(getStoredDubbing());
+        setDubbingSessions([]);
       }
     } catch (err) {
       console.warn('Backend fetch error in SingerDubbing:', err);
