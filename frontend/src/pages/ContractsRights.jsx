@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   FileText,
   Scale,
@@ -23,8 +23,19 @@ import {
   FileCheck,
   Calendar,
   DollarSign,
-  Briefcase
+  Briefcase,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
+import {
+  contractApi,
+  contentRightApi,
+  extractPageItems,
+  normalizeContractStatusToBackend,
+  normalizeContractStatusToFrontend,
+  normalizeRightsStatusToBackend,
+  normalizeRightsStatusToFrontend
+} from '../api/mediaAudioLegalApi.js';
 import {
   getStoredProjects,
   formatCurrency,
@@ -51,6 +62,84 @@ export default function ContractsRights() {
   // Data states
   const [contracts, setContracts] = useState(() => getStoredContracts());
   const [rights, setRights] = useState(() => getStoredRights());
+
+  // Live API States
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const fetchBackendData = async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const [contractsRes, rightsRes] = await Promise.allSettled([
+        contractApi.list({ size: 100 }),
+        contentRightApi.list({ size: 100 })
+      ]);
+
+      if (contractsRes.status === 'fulfilled' && contractsRes.value) {
+        const items = extractPageItems(contractsRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            title: item.name || item.title || 'Production Agreement',
+            project: item.projectRef || item.project || 'The Last Monsoon',
+            counterparty: item.partyTwo || item.counterparty || 'Counterparty',
+            agreementType: item.contractType || item.agreementType || 'Talent / Cast Agreement',
+            contractValue: item.contractValue || 5000000,
+            paymentTerms: item.notes || item.paymentTerms || '30% Signing · 40% Wrap · 30% Delivery',
+            effectiveDate: item.startsAt ? item.startsAt.slice(0, 10) : (item.effectiveDate || new Date().toISOString().split('T')[0]),
+            expiryDate: item.endsAt ? item.endsAt.slice(0, 10) : (item.expiryDate || '2028-12-31'),
+            status: item.status === 'ACTIVE' ? 'Executed / Signed' : item.status === 'PENDING' ? 'Pending Review' : (normalizeContractStatusToFrontend(item.status) || 'Executed / Signed'),
+            legalSignatory: item.partyOne || item.legalSignatory || 'Studio North Legal & Counterparty',
+            governingLaw: item.governingLaw || 'High Court of Bombay, Mumbai',
+            platform: item.platform || 'LoopNexus',
+            image: item.image || getContractImage(item.id)
+          }));
+          setContracts(mapped);
+        }
+      }
+
+      if (rightsRes.status === 'fulfilled' && rightsRes.value) {
+        const items = extractPageItems(rightsRes.value);
+        if (items.length > 0) {
+          const mapped = items.map(item => ({
+            ...item,
+            title: item.name || item.title || 'Digital Streaming Rights',
+            project: item.projectRef || item.project || 'The Last Monsoon',
+            territory: item.territory || 'Worldwide',
+            rightsType: item.rightsType || 'SVOD / OTT Subscription',
+            exclusivity: item.exclusive ? 'Exclusive' : 'Non-Exclusive',
+            rightsPeriod: item.rightsPeriod || '5 Years',
+            startDate: item.startsAt ? item.startsAt.slice(0, 10) : (item.startDate || new Date().toISOString().split('T')[0]),
+            endDate: item.endsAt ? item.endsAt.slice(0, 10) : (item.endDate || '2031-12-31'),
+            platform: item.platforms ? item.platforms.split(',')[0].trim() : (item.platform || 'LoopNexus'),
+            licenseFee: item.licenseFee || 50000000,
+            revenueSharePct: item.revenueSharePct || '0% (Flat License)',
+            status: normalizeRightsStatusToFrontend(item.status),
+            restrictions: item.restrictions || 'Standard holdback windows apply',
+            image: item.image || getContentRightImage(item.id)
+          }));
+          setRights(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn('Backend fetch error in ContractsRights:', err);
+      setApiError(err.message || 'Could not connect to live backend.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBackendData();
+  }, []);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -201,18 +290,88 @@ export default function ContractsRights() {
   };
 
   // Submit Create
-  const handleCreateSubmit = (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (activeTab === 'contracts') {
-      if (!contractFormData.title.trim()) return;
-      const { all } = createContract(contractFormData);
-      setContracts(all);
-    } else {
-      if (!rightFormData.title.trim()) return;
-      const { all } = createRight(rightFormData);
-      setRights(all);
+    setIsSubmitting(true);
+    try {
+      if (activeTab === 'contracts') {
+        if (!contractFormData.title.trim()) return;
+        const payload = {
+          name: contractFormData.title.trim(),
+          description: contractFormData.agreementType || 'Legal Agreement',
+          projectRef: contractFormData.project,
+          contractType: contractFormData.agreementType || 'Talent / Cast Agreement',
+          partyOne: contractFormData.legalSignatory || 'Studio North Legal',
+          partyTwo: contractFormData.counterparty || 'Counterparty',
+          mediaId: null,
+          status: normalizeContractStatusToBackend(contractFormData.status),
+          startsAt: contractFormData.effectiveDate || new Date().toISOString().split('T')[0],
+          endsAt: contractFormData.expiryDate || '2028-12-31',
+          renewalAt: null,
+          documentReference: contractFormData.fileAttachment || 'doc://legal/vault/contract.pdf',
+          notes: contractFormData.paymentTerms || '',
+          active: true
+        };
+
+        try {
+          const created = await contractApi.create(payload);
+          const mappedNew = {
+            ...contractFormData,
+            id: created.id,
+            title: created.name || contractFormData.title,
+            image: getContractImage(created.id)
+          };
+          setContracts(prev => [mappedNew, ...prev]);
+          showToast('Legal contract registered on backend successfully!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createContract(contractFormData);
+          setContracts(all);
+          showToast('Contract saved locally.', 'info');
+        }
+      } else {
+        if (!rightFormData.title.trim()) return;
+        const contractRefId = typeof contracts[0]?.id === 'number' ? contracts[0].id : null;
+
+        const payload = {
+          name: rightFormData.title.trim(),
+          description: rightFormData.rightsType || 'Content Distribution Rights',
+          projectRef: rightFormData.project,
+          rightsType: rightFormData.rightsType || 'SVOD / OTT Subscription',
+          mediaId: 1,
+          contractId: contractRefId,
+          territory: rightFormData.territory || 'Worldwide',
+          platforms: rightFormData.platform || 'LoopNexus, LoopKids',
+          languages: 'Hindi, Tamil, Telugu, English',
+          exclusive: rightFormData.exclusivity?.toLowerCase() !== 'non-exclusive',
+          startsAt: rightFormData.startDate || new Date().toISOString().split('T')[0],
+          endsAt: rightFormData.endDate || '2031-12-31',
+          restrictions: rightFormData.restrictions || '',
+          status: normalizeRightsStatusToBackend(rightFormData.status),
+          active: true
+        };
+
+        try {
+          const created = await contentRightApi.create(payload);
+          const mappedNew = {
+            ...rightFormData,
+            id: created.id,
+            title: created.name || rightFormData.title,
+            image: getContentRightImage(created.id)
+          };
+          setRights(prev => [mappedNew, ...prev]);
+          showToast('Content rights license registered on backend successfully!');
+        } catch (apiErr) {
+          console.warn('Backend create failed, storing locally:', apiErr);
+          const { all } = createRight(rightFormData);
+          setRights(all);
+          showToast('Content rights saved locally.', 'info');
+        }
+      }
+      setCreateModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
     }
-    setCreateModalOpen(false);
   };
 
   // Open Edit
@@ -256,32 +415,139 @@ export default function ContractsRights() {
   };
 
   // Submit Edit
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editItem) return;
-    if (activeTab === 'contracts') {
-      const updated = updateContract(editItem.id, contractFormData);
-      setContracts(updated);
-    } else {
-      const updated = updateRight(editItem.id, rightFormData);
-      setRights(updated);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof editItem.id === 'number' || /^\d+$/.test(editItem.id);
+
+      if (activeTab === 'contracts') {
+        const payload = {
+          name: contractFormData.title.trim(),
+          description: contractFormData.agreementType || 'Legal Agreement',
+          projectRef: contractFormData.project,
+          contractType: contractFormData.agreementType || 'Talent / Cast Agreement',
+          partyOne: contractFormData.legalSignatory || 'Studio North Legal',
+          partyTwo: contractFormData.counterparty || 'Counterparty',
+          mediaId: null,
+          status: normalizeContractStatusToBackend(contractFormData.status),
+          startsAt: contractFormData.effectiveDate || new Date().toISOString().split('T')[0],
+          endsAt: contractFormData.expiryDate || '2028-12-31',
+          renewalAt: null,
+          documentReference: contractFormData.fileAttachment || 'doc://legal/vault/contract.pdf',
+          notes: contractFormData.paymentTerms || '',
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await contractApi.update(editItem.id, payload);
+            setContracts(prev => prev.map(c => (c.id === editItem.id ? { ...c, ...contractFormData } : c)));
+            showToast('Legal contract updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating locally:', apiErr);
+            const updated = updateContract(editItem.id, contractFormData);
+            setContracts(updated);
+            showToast('Contract updated locally.', 'info');
+          }
+        } else {
+          const updated = updateContract(editItem.id, contractFormData);
+          setContracts(updated);
+          showToast('Contract updated locally.');
+        }
+      } else {
+        const contractRefId = typeof contracts[0]?.id === 'number' ? contracts[0].id : null;
+        const payload = {
+          name: rightFormData.title.trim(),
+          description: rightFormData.rightsType || 'Content Distribution Rights',
+          projectRef: rightFormData.project,
+          rightsType: rightFormData.rightsType || 'SVOD / OTT Subscription',
+          mediaId: 1,
+          contractId: contractRefId,
+          territory: rightFormData.territory || 'Worldwide',
+          platforms: rightFormData.platform || 'LoopNexus, LoopKids',
+          languages: 'Hindi, Tamil, Telugu, English',
+          exclusive: rightFormData.exclusivity?.toLowerCase() !== 'non-exclusive',
+          startsAt: rightFormData.startDate || new Date().toISOString().split('T')[0],
+          endsAt: rightFormData.endDate || '2031-12-31',
+          restrictions: rightFormData.restrictions || '',
+          status: normalizeRightsStatusToBackend(rightFormData.status),
+          active: true
+        };
+
+        if (isNumericId) {
+          try {
+            await contentRightApi.update(editItem.id, payload);
+            setRights(prev => prev.map(r => (r.id === editItem.id ? { ...r, ...rightFormData } : r)));
+            showToast('Content rights updated successfully on backend!');
+          } catch (apiErr) {
+            console.warn('Backend update failed, updating locally:', apiErr);
+            const updated = updateRight(editItem.id, rightFormData);
+            setRights(updated);
+            showToast('Content rights updated locally.', 'info');
+          }
+        } else {
+          const updated = updateRight(editItem.id, rightFormData);
+          setRights(updated);
+          showToast('Content rights updated locally.');
+        }
+      }
+      setEditItem(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    setEditItem(null);
   };
 
   // Confirm Delete
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    if (activeTab === 'contracts') {
-      const updated = deleteContract(deleteTarget.id);
-      setContracts(updated);
-    } else {
-      const updated = deleteRight(deleteTarget.id);
-      setRights(updated);
-    }
-    setDeleteTarget(null);
-    if (detailItem && detailItem.id === deleteTarget.id) {
-      setDetailItem(null);
+    setIsSubmitting(true);
+    try {
+      const isNumericId = typeof deleteTarget.id === 'number' || /^\d+$/.test(deleteTarget.id);
+
+      if (activeTab === 'contracts') {
+        if (isNumericId) {
+          try {
+            await contractApi.delete(deleteTarget.id);
+            setContracts(prev => prev.filter(c => c.id !== deleteTarget.id));
+            showToast('Contract deleted from backend.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deleteContract(deleteTarget.id);
+            setContracts(updated);
+            showToast('Contract removed locally.', 'info');
+          }
+        } else {
+          const updated = deleteContract(deleteTarget.id);
+          setContracts(updated);
+          showToast('Contract deleted successfully.');
+        }
+      } else {
+        if (isNumericId) {
+          try {
+            await contentRightApi.delete(deleteTarget.id);
+            setRights(prev => prev.filter(r => r.id !== deleteTarget.id));
+            showToast('Content right deleted from backend.');
+          } catch (apiErr) {
+            console.warn('Backend delete failed, removing locally:', apiErr);
+            const updated = deleteRight(deleteTarget.id);
+            setRights(updated);
+            showToast('Content right removed locally.', 'info');
+          }
+        } else {
+          const updated = deleteRight(deleteTarget.id);
+          setRights(updated);
+          showToast('Content right deleted successfully.');
+        }
+      }
+
+      if (detailItem && detailItem.id === deleteTarget.id) {
+        setDetailItem(null);
+      }
+      setDeleteTarget(null);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -601,6 +867,56 @@ export default function ContractsRights() {
           <span>Contract Commitments</span>
           <strong>{formatCurrency(totalContractSpend)}</strong>
         </div>
+      </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '28px',
+          zIndex: 9999,
+          background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.95)' : 'rgba(34, 197, 94, 0.95)',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '10px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          fontWeight: 600,
+          fontSize: '13px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', marginLeft: '8px' }}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
+      {/* Sync Status / Refresh Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '14px', gap: '10px' }}>
+        <button
+          onClick={fetchBackendData}
+          disabled={loading}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid #2e2e2e',
+            borderRadius: '8px',
+            color: '#a7a09a',
+            padding: '6px 12px',
+            fontSize: '11px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title="Refresh from Spring Boot API"
+        >
+          <RefreshCw size={12} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          {loading ? 'Syncing Spring Boot...' : 'Refresh Live Data'}
+        </button>
       </div>
 
       {/* Main Panel */}
