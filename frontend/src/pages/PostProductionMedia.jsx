@@ -39,6 +39,11 @@ import {
   normalizeMediaStatusToFrontend
 } from '../api/mediaAudioLegalApi.js';
 import {
+  resolvePostProductionPicture,
+  resolveMediaAssetPicture
+} from '../utils/mediaAudioLegalImages.js';
+import MediaImagePicker from '../components/MediaImagePicker.jsx';
+import {
   getStoredProjects,
   getStoredPostProduction,
   savePostProduction,
@@ -50,8 +55,6 @@ import {
   createMediaAsset,
   updateMediaAsset,
   deleteMediaAsset,
-  getPostProductionImage,
-  getMediaAssetImage
 } from '../utils/productionStorage.js';
 
 export default function PostProductionMedia() {
@@ -99,7 +102,7 @@ export default function PostProductionMedia() {
         qcStatus: item.qcStatus || 'Passed Initial QC',
         platform: item.platform || 'LoopNexus',
         tone: item.status === 'COMPLETED' ? 'green' : 'orange',
-        image: item.image || getPostProductionImage(item.id)
+        image: item.image || resolvePostProductionPicture(item)
       }));
       setPostTasks(mapped);
 
@@ -117,7 +120,7 @@ export default function PostProductionMedia() {
         resolution: item.resolution || '4K UHD (3840x2160)',
         platform: item.platform || 'LoopNexus',
         uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
-        image: item.image || getMediaAssetImage(item.id)
+        image: item.image || resolveMediaAssetPicture(item)
       }));
       setMediaAssets(mappedAssets);
     } catch (err) {
@@ -343,7 +346,7 @@ export default function PostProductionMedia() {
             ...taskFormData,
             id: created.id,
             title: created.name || taskFormData.title,
-            image: getPostProductionImage(created.id)
+            image: taskFormData.image || resolvePostProductionPicture(created)
           };
           setPostTasks(prev => [mappedNew, ...prev]);
           showToast('Post-production milestone created successfully on backend!');
@@ -376,7 +379,7 @@ export default function PostProductionMedia() {
             ...assetFormData,
             id: created.id,
             title: created.name || assetFormData.title,
-            image: getMediaAssetImage(created.id)
+            image: assetFormData.image || resolveMediaAssetPicture(created)
           };
           setMediaAssets(prev => [mappedNew, ...prev]);
           showToast('Media asset ingested into backend vault successfully!');
@@ -1063,7 +1066,7 @@ export default function PostProductionMedia() {
               filteredTasks.map(t => {
                 const tone = getStatusTone(t.status);
                 const isKids = t.platform === 'LoopKids';
-                const postImg = getPostProductionImage(t);
+                const postImg = t.image || resolvePostProductionPicture(t);
 
                 return (
                   <div className="prod-card" key={t.id}>
@@ -1074,6 +1077,7 @@ export default function PostProductionMedia() {
                         alt={t.title}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolvePostProductionPicture(t); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1189,7 +1193,7 @@ export default function PostProductionMedia() {
               filteredAssets.map(a => {
                 const tone = getStatusTone(a.status);
                 const isKids = a.platform === 'LoopKids';
-                const assetImg = getMediaAssetImage(a);
+                const assetImg = a.image || resolveMediaAssetPicture(a);
 
                 return (
                   <div className="prod-card" key={a.id}>
@@ -1200,6 +1204,7 @@ export default function PostProductionMedia() {
                         alt={a.title}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolveMediaAssetPicture(a); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1310,7 +1315,7 @@ export default function PostProductionMedia() {
             {activeTab === 'pipeline' ? (
               filteredTasks.map(t => {
                 const tone = getStatusTone(t.status);
-                const postImg = getPostProductionImage(t);
+                const postImg = t.image || resolvePostProductionPicture(t);
                 return (
                   <div
                     className="prod-list-card"
@@ -1329,7 +1334,7 @@ export default function PostProductionMedia() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={postImg} alt={t.title} className="list-poster-img" loading="lazy" />
+                        <img src={postImg} alt={t.title} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolvePostProductionPicture(t); }} />
                         <div className="list-poster-overlay">
                           <Cpu size={18} />
                         </div>
@@ -1391,7 +1396,7 @@ export default function PostProductionMedia() {
             ) : (
               filteredAssets.map(a => {
                 const tone = getStatusTone(a.status);
-                const assetImg = getMediaAssetImage(a);
+                const assetImg = a.image || resolveMediaAssetPicture(a);
                 return (
                   <div
                     className="prod-list-card"
@@ -1410,7 +1415,7 @@ export default function PostProductionMedia() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={assetImg} alt={a.title} className="list-poster-img" loading="lazy" />
+                        <img src={assetImg} alt={a.title} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveMediaAssetPicture(a); }} />
                         <div className="list-poster-overlay">
                           <HardDrive size={18} />
                         </div>
@@ -1490,13 +1495,13 @@ export default function PostProductionMedia() {
                 <tbody>
                   {filteredTasks.map(t => {
                     const tone = getStatusTone(t.status);
-                    const postImg = getPostProductionImage(t);
+                    const postImg = t.image || resolvePostProductionPicture(t);
                     return (
                       <tr key={t.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={postImg} alt={t.title} className="table-poster-img" loading="lazy" />
+                              <img src={postImg} alt={t.title} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolvePostProductionPicture(t); }} />
                             </div>
                             <div>
                               <strong>{t.title}</strong>
@@ -1569,13 +1574,13 @@ export default function PostProductionMedia() {
                 <tbody>
                   {filteredAssets.map(a => {
                     const tone = getStatusTone(a.status);
-                    const assetImg = getMediaAssetImage(a);
+                    const assetImg = a.image || resolveMediaAssetPicture(a);
                     return (
                       <tr key={a.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={assetImg} alt={a.title} className="table-poster-img" loading="lazy" />
+                              <img src={assetImg} alt={a.title} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveMediaAssetPicture(a); }} />
                             </div>
                             <div>
                               <strong style={{ wordBreak: 'break-all' }}>{a.title}</strong>
@@ -1799,6 +1804,14 @@ export default function PostProductionMedia() {
                     onChange={e => setTaskFormData({ ...taskFormData, notes: e.target.value })}
                   />
                 </label>
+
+                <MediaImagePicker
+                  value={taskFormData.image}
+                  onChange={img => setTaskFormData({ ...taskFormData, image: img })}
+                  label="Milestone / Project Poster"
+                  defaultFallback={resolvePostProductionPicture(taskFormData)}
+                  placeholder="Paste project image URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -1886,6 +1899,14 @@ export default function PostProductionMedia() {
                     </select>
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={assetFormData.image}
+                  onChange={img => setAssetFormData({ ...assetFormData, image: img })}
+                  label="Master Media Asset Artwork"
+                  defaultFallback={resolveMediaAssetPicture(assetFormData)}
+                  placeholder="Paste asset/cover image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -1999,6 +2020,14 @@ export default function PostProductionMedia() {
                     onChange={e => setTaskFormData({ ...taskFormData, notes: e.target.value })}
                   />
                 </label>
+
+                <MediaImagePicker
+                  value={taskFormData.image}
+                  onChange={img => setTaskFormData({ ...taskFormData, image: img })}
+                  label="Milestone / Project Poster"
+                  defaultFallback={resolvePostProductionPicture(taskFormData)}
+                  placeholder="Paste project image URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -2046,6 +2075,14 @@ export default function PostProductionMedia() {
                     </select>
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={assetFormData.image}
+                  onChange={img => setAssetFormData({ ...assetFormData, image: img })}
+                  label="Master Media Asset Artwork"
+                  defaultFallback={resolveMediaAssetPicture(assetFormData)}
+                  placeholder="Paste asset/cover image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -2072,9 +2109,14 @@ export default function PostProductionMedia() {
             {/* Contextual Visual Header (Color console / sound desk / server rack) */}
             <div style={{ position: 'relative', width: '100%', height: '170px', background: '#111', overflow: 'hidden' }}>
               <img
-                src={activeTab === 'pipeline' ? getPostProductionImage(detailItem) : getMediaAssetImage(detailItem)}
+                src={activeTab === 'pipeline' ? (detailItem.image || resolvePostProductionPicture(detailItem)) : (detailItem.image || resolveMediaAssetPicture(detailItem))}
                 alt={detailItem.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(0.75) contrast(1.1)' }}
+                onError={(e) => {
+                  e.currentTarget.src = activeTab === 'pipeline'
+                    ? resolvePostProductionPicture(detailItem)
+                    : resolveMediaAssetPicture(detailItem);
+                }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(25,25,25,0.6) 60%, #191919 100%)' }} />
               <button

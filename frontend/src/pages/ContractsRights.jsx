@@ -37,6 +37,11 @@ import {
   normalizeRightsStatusToFrontend
 } from '../api/mediaAudioLegalApi.js';
 import {
+  resolveContractPicture,
+  resolveContentRightPicture
+} from '../utils/mediaAudioLegalImages.js';
+import MediaImagePicker from '../components/MediaImagePicker.jsx';
+import {
   getStoredProjects,
   formatCurrency,
   normalizeLoopPlatform,
@@ -50,8 +55,6 @@ import {
   createRight,
   updateRight,
   deleteRight,
-  getContractImage,
-  getContentRightImage
 } from '../utils/productionStorage.js';
 
 export default function ContractsRights() {
@@ -98,7 +101,7 @@ export default function ContractsRights() {
         legalSignatory: item.partyOne || 'Studio North Legal & Counterparty',
         governingLaw: item.governingLaw || 'High Court of Bombay, Mumbai',
         platform: item.platform || 'LoopNexus',
-        image: item.image || getContractImage(item.id)
+        image: item.image || resolveContractPicture(item)
       }));
       setContracts(mapped);
 
@@ -118,7 +121,7 @@ export default function ContractsRights() {
         revenueSharePct: item.revenueSharePct || '0% (Flat License)',
         status: normalizeRightsStatusToFrontend(item.status),
         restrictions: item.restrictions || 'Standard holdback windows apply',
-        image: item.image || getContentRightImage(item.id)
+        image: item.image || resolveContentRightPicture(item)
       }));
       setRights(mappedRights);
     } catch (err) {
@@ -331,7 +334,7 @@ export default function ContractsRights() {
             ...contractFormData,
             id: created.id,
             title: created.name || contractFormData.title,
-            image: getContractImage(created.id)
+            image: contractFormData.image || resolveContractPicture(created)
           };
           setContracts(prev => [mappedNew, ...prev]);
           showToast('Legal contract registered on backend successfully!');
@@ -369,7 +372,7 @@ export default function ContractsRights() {
             ...rightFormData,
             id: created.id,
             title: created.name || rightFormData.title,
-            image: getContentRightImage(created.id)
+            image: rightFormData.image || resolveContentRightPicture(created)
           };
           setRights(prev => [mappedNew, ...prev]);
           showToast('Content rights license registered on backend successfully!');
@@ -1062,7 +1065,7 @@ export default function ContractsRights() {
               filteredContracts.map(c => {
                 const tone = getStatusTone(c.status);
                 const isKids = c.platform === 'LoopKids';
-                const contractImg = getContractImage(c);
+                const contractImg = c.image || resolveContractPicture(c);
 
                 return (
                   <div className="prod-card" key={c.id}>
@@ -1073,6 +1076,7 @@ export default function ContractsRights() {
                         alt={c.title}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolveContractPicture(c); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1169,7 +1173,7 @@ export default function ContractsRights() {
               filteredRights.map(r => {
                 const tone = getStatusTone(r.status);
                 const isKids = r.platform === 'LoopKids';
-                const rightImg = getContentRightImage(r);
+                const rightImg = r.image || resolveContentRightPicture(r);
 
                 return (
                   <div className="prod-card" key={r.id}>
@@ -1180,6 +1184,7 @@ export default function ContractsRights() {
                         alt={r.title}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolveContentRightPicture(r); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1279,7 +1284,7 @@ export default function ContractsRights() {
             {activeTab === 'contracts' ? (
               filteredContracts.map(c => {
                 const tone = getStatusTone(c.status);
-                const contractImg = getContractImage(c);
+                const contractImg = c.image || resolveContractPicture(c);
                 return (
                   <div
                     className="prod-list-card"
@@ -1298,7 +1303,7 @@ export default function ContractsRights() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={contractImg} alt={c.title} className="list-poster-img" loading="lazy" />
+                        <img src={contractImg} alt={c.title} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveContractPicture(c); }} />
                         <div className="list-poster-overlay">
                           <Scale size={18} />
                         </div>
@@ -1356,7 +1361,7 @@ export default function ContractsRights() {
             ) : (
               filteredRights.map(r => {
                 const tone = getStatusTone(r.status);
-                const rightImg = getContentRightImage(r);
+                const rightImg = r.image || resolveContentRightPicture(r);
                 return (
                   <div
                     className="prod-list-card"
@@ -1375,7 +1380,7 @@ export default function ContractsRights() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={rightImg} alt={r.title} className="list-poster-img" loading="lazy" />
+                        <img src={rightImg} alt={r.title} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveContentRightPicture(r); }} />
                         <div className="list-poster-overlay">
                           <Globe size={18} />
                         </div>
@@ -1455,13 +1460,13 @@ export default function ContractsRights() {
                 <tbody>
                   {filteredContracts.map(c => {
                     const tone = getStatusTone(c.status);
-                    const contractImg = getContractImage(c);
+                    const contractImg = c.image || resolveContractPicture(c);
                     return (
                       <tr key={c.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={contractImg} alt={c.title} className="table-poster-img" loading="lazy" />
+                              <img src={contractImg} alt={c.title} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveContractPicture(c); }} />
                             </div>
                             <div>
                               <strong>{c.title}</strong>
@@ -1524,13 +1529,13 @@ export default function ContractsRights() {
                 <tbody>
                   {filteredRights.map(r => {
                     const tone = getStatusTone(r.status);
-                    const rightImg = getContentRightImage(r);
+                    const rightImg = r.image || resolveContentRightPicture(r);
                     return (
                       <tr key={r.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={rightImg} alt={r.title} className="table-poster-img" loading="lazy" />
+                              <img src={rightImg} alt={r.title} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveContentRightPicture(r); }} />
                             </div>
                             <div>
                               <strong>{r.title}</strong>
@@ -1738,6 +1743,14 @@ export default function ContractsRights() {
                     onChange={e => setContractFormData({ ...contractFormData, paymentTerms: e.target.value })}
                   />
                 </label>
+
+                <MediaImagePicker
+                  value={contractFormData.image}
+                  onChange={img => setContractFormData({ ...contractFormData, image: img })}
+                  label="Contract Document / Key Art Picture"
+                  defaultFallback={resolveContractPicture(contractFormData)}
+                  placeholder="Paste legal contract image URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -1858,6 +1871,14 @@ export default function ContractsRights() {
                     onChange={e => setRightFormData({ ...rightFormData, restrictions: e.target.value })}
                   />
                 </label>
+
+                <MediaImagePicker
+                  value={rightFormData.image}
+                  onChange={img => setRightFormData({ ...rightFormData, image: img })}
+                  label="Content Rights Certificate / License Art"
+                  defaultFallback={resolveContentRightPicture(rightFormData)}
+                  placeholder="Paste rights certificate image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -1960,6 +1981,14 @@ export default function ContractsRights() {
                     />
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={contractFormData.image}
+                  onChange={img => setContractFormData({ ...contractFormData, image: img })}
+                  label="Contract Document / Key Art Picture"
+                  defaultFallback={resolveContractPicture(contractFormData)}
+                  placeholder="Paste legal contract image URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -2012,6 +2041,14 @@ export default function ContractsRights() {
                     </select>
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={rightFormData.image}
+                  onChange={img => setRightFormData({ ...rightFormData, image: img })}
+                  label="Content Rights Certificate / License Art"
+                  defaultFallback={resolveContentRightPicture(rightFormData)}
+                  placeholder="Paste rights certificate image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -2038,9 +2075,14 @@ export default function ContractsRights() {
             {/* Contextual Visual Header (Legal parchment & seal / world territory streaming map) */}
             <div style={{ position: 'relative', width: '100%', height: '170px', background: '#111', overflow: 'hidden' }}>
               <img
-                src={activeTab === 'contracts' ? getContractImage(detailItem) : getContentRightImage(detailItem)}
+                src={activeTab === 'contracts' ? (detailItem.image || resolveContractPicture(detailItem)) : (detailItem.image || resolveContentRightPicture(detailItem))}
                 alt={detailItem.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(0.7) contrast(1.1)' }}
+                onError={(e) => {
+                  e.currentTarget.src = activeTab === 'contracts'
+                    ? resolveContractPicture(detailItem)
+                    : resolveContentRightPicture(detailItem);
+                }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(25,25,25,0.6) 60%, #191919 100%)' }} />
               <button
