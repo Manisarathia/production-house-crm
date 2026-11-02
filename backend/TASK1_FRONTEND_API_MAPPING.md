@@ -8,7 +8,7 @@ Base URL: `http://localhost:8080` in local development. JSON is used for request
 
 | Frontend component/action | Method and endpoint | Request fields | Response fields | Access |
 |---|---|---|---|---|
-| `Login.jsx` sign-in | `POST /api/auth/login` | `{ "email": "admin@studio.test", "password": "<password>" }` | `{ "accessToken": "...", "tokenType": "Bearer", "expiresIn": 900, "user": { "id", "name", "email", "roles", "permissions" } }` | Public; invalid credentials return 401 |
+| `Login.jsx` sign-in | `POST /api/auth/login` | `{ "email": "ramya@project.com", "password": "Ramyavinod@30" }` | `{ "accessToken": "...", "tokenType": "Bearer", "expiresIn": 900, "user": { "id", "name", "email", "roles", "permissions" } }` | Public; invalid credentials return 401 |
 | `MainLayout.jsx` sign out | `POST /api/auth/logout` | None | 204, no body | Active authenticated user; revokes all that user's outstanding tokens |
 | Future profile view | `GET /api/auth/me` | None | `{ "id", "name", "email", "roles": [], "permissions": [] }` | Active authenticated user |
 | Future password form | `POST /api/auth/password` | `{ "currentPassword", "newPassword" }` | 204, no body | Active authenticated user; new password 12–72 characters and no more than 72 UTF-8 bytes |
