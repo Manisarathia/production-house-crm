@@ -13,6 +13,7 @@ import com.productionhouse.crm.finance.repository.InvoiceRepository;
 @Service
 @Transactional
 public class InvoiceService {
+
 	@Autowired
 	private InvoiceRepository invoiceRepository;
 

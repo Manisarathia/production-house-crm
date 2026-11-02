@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.productionhouse.crm.production.repository.ProjectRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.productionhouse.crm.finance.model.Budget;
@@ -18,12 +19,21 @@ import com.productionhouse.crm.finance.repository.ExpenseRepository;
 public class FinanceService {
 
 	@Autowired
+	private ProjectRepository projectRepository;
+
+	@Autowired
 	private BudgetRepository budgetRepository;
 
 	@Autowired
 	private ExpenseRepository expenseRepository;
 
+	private void requireProject(String id) {
+		if (id == null || !projectRepository.existsById(id))
+			throw new IllegalArgumentException("Production project not found: " + id);
+	}
+
 	public Budget initializeBudget(String projectId, BigDecimal totalAllocated) {
+		requireProject(projectId);
 		Budget budget = new Budget();
 		budget.setProjectId(projectId);
 		budget.setTotalAllocated(totalAllocated);
@@ -38,6 +48,7 @@ public class FinanceService {
 		}
 
 		String targetProjectId = expense.getProject().getId();
+		requireProject(targetProjectId);
 
 		budgetRepository.findByProjectId(targetProjectId).orElseGet(() -> {
 			Budget defaultBudget = new Budget();
@@ -88,6 +99,7 @@ public class FinanceService {
 	}
 
 	public Budget getBudgetByProject(String projectId) {
+		requireProject(projectId);
 		return budgetRepository.findByProjectId(projectId).orElseThrow(
 				() -> new RuntimeException("Budget context mapping profile not found for identifier: " + projectId));
 	}

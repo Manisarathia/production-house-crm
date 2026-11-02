@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.productionhouse.crm.finance.model.Invoice;
+import com.productionhouse.crm.production.repository.ProjectRepository;
 import com.productionhouse.crm.finance.model.InvoiceResponse;
 import com.productionhouse.crm.finance.model.Payment;
 import com.productionhouse.crm.finance.model.PaymentStatus;
@@ -33,6 +34,8 @@ public class InvoicePaymentController {
 
 	@Autowired
 	private InvoiceService invoiceService;
+
+    @Autowired private ProjectRepository projectRepository;
 
 	@Autowired
 	private InvoiceRepository invoiceRepository;
@@ -78,7 +81,11 @@ public class InvoicePaymentController {
 			}
 
 			Invoice invoice = new Invoice();
-			invoice.setProjectId((String) payload.get("projectId"));
+			String projectId = (String) payload.get("projectId");
+            if (projectId == null || !projectRepository.existsById(projectId)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid production project ID"));
+            }
+            invoice.setProjectId(projectId);
 			invoice.setIssuedTo((String) payload.get("issuedTo"));
 
 			BigDecimal amountDue = new BigDecimal(payload.get("amountDue").toString());
