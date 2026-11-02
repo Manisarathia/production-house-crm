@@ -86,7 +86,8 @@ export default function SingerDubbing() {
       ]);
 
       const items = extractPageItems(singersRes);
-      const mapped = items.map(item => ({
+      if (items.length > 0) {
+        const mapped = items.map(item => ({
         id: item.id,
         songTitle: item.biography || (item.name ? item.name + ' - Theme Track' : 'Original Soundtrack'),
         singerName: item.name || 'Lead Vocalist',
@@ -102,10 +103,14 @@ export default function SingerDubbing() {
         platform: item.platform || 'LoopNexus',
         image: item.image || resolveSingerPicture(item)
       }));
-      setSingers(mapped);
+        setSingers(mapped);
+      } else {
+        setSingers(getStoredSingers());
+      }
 
       const dubbingItems = extractPageItems(dubbingRes);
-      const mappedDubbing = dubbingItems.map(item => ({
+      if (dubbingItems.length > 0) {
+        const mappedDubbing = dubbingItems.map(item => ({
         id: item.id,
         characterName: item.name || 'Lead Character',
         project: item.projectRef || 'The Last Monsoon',
@@ -121,10 +126,15 @@ export default function SingerDubbing() {
         platform: item.platform || 'LoopNexus',
         image: item.image || resolveDubbingPicture(item)
       }));
-      setDubbingSessions(mappedDubbing);
+        setDubbingSessions(mappedDubbing);
+      } else {
+        setDubbingSessions(getStoredDubbing());
+      }
     } catch (err) {
       console.warn('Backend fetch error in SingerDubbing:', err);
       setApiError(err.message || 'Could not connect to live backend.');
+      setSingers(getStoredSingers());
+      setDubbingSessions(getStoredDubbing());
     } finally {
       setLoading(false);
     }
@@ -322,6 +332,7 @@ export default function SingerDubbing() {
             image: singerFormData.image || resolveSingerPicture(created)
           };
           setSingers(prev => [mappedNew, ...prev]);
+          saveSingers([mappedNew, ...getStoredSingers()]);
           showToast('Singer profile and track registered on backend successfully!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);
@@ -358,6 +369,7 @@ export default function SingerDubbing() {
             image: dubbingFormData.image || resolveDubbingPicture(created)
           };
           setDubbingSessions(prev => [mappedNew, ...prev]);
+          saveDubbing([mappedNew, ...getStoredDubbing()]);
           showToast('Dubbing session scheduled on backend successfully!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);

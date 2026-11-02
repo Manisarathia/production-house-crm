@@ -87,7 +87,8 @@ export default function ContractsRights() {
       ]);
 
       const items = extractPageItems(contractsRes);
-      const mapped = items.map(item => ({
+      if (items.length > 0) {
+        const mapped = items.map(item => ({
         id: item.id,
         title: item.name || 'Production Agreement',
         project: item.projectRef || 'General',
@@ -103,10 +104,14 @@ export default function ContractsRights() {
         platform: item.platform || 'LoopNexus',
         image: item.image || resolveContractPicture(item)
       }));
-      setContracts(mapped);
+        setContracts(mapped);
+      } else {
+        setContracts(getStoredContracts());
+      }
 
       const rightItems = extractPageItems(rightsRes);
-      const mappedRights = rightItems.map(item => ({
+      if (rightItems.length > 0) {
+        const mappedRights = rightItems.map(item => ({
         id: item.id,
         title: item.name || 'Digital Streaming Rights',
         project: item.projectRef || 'General',
@@ -123,10 +128,15 @@ export default function ContractsRights() {
         restrictions: item.restrictions || 'Standard holdback windows apply',
         image: item.image || resolveContentRightPicture(item)
       }));
-      setRights(mappedRights);
+        setRights(mappedRights);
+      } else {
+        setRights(getStoredContentRights());
+      }
     } catch (err) {
       console.warn('Backend fetch error in ContractsRights:', err);
       setApiError(err.message || 'Could not connect to live backend.');
+      setContracts(getStoredContracts());
+      setRights(getStoredContentRights());
     } finally {
       setLoading(false);
     }
@@ -337,6 +347,7 @@ export default function ContractsRights() {
             image: contractFormData.image || resolveContractPicture(created)
           };
           setContracts(prev => [mappedNew, ...prev]);
+          saveContracts([mappedNew, ...getStoredContracts()]);
           showToast('Legal contract registered on backend successfully!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);
@@ -375,6 +386,7 @@ export default function ContractsRights() {
             image: rightFormData.image || resolveContentRightPicture(created)
           };
           setRights(prev => [mappedNew, ...prev]);
+          saveContentRights([mappedNew, ...getStoredContentRights()]);
           showToast('Content rights license registered on backend successfully!');
         } catch (apiErr) {
           console.warn('Backend create failed, storing locally:', apiErr);
