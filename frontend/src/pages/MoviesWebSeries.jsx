@@ -7,6 +7,7 @@ import {
   X,
   PlayCircle,
   LayoutGrid,
+  List,
   Table as TableIcon,
   Edit3,
   Trash2,
@@ -301,6 +302,7 @@ export default function MoviesWebSeries() {
           <div className="inline-actions">
             <div className="segmented">
               <button type="button" className={viewMode === 'grid' ? 'chosen' : ''} onClick={() => setViewMode('grid')}><LayoutGrid size={15} /> Grid</button>
+              <button type="button" className={viewMode === 'list' ? 'chosen' : ''} onClick={() => setViewMode('list')}><List size={15} /> List</button>
               <button type="button" className={viewMode === 'table' ? 'chosen' : ''} onClick={() => setViewMode('table')}><TableIcon size={15} /> Table</button>
             </div>
             <label className="table-search">
@@ -359,6 +361,34 @@ export default function MoviesWebSeries() {
               ))}
             </div>
           )
+        )}
+
+        {!loading && viewMode === 'list' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '16px 20px' }}>
+            {filteredTitles.map(t => (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', background: '#191919', border: '1px solid #303030', borderRadius: '10px', flexWrap: 'wrap' }}>
+                {t.posterUrl ? (
+                  <img src={t.posterUrl} alt={t.title} style={{ width: '64px', height: '76px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '64px', height: '76px', background: '#222', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><ImageIcon size={24} /></div>
+                )}
+                <div style={{ flex: '1 1 190px', minWidth: 0 }}>
+                  <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '15px', overflowWrap: 'anywhere' }}>{t.title}</strong>
+                  <span style={{ color: '#8a96a8', fontSize: '12px' }}>{t.category} · {t.seasons}</span>
+                  <div style={{ marginTop: '7px', fontSize: '12px', color: '#a7a09a' }}>Status: {t.contentStatus}</div>
+                </div>
+                <div style={{ flex: '1 1 150px', minWidth: 0, fontSize: '12px', color: '#a7a09a' }}>
+                  <div>Project: {t.associatedProject}</div>
+                  <div style={{ marginTop: '5px' }}>Release: {t.targetReleaseDate}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
+                  <button className="icon-button" onClick={() => setDetailModalTitle(t)} title="View Details"><Eye size={16} /></button>
+                  <button className="icon-button" onClick={() => handleOpenEdit(t)} title="Edit"><Edit3 size={16} /></button>
+                  <button className="icon-button" onClick={() => handlePurgeTitle(t.id)} title="Delete" style={{ color: '#ff6b6b' }}><Trash2 size={16} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
 
         {!loading && viewMode === 'table' && (
