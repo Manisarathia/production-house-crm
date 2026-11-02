@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class ApiExceptionHandler {
+public class ProductionApiExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public org.springframework.http.ResponseEntity<ApiError> handleApiException(
             ApiException exception,
