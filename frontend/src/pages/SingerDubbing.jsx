@@ -37,6 +37,11 @@ import {
   normalizeDubbingStatusToFrontend
 } from '../api/mediaAudioLegalApi.js';
 import {
+  resolveSingerPicture,
+  resolveDubbingPicture
+} from '../utils/mediaAudioLegalImages.js';
+import MediaImagePicker from '../components/MediaImagePicker.jsx';
+import {
   getStoredProjects,
   formatCurrency,
   getStoredSingers,
@@ -49,8 +54,6 @@ import {
   createDubbing,
   updateDubbing,
   deleteDubbing,
-  getSingerImage,
-  getDubbingImage
 } from '../utils/productionStorage.js';
 
 export default function SingerDubbing() {
@@ -97,7 +100,7 @@ export default function SingerDubbing() {
         recordingStatus: normalizeSingerStatusToFrontend(item.status) === 'Active' ? 'Mastered & Mixed' : 'In Studio',
         fee: item.fee || 1500000,
         platform: item.platform || 'LoopNexus',
-        image: item.image || getSingerImage(item.id)
+        image: item.image || resolveSingerPicture(item)
       }));
       setSingers(mapped);
 
@@ -116,7 +119,7 @@ export default function SingerDubbing() {
         status: normalizeDubbingStatusToFrontend(item.status),
         lipsyncQuality: item.lipsyncQuality || 'Passed Sync Check',
         platform: item.platform || 'LoopNexus',
-        image: item.image || getDubbingImage(item.id)
+        image: item.image || resolveDubbingPicture(item)
       }));
       setDubbingSessions(mappedDubbing);
     } catch (err) {
@@ -316,7 +319,7 @@ export default function SingerDubbing() {
             ...singerFormData,
             id: created.id,
             singerName: created.name || singerFormData.singerName,
-            image: getSingerImage(created.id)
+            image: singerFormData.image || resolveSingerPicture(created)
           };
           setSingers(prev => [mappedNew, ...prev]);
           showToast('Singer profile and track registered on backend successfully!');
@@ -352,7 +355,7 @@ export default function SingerDubbing() {
             ...dubbingFormData,
             id: created.id,
             characterName: created.name || dubbingFormData.characterName,
-            image: getDubbingImage(created.id)
+            image: dubbingFormData.image || resolveDubbingPicture(created)
           };
           setDubbingSessions(prev => [mappedNew, ...prev]);
           showToast('Dubbing session scheduled on backend successfully!');
@@ -1027,7 +1030,7 @@ export default function SingerDubbing() {
               filteredSingers.map(s => {
                 const tone = getStatusTone(s.recordingStatus);
                 const isKids = s.platform === 'LoopKids';
-                const singerImg = getSingerImage(s);
+                const singerImg = s.image || resolveSingerPicture(s);
                 const isPlaying = playingTrackId === s.id;
 
                 return (
@@ -1039,6 +1042,7 @@ export default function SingerDubbing() {
                         alt={s.singerName}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolveSingerPicture(s); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1157,7 +1161,7 @@ export default function SingerDubbing() {
               filteredDubbing.map(d => {
                 const tone = getStatusTone(d.status);
                 const isKids = d.platform === 'LoopKids';
-                const dubImg = getDubbingImage(d);
+                const dubImg = d.image || resolveDubbingPicture(d);
 
                 return (
                   <div className="prod-card" key={d.id}>
@@ -1168,6 +1172,7 @@ export default function SingerDubbing() {
                         alt={d.voiceArtist}
                         className="prod-card-poster-img"
                         loading="lazy"
+                        onError={(e) => { e.currentTarget.src = resolveDubbingPicture(d); }}
                       />
                       <div className="prod-card-poster-gradient" />
                       <div className="prod-card-poster-badges">
@@ -1268,7 +1273,7 @@ export default function SingerDubbing() {
             {activeTab === 'singers' ? (
               filteredSingers.map(s => {
                 const tone = getStatusTone(s.recordingStatus);
-                const singerImg = getSingerImage(s);
+                const singerImg = s.image || resolveSingerPicture(s);
                 return (
                   <div
                     className="prod-list-card"
@@ -1287,7 +1292,7 @@ export default function SingerDubbing() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={singerImg} alt={s.singerName} className="list-poster-img" loading="lazy" />
+                        <img src={singerImg} alt={s.singerName} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveSingerPicture(s); }} />
                         <div className="list-poster-overlay">
                           <Mic size={18} />
                         </div>
@@ -1345,7 +1350,7 @@ export default function SingerDubbing() {
             ) : (
               filteredDubbing.map(d => {
                 const tone = getStatusTone(d.status);
-                const dubImg = getDubbingImage(d);
+                const dubImg = d.image || resolveDubbingPicture(d);
                 return (
                   <div
                     className="prod-list-card"
@@ -1364,7 +1369,7 @@ export default function SingerDubbing() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '240px', flex: '1.3' }}>
                       <div className="list-poster-thumb">
-                        <img src={dubImg} alt={d.voiceArtist} className="list-poster-img" loading="lazy" />
+                        <img src={dubImg} alt={d.voiceArtist} className="list-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveDubbingPicture(d); }} />
                         <div className="list-poster-overlay">
                           <Languages size={18} />
                         </div>
@@ -1444,13 +1449,13 @@ export default function SingerDubbing() {
                 <tbody>
                   {filteredSingers.map(s => {
                     const tone = getStatusTone(s.recordingStatus);
-                    const singerImg = getSingerImage(s);
+                    const singerImg = s.image || resolveSingerPicture(s);
                     return (
                       <tr key={s.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={singerImg} alt={s.singerName} className="table-poster-img" loading="lazy" />
+                              <img src={singerImg} alt={s.singerName} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveSingerPicture(s); }} />
                             </div>
                             <div>
                               <strong>{s.songTitle}</strong>
@@ -1519,13 +1524,13 @@ export default function SingerDubbing() {
                 <tbody>
                   {filteredDubbing.map(d => {
                     const tone = getStatusTone(d.status);
-                    const dubImg = getDubbingImage(d);
+                    const dubImg = d.image || resolveDubbingPicture(d);
                     return (
                       <tr key={d.id}>
                         <td>
                           <div className="project-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="table-poster-thumb">
-                              <img src={dubImg} alt={d.voiceArtist} className="table-poster-img" loading="lazy" />
+                              <img src={dubImg} alt={d.voiceArtist} className="table-poster-img" loading="lazy" onError={(e) => { e.currentTarget.src = resolveDubbingPicture(d); }} />
                             </div>
                             <div>
                               <strong>{d.characterName}</strong>
@@ -1746,6 +1751,14 @@ export default function SingerDubbing() {
                     onChange={e => setSingerFormData({ ...singerFormData, recordingStudio: e.target.value })}
                   />
                 </label>
+
+                <MediaImagePicker
+                  value={singerFormData.image}
+                  onChange={img => setSingerFormData({ ...singerFormData, image: img })}
+                  label="Singer Portrait / Track Cover Art"
+                  defaultFallback={resolveSingerPicture(singerFormData)}
+                  placeholder="Paste singer portrait URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -1848,6 +1861,14 @@ export default function SingerDubbing() {
                     />
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={dubbingFormData.image}
+                  onChange={img => setDubbingFormData({ ...dubbingFormData, image: img })}
+                  label="Dubbing Studio / Voice Artist Picture"
+                  defaultFallback={resolveDubbingPicture(dubbingFormData)}
+                  placeholder="Paste dubbing studio image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -1951,6 +1972,14 @@ export default function SingerDubbing() {
                     />
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={singerFormData.image}
+                  onChange={img => setSingerFormData({ ...singerFormData, image: img })}
+                  label="Singer Portrait / Track Cover Art"
+                  defaultFallback={resolveSingerPicture(singerFormData)}
+                  placeholder="Paste singer portrait URL or choose local image file..."
+                />
               </>
             ) : (
               <>
@@ -2000,6 +2029,14 @@ export default function SingerDubbing() {
                     </select>
                   </label>
                 </div>
+
+                <MediaImagePicker
+                  value={dubbingFormData.image}
+                  onChange={img => setDubbingFormData({ ...dubbingFormData, image: img })}
+                  label="Dubbing Studio / Voice Artist Picture"
+                  defaultFallback={resolveDubbingPicture(dubbingFormData)}
+                  placeholder="Paste dubbing studio image URL or choose local image file..."
+                />
               </>
             )}
 
@@ -2026,9 +2063,14 @@ export default function SingerDubbing() {
             {/* Contextual Visual Header (Singer at mic / voice talent booth) */}
             <div style={{ position: 'relative', width: '100%', height: '170px', background: '#111', overflow: 'hidden' }}>
               <img
-                src={activeTab === 'singers' ? getSingerImage(detailItem) : getDubbingImage(detailItem)}
+                src={activeTab === 'singers' ? (detailItem.image || resolveSingerPicture(detailItem)) : (detailItem.image || resolveDubbingPicture(detailItem))}
                 alt={activeTab === 'singers' ? detailItem.singerName : detailItem.voiceArtist}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(0.7) contrast(1.1)' }}
+                onError={(e) => {
+                  e.currentTarget.src = activeTab === 'singers'
+                    ? resolveSingerPicture(detailItem)
+                    : resolveDubbingPicture(detailItem);
+                }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(25,25,25,0.6) 60%, #191919 100%)' }} />
               <button
