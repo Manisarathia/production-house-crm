@@ -578,6 +578,7 @@ export default function SingerDubbing() {
           align-items: stretch;
           width: 100%;
           box-sizing: border-box;
+          padding: 0 20px 20px !important;
         }
 
         .prod-card, .prod-list-card {
@@ -1256,7 +1257,7 @@ export default function SingerDubbing() {
         </div>
 
         {/* Filter Tabs Bar */}
-        <div style={{ padding: '0 0 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {/* Platform Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>
@@ -1550,7 +1551,7 @@ export default function SingerDubbing() {
 
         {/* ================= LIST VIEW ================= */}
         {viewMode === 'list' && (
-          <div className="production-list-grid" style={{ padding: '0 0 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="production-list-grid" style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {activeTab === 'singers' ? (
               filteredSingers.map(s => {
                 const tone = getStatusTone(s.recordingStatus);
