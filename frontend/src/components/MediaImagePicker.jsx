@@ -1,20 +1,20 @@
 import React, { useRef } from 'react';
-import { Image as ImageIcon, Upload, X, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Upload, X, Sparkles, Check } from 'lucide-react';
 
 export default function MediaImagePicker({
   value,
   onChange,
-  label = 'Relevant Picture / Poster',
+  label = 'Relevant Picture / Poster / Singer Portrait',
   defaultFallback = '',
-  placeholder = 'Paste image URL (https://...) or choose local file below...'
+  placeholder = 'Paste image URL (https://...) or click Browse File to pick from your computer...'
 }) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Please choose an image under 5MB.');
+      if (file.size > 8 * 1024 * 1024) {
+        alert('Please choose an image under 8MB.');
         return;
       }
       const reader = new FileReader();
@@ -30,28 +30,40 @@ export default function MediaImagePicker({
   return (
     <div
       style={{
-        marginTop: '10px',
-        marginBottom: '12px',
-        padding: '12px 14px',
-        background: 'rgba(255, 255, 255, 0.02)',
-        border: '1px solid #2a2826',
-        borderRadius: '8px'
+        marginTop: '14px',
+        marginBottom: '16px',
+        padding: '14px 16px',
+        background: '#1c1b19',
+        border: '1.5px solid #3d3a36',
+        borderRadius: '10px',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <label
-          style={{
-            margin: 0,
-            fontSize: '11.5px',
-            fontWeight: 600,
-            color: '#f4f0eb',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <ImageIcon size={14} color="#f07842" /> {label}
-        </label>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div
+            style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '6px',
+              background: 'rgba(240, 120, 66, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ImageIcon size={15} color="#f07842" />
+          </div>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#f4f0eb', display: 'block' }}>
+              {label}
+            </span>
+            <span style={{ fontSize: '10.5px', color: '#a7a09a' }}>
+              Upload local image file or paste direct picture URL
+            </span>
+          </div>
+        </div>
+
         {value && (
           <button
             type="button"
@@ -60,22 +72,25 @@ export default function MediaImagePicker({
               if (fileInputRef.current) fileInputRef.current.value = '';
             }}
             style={{
-              background: 'transparent',
-              border: 'none',
+              background: 'rgba(224, 86, 86, 0.12)',
+              border: '1px solid rgba(224, 86, 86, 0.3)',
+              borderRadius: '5px',
+              padding: '4px 9px',
               color: '#e05656',
               fontSize: '11px',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              fontWeight: 500
             }}
           >
-            <X size={12} /> Clear Custom Image
+            <X size={12} /> Reset to Auto-Match
           </button>
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', alignItems: 'center' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
         <input
           type="url"
           placeholder={placeholder}
@@ -83,11 +98,11 @@ export default function MediaImagePicker({
           onChange={(e) => onChange(e.target.value)}
           style={{
             width: '100%',
-            padding: '8px 10px',
+            padding: '9px 12px',
             fontSize: '12px',
-            background: '#191919',
+            background: '#141414',
             border: '1px solid #3d3a36',
-            borderRadius: '6px',
+            borderRadius: '7px',
             color: '#f4f0eb',
             boxSizing: 'border-box'
           }}
@@ -98,18 +113,19 @@ export default function MediaImagePicker({
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '8px 12px',
-            background: '#232220',
-            border: '1px solid #3d3a36',
-            borderRadius: '6px',
-            color: '#f4f0eb',
+            gap: '7px',
+            padding: '9px 15px',
+            background: 'rgba(240, 120, 66, 0.15)',
+            border: '1px solid #f07842',
+            borderRadius: '7px',
+            color: '#f07842',
             cursor: 'pointer',
-            fontSize: '11.5px',
+            fontSize: '12px',
+            fontWeight: 600,
             whiteSpace: 'nowrap'
           }}
         >
-          <Upload size={13} color="#f07842" /> Browse File
+          <Upload size={14} color="#f07842" /> Browse File
         </button>
         <input
           ref={fileInputRef}
@@ -121,17 +137,29 @@ export default function MediaImagePicker({
       </div>
 
       {previewSrc && (
-        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div
+          style={{
+            marginTop: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '8px 10px',
+            background: '#141414',
+            borderRadius: '8px',
+            border: '1px solid #2a2826'
+          }}
+        >
           <img
             src={previewSrc}
             alt="Preview"
             style={{
-              width: '84px',
-              height: '48px',
+              width: '108px',
+              height: '60px',
               objectFit: 'cover',
               borderRadius: '6px',
-              border: '1px solid #3d3a36',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+              border: '1px solid #4a4642',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+              flexShrink: 0
             }}
             onError={(e) => {
               if (defaultFallback && e.currentTarget.src !== defaultFallback) {
@@ -139,14 +167,19 @@ export default function MediaImagePicker({
               }
             }}
           />
-          <div style={{ fontSize: '11px', color: '#a7a09a', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '11px', color: '#a7a09a', lineHeight: '1.5' }}>
             {value ? (
-              <span style={{ color: '#67d7a3' }}>Custom picture attached</span>
+              <span style={{ color: '#67d7a3', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+                <Check size={13} color="#67d7a3" /> Custom picture attached
+              </span>
             ) : (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Sparkles size={11} color="#f07842" /> Auto-matched picture preview
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#e09868' }}>
+                <Sparkles size={13} color="#f07842" /> Auto-matched poster / singer portrait active
               </span>
             )}
+            <span style={{ display: 'block', fontSize: '10px', color: '#7a746e', marginTop: '2px' }}>
+              This visual will display on Grid Cards, List rows, and Detail views.
+            </span>
           </div>
         </div>
       )}
