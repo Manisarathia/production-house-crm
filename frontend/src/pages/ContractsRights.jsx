@@ -60,8 +60,8 @@ export default function ContractsRights() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list' | 'table'
 
   // Data states
-  const [contracts, setContracts] = useState(() => getStoredContracts());
-  const [rights, setRights] = useState(() => getStoredRights());
+  const [contracts, setContracts] = useState([]);
+  const [rights, setRights] = useState([]);
 
   // Live API States
   const [loading, setLoading] = useState(true);
@@ -78,62 +78,74 @@ export default function ContractsRights() {
     setLoading(true);
     setApiError(null);
     try {
-      const [contractsRes, rightsRes] = await Promise.allSettled([
+      const [contractsRes, rightsRes] = await Promise.all([
         contractApi.list({ size: 100 }),
         contentRightApi.list({ size: 100 })
       ]);
 
-      if (contractsRes.status === 'fulfilled' && contractsRes.value) {
-        const items = extractPageItems(contractsRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            title: item.name || item.title || 'Production Agreement',
-            project: item.projectRef || item.project || 'The Last Monsoon',
-            counterparty: item.partyTwo || item.counterparty || 'Counterparty',
-            agreementType: item.contractType || item.agreementType || 'Talent / Cast Agreement',
-            contractValue: item.contractValue || 5000000,
-            paymentTerms: item.notes || item.paymentTerms || '30% Signing · 40% Wrap · 30% Delivery',
-            effectiveDate: item.startsAt ? item.startsAt.slice(0, 10) : (item.effectiveDate || new Date().toISOString().split('T')[0]),
-            expiryDate: item.endsAt ? item.endsAt.slice(0, 10) : (item.expiryDate || '2028-12-31'),
-            status: item.status === 'ACTIVE' ? 'Executed / Signed' : item.status === 'PENDING' ? 'Pending Review' : (normalizeContractStatusToFrontend(item.status) || 'Executed / Signed'),
-            legalSignatory: item.partyOne || item.legalSignatory || 'Studio North Legal & Counterparty',
-            governingLaw: item.governingLaw || 'High Court of Bombay, Mumbai',
-            platform: item.platform || 'LoopNexus',
-            image: item.image || getContractImage(item.id)
-          }));
-          setContracts(mapped);
-        }
-      }
+      const items = extractPageItems(contractsRes);
+      const mapped = items.map(item => ({
+        id: item.id,
+        title: item.name || 'Production Agreement',
+        project: item.projectRef || 'General',
+        counterparty: item.partyTwo || item.partyOne || 'Counterparty',
+        agreementType: item.contractType || 'Talent / Cast Agreement',
+        contractValue: item.contractValue || 5000000,
+        paymentTerms: item.notes || '30% Signing · 40% Wrap · 30% Delivery',
+        effectiveDate: item.startsAt ? item.startsAt.slice(0, 10) : new Date().toISOString().split('T')[0],
+        expiryDate: item.endsAt ? item.endsAt.slice(0, 10) : '2028-12-31',
+        status: item.status === 'ACTIVE' ? 'Executed / Signed' : item.status === 'PENDING' ? 'Pending Review' : (normalizeContractStatusToFrontend(item.status) || 'Executed / Signed'),
+        legalSignatory: item.partyOne || 'Studio North Legal & Counterparty',
+        governingLaw: item.governingLaw || 'High Court of Bombay, Mumbai',
+        platform: item.platform || 'LoopNexus',
+        image: item.image || getContractImage(item.id)
+      }));
+      setContracts(mapped);
 
-      if (rightsRes.status === 'fulfilled' && rightsRes.value) {
-        const items = extractPageItems(rightsRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            title: item.name || item.title || 'Digital Streaming Rights',
-            project: item.projectRef || item.project || 'The Last Monsoon',
-            territory: item.territory || 'Worldwide',
-            rightsType: item.rightsType || 'SVOD / OTT Subscription',
-            exclusivity: item.exclusive ? 'Exclusive' : 'Non-Exclusive',
-            rightsPeriod: item.rightsPeriod || '5 Years',
-            startDate: item.startsAt ? item.startsAt.slice(0, 10) : (item.startDate || new Date().toISOString().split('T')[0]),
-            endDate: item.endsAt ? item.endsAt.slice(0, 10) : (item.endDate || '2031-12-31'),
-            platform: item.platforms ? item.platforms.split(',')[0].trim() : (item.platform || 'LoopNexus'),
-            licenseFee: item.licenseFee || 50000000,
-            revenueSharePct: item.revenueSharePct || '0% (Flat License)',
-            status: normalizeRightsStatusToFrontend(item.status),
-            restrictions: item.restrictions || 'Standard holdback windows apply',
-            image: item.image || getContentRightImage(item.id)
-          }));
-          setRights(mapped);
-        }
-      }
+      const rightItems = extractPageItems(rightsRes);
+      const mappedRights = rightItems.map(item => ({
+        id: item.id,
+        title: item.name || 'Digital Streaming Rights',
+        project: item.projectRef || 'General',
+        territory: item.territory || 'Worldwide',
+        rightsType: item.rightsType || 'SVOD / OTT Subscription',
+        exclusivity: item.exclusive ? 'Exclusive' : 'Non-Exclusive',
+        rightsPeriod: item.rightsPeriod || '5 Years',
+        startDate: item.startsAt ? item.startsAt.slice(0, 10) : new Date().toISOString().split('T')[0],
+        endDate: item.endsAt ? item.endsAt.slice(0, 10) : '2031-12-31',
+        platform: item.platforms ? item.platforms.split(',')[0].trim() : 'LoopNexus',
+        licenseFee: item.licenseFee || 50000000,
+        revenueSharePct: item.revenueSharePct || '0% (Flat License)',
+        status: normalizeRightsStatusToFrontend(item.status),
+        restrictions: item.restrictions || 'Standard holdback windows apply',
+        image: item.image || getContentRightImage(item.id)
+      }));
+      setRights(mappedRights);
     } catch (err) {
       console.warn('Backend fetch error in ContractsRights:', err);
       setApiError(err.message || 'Could not connect to live backend.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeedBackend = async () => {
+    setIsSubmitting(true);
+    try {
+      showToast('Seeding initial contracts to Spring Boot backend database...', 'info');
+      const sampleContracts = [
+        { name: 'Lead Actor Engagement Agreement', description: 'Talent Agreement', projectRef: 'The Last Monsoon', contractType: 'Talent / Cast Agreement', partyOne: 'Studio North Legal', partyTwo: 'Ranbir Kapoor / Matrix Talent', status: 'ACTIVE', startsAt: '2026-08-01', endsAt: '2028-12-31', documentReference: 'doc://legal/vault/contract-101.pdf', notes: '30% Signing · 40% Wrap · 30% Delivery', active: true },
+        { name: 'Principal Director Long-Form Service Agreement', description: 'Director Agreement', projectRef: 'City of Echoes', contractType: 'Director Service Agreement', partyOne: 'Studio North Legal', partyTwo: 'Vikramaditya Motwane', status: 'ACTIVE', startsAt: '2026-06-01', endsAt: '2029-06-01', documentReference: 'doc://legal/vault/contract-102.pdf', notes: 'Standard director terms', active: true }
+      ];
+      for (const c of sampleContracts) {
+        await contractApi.create(c).catch(() => {});
+      }
+      await fetchBackendData();
+      showToast('Contracts seeded into backend database successfully!');
+    } catch (e) {
+      showToast('Failed to seed contracts: ' + e.message, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
