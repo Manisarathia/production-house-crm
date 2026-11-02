@@ -3,6 +3,7 @@ package com.productionhouse.crm.auth.api;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -22,6 +23,14 @@ public class ProductionApiExceptionHandler {
             HttpServletRequest request
     ) {
         return response(exception.getStatus(), exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public org.springframework.http.ResponseEntity<ApiError> handleAccessDenied(
+            AccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        return response(HttpStatus.FORBIDDEN, "You do not have permission to perform this action.", request, Map.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

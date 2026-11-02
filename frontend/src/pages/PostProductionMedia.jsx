@@ -45,16 +45,6 @@ import {
 import MediaImagePicker from '../components/MediaImagePicker.jsx';
 import {
   getStoredProjects,
-  getStoredPostProduction,
-  savePostProduction,
-  createPostProduction,
-  updatePostProduction,
-  deletePostProduction,
-  getStoredMediaAssets,
-  saveMediaAssets,
-  createMediaAsset,
-  updateMediaAsset,
-  deleteMediaAsset,
 } from '../utils/productionStorage.js';
 
 export default function PostProductionMedia() {
@@ -95,15 +85,17 @@ export default function PostProductionMedia() {
         stage: item.description || 'Color Grading (DI)',
         status: normalizePostProductionStatusToFrontend(item.status),
         targetDeliveryDate: item.dueAt || '',
-        supervisor: item.assigneeName || 'Red Chillies Color',
-        leadArtist: item.assigneeName || 'Makarand Surte',
-        facility: item.facility || 'Red Chillies Color Lab, Mumbai',
-        progress: item.progress ?? (item.status === 'COMPLETED' ? 100 : 75),
-        reelsCount: item.reelsCount || '8 Episodes · 16 Reels',
-        qcStatus: item.qcStatus || 'Passed Initial QC',
-        platform: item.platform || 'LoopNexus',
+        supervisor: item.assigneeName || 'Unassigned',
+        leadArtist: item.assigneeName || 'Unassigned',
+        facility: '—',
+        progress: item.status === 'COMPLETED' ? 100 : 0,
+        reelsCount: '—',
+        qcStatus: 'Not specified',
+        platform: '—',
         tone: item.status === 'COMPLETED' ? 'green' : 'orange',
-        image: item.image || resolvePostProductionPicture(item)
+        image: item.image || resolvePostProductionPicture(item),
+        startedAt: item.startedAt,
+        active: item.active
       }));
         setPostTasks(mapped);
       } else {
@@ -118,14 +110,16 @@ export default function PostProductionMedia() {
         project: item.projectRef || 'General',
         assetType: item.assetType || 'Master Cut',
         status: normalizeMediaStatusToFrontend(item.status),
-        storageLocation: item.storageReference || 'Loop Cloud Vault',
-        codecFormat: item.format || 'Apple ProRes 4444 XQ',
-        fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : '150.0 GB',
-        duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : '8h 24m',
-        resolution: item.resolution || '4K UHD (3840x2160)',
-        platform: item.platform || 'LoopNexus',
+        storageLocation: item.storageReference || '—',
+        codecFormat: item.format || '—',
+        fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : '0 GB',
+        duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : '—',
+        resolution: '—',
+        platform: '—',
         uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
-        image: item.image || resolveMediaAssetPicture(item)
+        image: item.image || resolveMediaAssetPicture(item),
+        notes: item.notes,
+        active: item.active
       }));
         setMediaAssets(mappedAssets);
       } else {
@@ -134,40 +128,10 @@ export default function PostProductionMedia() {
     } catch (err) {
       console.warn('Backend fetch error in PostProductionMedia:', err);
       setApiError(err.message || 'Could not connect to live backend.');
-      setPostTasks(getStoredPostProduction());
-      setMediaAssets(getStoredMediaAssets());
+      setPostTasks([]);
+      setMediaAssets([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSeedBackend = async () => {
-    setIsSubmitting(true);
-    try {
-      showToast('Seeding initial records to Spring Boot backend database...', 'info');
-      const sampleTasks = [
-        { name: 'Dolby Vision Color Grading & DI Master', description: 'Color Grading (DI)', projectRef: 'The Last Monsoon', status: 'IN_PROGRESS', priority: 'High', dueAt: '2026-11-08', startedAt: '2026-10-01', notes: 'Dolby Vision pass' },
-        { name: 'Dolby Atmos 7.1.4 Surround Sound Mix', description: 'Sound Design & Atmos Mix', projectRef: 'City of Echoes', status: 'IN_REVIEW', priority: 'High', dueAt: '2026-11-06', startedAt: '2026-10-05', notes: 'Surround mix' },
-        { name: 'Archival 35mm Celluloid Restoration', description: 'Offline Edit', projectRef: 'Beyond The Frame', status: 'IN_PROGRESS', priority: 'Normal', dueAt: '2026-11-15', startedAt: '2026-10-10', notes: 'Scratch removal' }
-      ];
-      for (const t of sampleTasks) {
-        await postProductionApi.create(t).catch(() => {});
-      }
-
-      const sampleAssets = [
-        { name: 'Apple ProRes 4444 XQ Master Deliverable', description: 'Master Video File', projectRef: 'The Last Monsoon', assetType: 'MASTER_VIDEO', status: 'READY', storageReference: 's3://loopstream-vault-prod/masters/', format: 'ProRes 4444 XQ', sizeBytes: 156000000000, durationSeconds: 30240 },
-        { name: 'Dolby Atmos 7.1.4 PrintMaster WAV Stems', description: 'Audio Deliverable', projectRef: 'City of Echoes', assetType: 'AUDIO_STEMS', status: 'READY', storageReference: 's3://loopstream-vault-prod/audio/', format: 'Broadcast WAV 24-bit/48kHz', sizeBytes: 88000000000, durationSeconds: 8400 }
-      ];
-      for (const a of sampleAssets) {
-        await mediaAssetApi.create(a).catch(() => {});
-      }
-
-      await fetchBackendData();
-      showToast('Backend database seeded successfully!');
-    } catch (e) {
-      showToast('Failed to seed backend: ' + e.message, 'error');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -281,7 +245,7 @@ export default function PostProductionMedia() {
         const matchArtist = item.leadArtist?.toLowerCase().includes(q);
         const matchFacility = item.facility?.toLowerCase().includes(q);
         const matchStage = item.stage?.toLowerCase().includes(q);
-        const matchId = item.id?.toLowerCase().includes(q);
+        const matchId = String(item.id ?? '').toLowerCase().includes(q);
         return matchTitle || matchProj || matchSupervisor || matchArtist || matchFacility || matchStage || matchId;
       }
       return true;
@@ -304,7 +268,7 @@ export default function PostProductionMedia() {
         const matchType = item.assetType?.toLowerCase().includes(q);
         const matchCodec = item.codecFormat?.toLowerCase().includes(q);
         const matchStorage = item.storageLocation?.toLowerCase().includes(q);
-        const matchId = item.id?.toLowerCase().includes(q);
+        const matchId = String(item.id ?? '').toLowerCase().includes(q);
         return matchTitle || matchProj || matchType || matchCodec || matchStorage || matchId;
       }
       return true;
@@ -359,13 +323,11 @@ export default function PostProductionMedia() {
             image: taskFormData.image || resolvePostProductionPicture(created)
           };
           setPostTasks(prev => [mappedNew, ...prev]);
-          savePostProduction([mappedNew, ...getStoredPostProduction()]);
           showToast('Post-production milestone created successfully on backend!');
         } catch (apiErr) {
-          console.warn('Backend create failed, storing locally:', apiErr);
-          const { all } = createPostProduction(taskFormData);
-          setPostTasks(all);
-          showToast('Milestone saved locally.', 'info');
+          setApiError(apiErr.message || 'Unable to create the post-production task.');
+          showToast(apiErr.message || 'Unable to create the post-production task.', 'error');
+          return;
         }
       } else {
         if (!assetFormData.title.trim()) return;
@@ -378,8 +340,9 @@ export default function PostProductionMedia() {
           status: backendStatus,
           storageReference: assetFormData.storageLocation || 's3://loopstream-vault/',
           format: assetFormData.codecFormat || 'ProRes 4444',
-          sizeBytes: 150000000000,
-          durationSeconds: 3600,
+          sizeBytes: Number.isFinite(Number.parseFloat(assetFormData.fileSize))
+            ? Math.round(Number.parseFloat(assetFormData.fileSize) * 1024 ** 3)
+            : null,
           notes: assetFormData.checksum || '',
           active: true
         };
@@ -393,13 +356,11 @@ export default function PostProductionMedia() {
             image: assetFormData.image || resolveMediaAssetPicture(created)
           };
           setMediaAssets(prev => [mappedNew, ...prev]);
-          saveMediaAssets([mappedNew, ...getStoredMediaAssets()]);
           showToast('Media asset ingested into backend vault successfully!');
         } catch (apiErr) {
-          console.warn('Backend create failed, storing locally:', apiErr);
-          const { all } = createMediaAsset(assetFormData);
-          setMediaAssets(all);
-          showToast('Media asset saved locally.', 'info');
+          setApiError(apiErr.message || 'Unable to create the media asset.');
+          showToast(apiErr.message || 'Unable to create the media asset.', 'error');
+          return;
         }
       }
       setCreateModalOpen(false);
@@ -478,15 +439,14 @@ export default function PostProductionMedia() {
             setPostTasks(prev => prev.map(t => (t.id === editItem.id ? { ...t, ...taskFormData } : t)));
             showToast('Post-production milestone updated successfully on backend!');
           } catch (apiErr) {
-            console.warn('Backend update failed, updating local state:', apiErr);
-            const updated = updatePostProduction(editItem.id, taskFormData);
-            setPostTasks(updated);
-            showToast('Milestone updated locally.', 'info');
+            setApiError(apiErr.message || 'Unable to update the post-production task.');
+            showToast(apiErr.message || 'Unable to update the post-production task.', 'error');
+            return;
           }
         } else {
-          const updated = updatePostProduction(editItem.id, taskFormData);
-          setPostTasks(updated);
-          showToast('Milestone updated locally.');
+          setApiError('This task does not have a backend record ID.');
+          showToast('This task cannot be updated because it has no backend record ID.', 'error');
+          return;
         }
       } else {
         const backendStatus = normalizeMediaStatusToBackend(assetFormData.status);
@@ -498,8 +458,9 @@ export default function PostProductionMedia() {
           status: backendStatus,
           storageReference: assetFormData.storageLocation || 's3://loopstream-vault/',
           format: assetFormData.codecFormat || 'ProRes 4444',
-          sizeBytes: 150000000000,
-          durationSeconds: 3600,
+          sizeBytes: Number.isFinite(Number.parseFloat(assetFormData.fileSize))
+            ? Math.round(Number.parseFloat(assetFormData.fileSize) * 1024 ** 3)
+            : null,
           notes: assetFormData.checksum || '',
           active: true
         };
@@ -510,15 +471,14 @@ export default function PostProductionMedia() {
             setMediaAssets(prev => prev.map(a => (a.id === editItem.id ? { ...a, ...assetFormData } : a)));
             showToast('Media asset updated successfully on backend!');
           } catch (apiErr) {
-            console.warn('Backend update failed, updating local state:', apiErr);
-            const updated = updateMediaAsset(editItem.id, assetFormData);
-            setMediaAssets(updated);
-            showToast('Media asset updated locally.', 'info');
+            setApiError(apiErr.message || 'Unable to update the media asset.');
+            showToast(apiErr.message || 'Unable to update the media asset.', 'error');
+            return;
           }
         } else {
-          const updated = updateMediaAsset(editItem.id, assetFormData);
-          setMediaAssets(updated);
-          showToast('Media asset updated locally.');
+          setApiError('This asset does not have a backend record ID.');
+          showToast('This asset cannot be updated because it has no backend record ID.', 'error');
+          return;
         }
       }
       setEditItem(null);
@@ -541,15 +501,14 @@ export default function PostProductionMedia() {
             setPostTasks(prev => prev.filter(t => t.id !== deleteTarget.id));
             showToast('Post-production milestone deleted from backend.');
           } catch (apiErr) {
-            console.warn('Backend delete failed, removing locally:', apiErr);
-            const updated = deletePostProduction(deleteTarget.id);
-            setPostTasks(updated);
-            showToast('Milestone removed locally.', 'info');
+            setApiError(apiErr.message || 'Unable to delete the post-production task.');
+            showToast(apiErr.message || 'Unable to delete the post-production task.', 'error');
+            return;
           }
         } else {
-          const updated = deletePostProduction(deleteTarget.id);
-          setPostTasks(updated);
-          showToast('Milestone deleted successfully.');
+          setApiError('This task does not have a backend record ID.');
+          showToast('This task cannot be deleted because it has no backend record ID.', 'error');
+          return;
         }
       } else {
         if (isNumericId) {
@@ -558,15 +517,14 @@ export default function PostProductionMedia() {
             setMediaAssets(prev => prev.filter(a => a.id !== deleteTarget.id));
             showToast('Media asset deleted from backend vault.');
           } catch (apiErr) {
-            console.warn('Backend delete failed, removing locally:', apiErr);
-            const updated = deleteMediaAsset(deleteTarget.id);
-            setMediaAssets(updated);
-            showToast('Media asset removed locally.', 'info');
+            setApiError(apiErr.message || 'Unable to delete the media asset.');
+            showToast(apiErr.message || 'Unable to delete the media asset.', 'error');
+            return;
           }
         } else {
-          const updated = deleteMediaAsset(deleteTarget.id);
-          setMediaAssets(updated);
-          showToast('Media asset deleted successfully.');
+          setApiError('This asset does not have a backend record ID.');
+          showToast('This asset cannot be deleted because it has no backend record ID.', 'error');
+          return;
         }
       }
 
@@ -876,6 +834,9 @@ export default function PostProductionMedia() {
           </button>
         </div>
       </div>
+
+      {apiError && <div className="empty-state" role="alert">{apiError}</div>}
+      {loading && <div className="empty-state">Loading media records…</div>}
 
       {/* Mini Stats KPI */}
       <div className="mini-stats">

@@ -12,33 +12,51 @@ import {
 } from 'lucide-react';
 
 import Login1 from '../assets/Login1.jpg';
+import { authApi } from '../api/systemAdministrationApi.js';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@frameflow.com');
-  const [password, setPassword] = useState('frameflow123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (!email.trim() || !password.trim()) {
       setError('Please enter your email and password.');
       return;
     }
 
-    localStorage.setItem('frameflow-auth', 'true');
-    localStorage.setItem('frameflow-user', email.trim());
-
-    if (remember) {
-      localStorage.setItem('frameflow-remember', 'true');
-    } else {
-      localStorage.removeItem('frameflow-remember');
+    setIsSubmitting(true);
+    try {
+      const response = await authApi.login({ email: email.trim(), password });
+      localStorage.removeItem('token');
+      localStorage.removeItem('frameflow-auth');
+      localStorage.removeItem('frameflow-user');
+      localStorage.removeItem('frameflow-permissions');
+      localStorage.removeItem('frameflow-roles');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('frameflow-auth');
+      sessionStorage.removeItem('frameflow-user');
+      sessionStorage.removeItem('frameflow-permissions');
+      sessionStorage.removeItem('frameflow-roles');
+      const storage = remember ? localStorage : sessionStorage;
+      storage.setItem('token', response.accessToken);
+      storage.setItem('frameflow-auth', 'true');
+      storage.setItem('frameflow-user', response.user.email);
+      storage.setItem('frameflow-permissions', JSON.stringify(response.user.permissions));
+      storage.setItem('frameflow-roles', JSON.stringify(response.user.roles));
+      navigate('/', { replace: true });
+    } catch (loginError) {
+      setError(loginError.message || 'Unable to sign in. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    navigate('/', { replace: true });
   };
 
   return (
@@ -146,7 +164,7 @@ export default function Login() {
               <label htmlFor="password">Password</label>
               <button
                 type="button"
-                onClick={() => setError('Use demo password: frameflow123')}
+                  onClick={() => setError('Contact your workspace administrator to reset your password.')}
               >
                 Forgot password?
               </button>
@@ -181,20 +199,14 @@ export default function Login() {
 
             {error && <div className="login-error">{error}</div>}
 
-            <button className="login-submit" type="submit">
-              Sign in to dashboard <ArrowRight size={17} />
+            <button className="login-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in…' : 'Sign in to dashboard'} <ArrowRight size={17} />
             </button>
           </form>
 
           <div className="login-secure-note">
             <ShieldCheck size={17} />
             <span>Your workspace is protected. Sign in to access your production data.</span>
-          </div>
-
-          <div className="login-demo-note">
-            <strong>Workspace credentials</strong>
-            <span>Email: admin@frameflow.com</span>
-            <span>Password: frameflow123</span>
           </div>
 
           <p className="login-copyright">

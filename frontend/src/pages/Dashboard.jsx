@@ -1,310 +1,392 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   Clapperboard,
+  Plus,
+  ReceiptText,
+  ShieldCheck,
   Users,
   Wallet,
-  ReceiptText,
-  Plus,
-  CalendarDays,
-  MoreHorizontal,
-  PlayCircle,
-  Clock3,
 } from 'lucide-react';
-import { getStoredProjects } from '../utils/productionStorage.js';
+import { dashboardApi } from '../api/systemAdministrationApi.js';
 
-const ACTIVITIES = [
-  { initial: 'AR', name: 'Ananya Rao', text: 'uploaded a new production brief', time: '12 min ago', color: 'pink' },
-  { initial: 'SK', name: 'Sanjay Kumar', text: 'approved equipment request #EQ-104', time: '48 min ago', color: 'blue' },
-  { initial: 'PM', name: 'Priya Menon', text: 'submitted an expense report', time: '1 hr ago', color: 'purple' },
-  { initial: 'RV', name: 'Rahul Verma', text: 'updated project milestone', time: '2 hrs ago', color: 'green' },
-];
+function StatTrend({ points, metric, formatValue }) {
+  const values = points.map((point) => point[metric]);
+  const maximum = Math.max(1, ...values.filter((value) => value !== null && value !== undefined));
 
-function StatCard({ title, value, change, positive, note, Icon, tone, spark }) {
   return (
-    <article className="stat-card">
+    <div className="stat-trend" role="img" aria-label="Monthly statistics for the last six months">
+      {points.map((point, index) => {
+        const value = point[metric];
+        const month = new Date(`${point.month}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'short' });
+        const unavailable = value === null || value === undefined;
+        const hasPreviousData = values.slice(0, index).some(
+          (previousValue) => previousValue !== null && previousValue !== undefined
+        );
+        const height = unavailable
+          ? '5px'
+          : index === points.length - 1 && !hasPreviousData
+            ? '22px'
+            : `${Math.max(3, value / maximum * 22)}px`;
+        return (
+          <div
+            className="stat-trend-item"
+            key={point.month}
+            title={`${month}: ${unavailable ? 'history unavailable' : formatValue(value)}`}
+          >
+            <span className="stat-trend-bar-track">
+              <span
+                className={`stat-trend-bar ${unavailable ? 'unavailable' : ''}`}
+                style={{ height }}
+              />
+            </span>
+            <span className="stat-trend-month">{month}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatCard({ title, value, note, Icon, tone, points, metric, formatValue }) {
+  return (
+    <article className="stat-card dashboard-metric-card">
       <div className="stat-top">
-        <div className={`stat-icon ${tone}`}>
-          <Icon size={19} />
-        </div>
-        <span className={`stat-change ${positive ? 'up' : 'down'}`}>
-          {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {change}
-        </span>
+        <div className={`stat-icon ${tone}`}><Icon size={19} /></div>
       </div>
-      <p className="stat-title">{title}</p>
+      <div className="stat-title-row">
+        <p className="stat-title">{title}</p>
+        <StatTrend points={points} metric={metric} formatValue={formatValue} />
+      </div>
       <div className="stat-bottom">
-        <div>
-          <strong>{value}</strong>
-          <span>{note}</span>
-        </div>
-        <div className={`sparkline ${tone}`}>
-          {spark.map((n, i) => (
-            <i key={i} style={{ height: `${n}%` }} />
-          ))}
-        </div>
+        <div><strong>{value}</strong><span>{note}</span></div>
       </div>
     </article>
   );
 }
 
-function DeadlineItem({ day, month, title, detail, tag, tone }) {
-  return (
-    <div className="deadline-item">
-      <div className={`date-box ${tone}`}>
-        <strong>{day}</strong>
-        <span>{month}</span>
-      </div>
-      <div className="deadline-copy">
-        <strong>{title}</strong>
-        <span>{detail}</span>
-      </div>
-      <span className={`deadline-tag ${tone}`}>{tag}</span>
-    </div>
-  );
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatCount(value) {
+  return new Intl.NumberFormat('en-IN').format(value);
+}
+
+function localDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function daysBetween(start, end) {
+  const [startYear, startMonth, startDay] = start.split('-').map(Number);
+  const [endYear, endMonth, endDay] = end.split('-').map(Number);
+  return Math.round((Date.UTC(endYear, endMonth - 1, endDay) - Date.UTC(startYear, startMonth - 1, startDay)) / 86400000);
+}
+
+function formatProjectDate(value) {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
+
+function emptyTrendPoints(teamMembers) {
+  const currentMonth = new Date();
+  return Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 5 + index, 1);
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const isCurrentMonth = index === 5;
+    return {
+      month,
+      activeProductions: null,
+      teamMembers: isCurrentMonth ? teamMembers ?? null : null,
+      totalBudget: null,
+      pendingInvoices: null,
+      overdueInvoices: null,
+    };
+  });
 }
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const storedProjects = getStoredProjects();
-  const displayProjects = storedProjects.slice(0, 4);
+  const [summary, setSummary] = useState(null);
+  const [trends, setTrends] = useState([]);
+  const [projects, setProjects] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadDashboard() {
+      const failures = [];
+      const [summaryResult, trendsResult, projectsResult] = await Promise.allSettled([
+        dashboardApi.get(),
+        dashboardApi.trends(),
+        dashboardApi.projects(),
+      ]);
+
+      if (!active) return;
+      if (summaryResult.status === 'fulfilled') {
+        setSummary(summaryResult.value);
+      } else {
+        failures.push(`Team statistics: ${summaryResult.reason.message || 'Unable to load team statistics.'}`);
+      }
+
+      if (trendsResult.status === 'fulfilled') {
+        const loadedTrends = Array.isArray(trendsResult.value) ? trendsResult.value : [];
+        setTrends(loadedTrends.length === 6
+          ? loadedTrends
+          : emptyTrendPoints(summaryResult.status === 'fulfilled' ? summaryResult.value.totalTeamMembers : null));
+      } else {
+        setTrends(emptyTrendPoints(summaryResult.status === 'fulfilled' ? summaryResult.value.totalTeamMembers : null));
+      }
+
+      if (projectsResult.status === 'fulfilled') {
+        setProjects(Array.isArray(projectsResult.value) ? projectsResult.value : []);
+      } else {
+        failures.push(`Production projects: ${projectsResult.reason.message || 'Unable to load production projects.'}`);
+      }
+
+      if (active) {
+        setErrors(failures);
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+    return () => { active = false; };
+  }, []);
+
+  const departments = summary?.membersByDepartment || [];
+  const roles = summary?.roleDistribution || [];
+  const currentTrend = trends.at(-1);
+  const today = localDateString(new Date());
+  const activeProjects = (projects || [])
+    .filter((project) => project.stage !== 'RELEASED'
+      && project.startDate <= today
+      && (!project.endDate || project.endDate >= today))
+    .sort((first, second) => (first.endDate || '9999-12-31').localeCompare(second.endDate || '9999-12-31'));
+  const upcomingDeadlines = (projects || [])
+    .filter((project) => project.stage !== 'RELEASED' && project.endDate && project.endDate >= today)
+    .sort((first, second) => first.endDate.localeCompare(second.endDate))
+    .slice(0, 4);
+  const count = (value) => value === null || value === undefined ? '—' : formatCount(value);
+  const trendPoints = trends;
+  const maxMonthlyProductions = Math.max(1, ...trendPoints.map((point) => point.activeProductions || 0));
+  const maxDepartmentMembers = useMemo(
+    () => Math.max(1, ...departments.map((department) => department.members)),
+    [departments]
+  );
 
   return (
     <>
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
-            <span className="live-dot" /> TODAY &middot; PRODUCTION OVERVIEW
-          </div>
-          <h1>
-            <span className='text-2xl text-orange-400'>L</span>oopstream DashBoard 
-          </h1>
-          <p>Here is what is happening across your production house today.</p>
+          <div className="eyebrow"><span className="live-dot" /> LIVE &middot; PRODUCTION OVERVIEW</div>
+          <h1>Loopstream Dashboard</h1>
+          <p>Production, team and finance statistics from your workspace.</p>
         </div>
-        <div className="heading-actions">
-          <button className="btn btn-light" onClick={() => window.print()}>
-            <CalendarDays size={17} /> This month
-          </button>
-          <button className="btn btn-primary" onClick={() => navigate('/projects')}>
-            <Plus size={18} /> New Production
-          </button>
-        </div>
+        <button className="btn btn-primary" onClick={() => navigate('/projects')}>
+          <Plus size={18} /> New Production
+        </button>
       </div>
 
-      <section className="stats-grid">
-        <StatCard
-          title="Active Productions"
-          value={String(storedProjects.length)}
-          change="12.5%"
-          positive
-          note="vs. last month"
-          Icon={Clapperboard}
-          tone="blue"
-          spark={[25, 38, 30, 48, 40, 61, 56, 78, 69, 88]}
-        />
-        <StatCard
-          title="Team Members"
-          value="64"
-          change="8.2%"
-          positive
-          note="vs. last month"
-          Icon={Users}
-          tone="violet"
-          spark={[38, 32, 48, 45, 57, 50, 68, 63, 75, 82]}
-        />
-        <StatCard
-          title="Total Budget"
-          value="₹84.6L"
-          change="3.1%"
-          positive={false}
-          note="vs. last month"
-          Icon={Wallet}
-          tone="cyan"
-          spark={[70, 60, 66, 52, 58, 43, 50, 38, 45, 30]}
-        />
-        <StatCard
-          title="Pending Invoices"
-          value="12"
-          change="2 overdue"
-          positive={false}
-          note="needs attention"
-          Icon={ReceiptText}
-          tone="orange"
-          spark={[30, 40, 36, 52, 47, 58, 62, 55, 75, 84]}
-        />
-      </section>
+      {errors.length > 0 && (
+        <div className="empty-state dashboard-errors" role="alert">
+          {errors.map((message) => <p key={message}>{message}</p>)}
+        </div>
+      )}
+      {loading && <div className="empty-state">Loading dashboard…</div>}
 
-      <section className="dashboard-grid">
-        <div className="panel production-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Production overview</h2>
-              <p>Track progress across your active projects.</p>
-            </div>
-            <button className="text-link" onClick={() => navigate('/projects')}>
-              View all projects <span>&nearr;</span>
-            </button>
-          </div>
-          <div className="chart-legend">
-            <span>
-              <i className="legend-blue" /> Production progress
-            </span>
-            <span>
-              <i className="legend-gray" /> Remaining
-            </span>
-            <button className="more-button" aria-label="More options">
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-          <div className="bar-chart">
-            {[
-              { m: 'May', a: 42, b: 58 },
-              { m: 'Jun', a: 58, b: 42 },
-              { m: 'Jul', a: 49, b: 51 },
-              { m: 'Aug', a: 72, b: 28 },
-              { m: 'Sep', a: 64, b: 36 },
-              { m: 'Oct', a: 82, b: 18 },
-              { m: 'Nov', a: 69, b: 31 },
-            ].map((x) => (
-              <div className="bar-column" key={x.m}>
-                <div className="bar-stack">
-                  <div className="bar-remaining" style={{ height: `${x.b}%` }} />
-                  <div className="bar-progress" style={{ height: `${x.a}%` }} />
+      {(summary || trends.length > 0 || projects !== null) && (
+        <>
+          <section className="stats-grid">
+            <StatCard
+              title="Active Productions"
+              value={count(currentTrend?.activeProductions)}
+              note="within their production dates"
+              Icon={Clapperboard}
+              tone="blue"
+              points={trendPoints}
+              metric="activeProductions"
+              formatValue={formatCount}
+            />
+            <StatCard
+              title="Team Members"
+              value={count(currentTrend?.teamMembers ?? summary?.totalTeamMembers)}
+              note={summary ? `${summary.activeTeamMembers} active` : 'Current workspace total'}
+              Icon={Users}
+              tone="violet"
+              points={trendPoints}
+              metric="teamMembers"
+              formatValue={formatCount}
+            />
+            <StatCard
+              title="Total Budget"
+              value={currentTrend?.totalBudget == null ? '—' : formatCurrency(currentTrend.totalBudget)}
+              note="allocated across productions"
+              Icon={Wallet}
+              tone="cyan"
+              points={trendPoints}
+              metric="totalBudget"
+              formatValue={formatCurrency}
+            />
+            <StatCard
+              title="Pending Invoices"
+              value={count(currentTrend?.pendingInvoices)}
+              note={currentTrend?.overdueInvoices == null ? 'Awaiting payment' : `${currentTrend.overdueInvoices} overdue`}
+              Icon={ReceiptText}
+              tone="orange"
+              points={trendPoints}
+              metric="pendingInvoices"
+              formatValue={formatCount}
+            />
+          </section>
+
+          <section className="dashboard-grid">
+            <div className="dashboard-column">
+              <div className="panel production-panel">
+                <div className="panel-head">
+                  <div><h2>Production overview</h2><p>Active productions over the last six months.</p></div>
+                  <button className="text-link" onClick={() => navigate('/projects')}>View all projects</button>
                 </div>
-                <span>{x.m}</span>
-              </div>
-            ))}
-          </div>
-          <div className="chart-footer">
-            <div>
-              <span className="footer-label">Overall completion</span>
-              <strong>68.4%</strong>
-            </div>
-            <div className="footer-trend">
-              <ArrowUpRight size={16} /> 6.8% <span>vs. last month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="panel schedule-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Upcoming deadlines</h2>
-              <p>Key dates to keep on your radar.</p>
-            </div>
-            <button className="more-button" aria-label="More options">
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-          <div className="deadline-list">
-            <DeadlineItem day="12" month="NOV" title="City of Echoes" detail="Final cut review" tag="3 days" tone="red" />
-            <DeadlineItem day="18" month="NOV" title="The Last Monsoon" detail="Episode 04 delivery" tag="9 days" tone="blue" />
-            <DeadlineItem day="24" month="NOV" title="Beyond The Frame" detail="Principal photography" tag="15 days" tone="purple" />
-            <DeadlineItem day="28" month="NOV" title="Studio North" detail="Monthly budget review" tag="19 days" tone="green" />
-          </div>
-          <button className="full-width-link" onClick={() => navigate('/projects')}>
-            View production calendar <span>&rarr;</span>
-          </button>
-        </div>
-      </section>
-
-      <section className="lower-grid">
-        <div className="panel projects-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Active projects</h2>
-              <p>Your productions, at a glance.</p>
-            </div>
-            <button className="filter-button" onClick={() => navigate('/projects')}>
-              All projects <span>&or;</span>
-            </button>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>PROJECT</th>
-                  <th>STATUS</th>
-                  <th>PROGRESS</th>
-                  <th>DEADLINE</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayProjects.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className="project-name">
-                        <div className={`project-icon ${p.tone || 'blue'}`}>
-                          <PlayCircle size={19} />
+                {trendPoints.length ? (
+                  <div className="bar-chart">
+                    {trendPoints.map((point) => {
+                      const month = new Date(`${point.month}-01T00:00:00`)
+                        .toLocaleDateString('en-IN', { month: 'short' });
+                      const percentage = point.activeProductions / maxMonthlyProductions * 100;
+                      return (
+                        <div className="bar-column" key={point.month}>
+                          <div className="bar-stack" title={`${point.activeProductions} active productions`}>
+                            <div className="bar-progress" style={{ height: `${Math.max(4, percentage)}%` }} />
+                          </div>
+                          <span>{month}</span>
                         </div>
-                        <div>
-                          <strong>{p.name}</strong>
-                          <span>{p.type} &middot; {p.platform}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status-pill ${p.tone || 'blue'}`}>{p.status}</span>
-                    </td>
-                    <td>
-                      <div className="progress-cell">
-                        <div className="progress-track">
-                          <div className={`progress-fill ${p.tone || 'blue'}`} style={{ width: `${p.progress}%` }} />
-                        </div>
-                        <span>{p.progress}%</span>
-                      </div>
-                    </td>
-                    <td className="date-cell">{p.targetDeliveryDate || 'TBD'}</td>
-                    <td>
-                      <button
-                        className="more-button"
-                        onClick={() => navigate('/projects')}
-                        aria-label={`More about ${p.name}`}
-                      >
-                        <MoreHorizontal size={19} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button className="full-width-link" onClick={() => navigate('/projects')}>
-            Explore all productions <span>&rarr;</span>
-          </button>
-        </div>
-
-        <div className="panel activity-panel">
-          <div className="panel-head">
-            <div>
-              <h2>Recent activity</h2>
-              <p>Latest updates from your team.</p>
-            </div>
-            <button className="more-button" aria-label="More options">
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-          <div className="activity-list">
-            {ACTIVITIES.map((a) => (
-              <div className="activity-item" key={a.name}>
-                <div className={`avatar avatar-${a.color}`}>{a.initial}</div>
-                <div className="activity-copy">
-                  <p>
-                    <strong>{a.name}</strong> {a.text}
-                  </p>
-                  <span>
-                    <Clock3 size={12} /> {a.time}
-                  </span>
+                      );
+                    })}
+                  </div>
+                ) : <div className="empty-state">Monthly production history is unavailable.</div>}
+                <div className="chart-footer">
+                  <div><span className="footer-label">Active productions now</span><strong>{count(currentTrend?.activeProductions)}</strong></div>
                 </div>
               </div>
-            ))}
-          </div>
-          <button className="full-width-link" onClick={() => navigate('/notifications')}>
-            View all notifications <span>&rarr;</span>
-          </button>
-        </div>
-      </section>
+
+              <div className="panel projects-panel">
+                <div className="panel-head">
+                  <div><h2>Active projects</h2><p>Productions currently within their scheduled dates.</p></div>
+                  <button className="text-link" onClick={() => navigate('/projects')}>View all projects</button>
+                </div>
+                {projects === null ? (
+                  <div className="empty-state">Loading production projects…</div>
+                ) : activeProjects.length ? (
+                  <div className="active-project-list">
+                    {activeProjects.slice(0, 5).map((project) => (
+                      <div className="active-project-item" key={project.id}>
+                        <div className="project-icon blue"><Clapperboard size={17} /></div>
+                        <div className="active-project-copy">
+                          <strong>{project.title || 'Untitled production'}</strong>
+                          <span>{String(project.stage || 'PRE_PRODUCTION').replaceAll('_', ' ')}</span>
+                        </div>
+                        <span className="active-project-date">
+                          {project.endDate ? formatProjectDate(project.endDate) : 'No end date'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <div className="empty-state">No active projects.</div>}
+              </div>
+
+              {summary && <div className="panel production-panel">
+                <div className="panel-head">
+                  <div><h2>Team by department</h2><p>Users assigned to each department.</p></div>
+                  <button className="text-link" onClick={() => navigate('/departments')}>Manage departments</button>
+                </div>
+                {departments.length ? (
+                  <div className="bar-chart">
+                    {departments.map((department) => (
+                      <div className="bar-column" key={department.id}>
+                        <div className="bar-stack" title={`${department.members} members`}>
+                          <div className="bar-progress" style={{ height: `${Math.max(4, department.members / maxDepartmentMembers * 100)}%` }} />
+                        </div>
+                        <span>{department.department}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <div className="empty-state">No departments to summarize.</div>}
+                <div className="chart-footer">
+                  <div><span className="footer-label">Unassigned members</span><strong>
+                    {Math.max(0, summary.totalTeamMembers - departments.reduce((total, department) => total + department.members, 0))}
+                  </strong></div>
+                  <button className="text-link" onClick={() => navigate('/team')}>View team</button>
+                </div>
+              </div>}
+            </div>
+
+            <div className="dashboard-column">
+              <div className="panel schedule-panel">
+                <div className="panel-head">
+                  <div><h2>Upcoming deadlines</h2><p>Scheduled production end dates.</p></div>
+                </div>
+                <div className="deadline-list">
+                  {upcomingDeadlines.map((project, index) => {
+                    const daysRemaining = daysBetween(today, project.endDate);
+                    const tone = daysRemaining <= 7 ? 'red' : index % 2 ? 'purple' : 'blue';
+                    return (
+                      <div className="deadline-item" key={project.id}>
+                        <div className={`date-box ${tone}`}>
+                          <strong>{project.endDate.slice(8, 10)}</strong>
+                          <span>{formatProjectDate(project.endDate).split(' ')[1].toUpperCase()}</span>
+                        </div>
+                        <div className="deadline-copy">
+                          <strong>{project.title || 'Untitled production'}</strong>
+                          <span>Production end date</span>
+                        </div>
+                        <span className={`deadline-tag ${tone}`}>
+                          {daysRemaining === 0 ? 'Today' : `${daysRemaining} days`}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {!upcomingDeadlines.length && projects !== null && <div className="empty-state">No upcoming deadlines.</div>}
+                  {projects === null && <div className="empty-state">Loading deadlines…</div>}
+                </div>
+                <button className="full-width-link" onClick={() => navigate('/projects')}>View all projects <span>&rarr;</span></button>
+              </div>
+
+              {summary && <div className="panel schedule-panel">
+                <div className="panel-head"><div><h2>Role distribution</h2><p>Workspace users grouped by assigned role.</p></div></div>
+                <div className="deadline-list">
+                  {roles.map((item) => {
+                    const percentage = summary.totalTeamMembers
+                      ? Math.round(item.members / summary.totalTeamMembers * 100)
+                      : 0;
+                    return (
+                      <div className="deadline-item" key={item.role}>
+                        <div className="date-box blue"><ShieldCheck size={18} /></div>
+                        <div className="deadline-copy"><strong>{item.role}</strong><span>{percentage}% of team</span></div>
+                        <span className="deadline-tag blue">{item.members}</span>
+                      </div>
+                    );
+                  })}
+                  {!roles.length && <div className="empty-state">No roles configured.</div>}
+                </div>
+                <button className="full-width-link" onClick={() => navigate('/team')}>Manage team roles <span>&rarr;</span></button>
+              </div>}
+            </div>
+          </section>
+        </>
+      )}
     </>
   );
 }

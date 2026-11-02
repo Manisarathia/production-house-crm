@@ -98,6 +98,8 @@ class Task1ApiIntegrationTests {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.message").exists());
+        mockMvc.perform(get("/api/dashboard/trends"))
+                .andExpect(status().isUnauthorized());
 
         String token = login(ADMIN_EMAIL, ADMIN_PASSWORD);
         mockMvc.perform(get("/api/dashboard").header("Authorization", bearer(token)))
@@ -109,6 +111,15 @@ class Task1ApiIntegrationTests {
                 .andExpect(jsonPath("$.totalDepartments").value(0))
                 .andExpect(jsonPath("$.membersByDepartment").isArray())
                 .andExpect(jsonPath("$.roleDistribution[0].members").value(1));
+
+        mockMvc.perform(get("/api/dashboard/trends").header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(6))
+                .andExpect(jsonPath("$[0].activeProductions").isNumber())
+                .andExpect(jsonPath("$[0].teamMembers").isNumber())
+                .andExpect(jsonPath("$[0].totalBudget").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$[5].totalBudget").value(0))
+                .andExpect(jsonPath("$[5].pendingInvoices").value(0));
     }
 
     @Test

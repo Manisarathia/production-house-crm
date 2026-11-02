@@ -44,17 +44,17 @@ import MediaImagePicker from '../components/MediaImagePicker.jsx';
 import {
   getStoredProjects,
   formatCurrency,
-  getStoredSingers,
-  saveSingers,
-  createSinger,
-  updateSinger,
-  deleteSinger,
-  getStoredDubbing,
-  saveDubbing,
-  createDubbing,
-  updateDubbing,
-  deleteDubbing,
 } from '../utils/productionStorage.js';
+
+const normalizeSessionTime = (value) => {
+  const time = value.trim();
+  if (/^(?:[01]?\d|2[0-3]):[0-5]\d$/.test(time)) return time.padStart(5, '0');
+  const match = time.match(/^(\d{1,2}):([0-5]\d)\s*(AM|PM)$/i);
+  if (!match) return null;
+  let hour = Number(match[1]) % 12;
+  if (match[3].toUpperCase() === 'PM') hour += 12;
+  return `${String(hour).padStart(2, '0')}:${match[2]}`;
+};
 
 export default function SingerDubbing() {
   const [projects] = useState(() => getStoredProjects());
@@ -94,12 +94,14 @@ export default function SingerDubbing() {
         vocalType: item.voiceType || 'Lead Vocalist (Playback)',
         language: item.languages || 'Hindi',
         project: item.voiceRange || 'The Last Monsoon',
-        musicDirector: item.musicDirector || 'Pritam Chakraborty',
-        lyricist: item.lyricist || 'Amitabh Bhattacharya',
-        duration: item.duration || '4 mins 20 secs',
-        recordingStudio: item.recordingStudio || 'YRF Studios (Studio A), Mumbai',
+        musicDirector: item.musicDirector || '—',
+        lyricist: item.lyricist || '—',
+        duration: item.duration || '—',
+        recordingStudio: item.recordingStudio || '—',
         recordingStatus: normalizeSingerStatusToFrontend(item.status) === 'Active' ? 'Mastered & Mixed' : 'In Studio',
-        fee: item.fee || 1500000,
+        fee: item.fee ?? 0,
+        isrcCode: item.isrcCode || '',
+        releaseDate: item.releaseDate || '',
         platform: item.platform || 'LoopNexus',
         image: item.image || resolveSingerPicture(item)
       }));
@@ -116,10 +118,13 @@ export default function SingerDubbing() {
         project: item.projectRef || 'The Last Monsoon',
         targetLanguage: item.language || 'Tamil',
         voiceArtist: item.singerName || 'Voice Artist',
+        singerId: item.singerId,
         dubbingDirector: item.dubbingDirector || 'Sound Lab Director',
         studioFacility: item.studio || 'Sound & Vision India, Andheri',
         sessionDate: item.scheduledAt ? item.scheduledAt.slice(0, 10) : new Date().toISOString().split('T')[0],
-        sessionTime: item.sessionTime || '10:00 AM - 02:00 PM',
+        sessionTime: item.scheduledAt && item.endsAt
+          ? `${item.scheduledAt.slice(11, 16)} - ${item.endsAt.slice(11, 16)}`
+          : '10:00 - 14:00',
         reelsOrEpisodes: item.notes || 'Episodes 1 to 4',
         status: normalizeDubbingStatusToFrontend(item.status),
         lipsyncQuality: item.lipsyncQuality || 'Passed Sync Check',
@@ -133,30 +138,10 @@ export default function SingerDubbing() {
     } catch (err) {
       console.warn('Backend fetch error in SingerDubbing:', err);
       setApiError(err.message || 'Could not connect to live backend.');
-      setSingers(getStoredSingers());
-      setDubbingSessions(getStoredDubbing());
+      setSingers([]);
+      setDubbingSessions([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSeedBackend = async () => {
-    setIsSubmitting(true);
-    try {
-      showToast('Seeding initial singers to Spring Boot backend database...', 'info');
-      const sampleSingers = [
-        { name: 'Arijit Singh', email: 'arijit@loopstream.media', phone: '+91 98200 11223', languages: 'Hindi, Bengali', voiceType: 'Lead Vocalist (Playback)', voiceRange: 'The Last Monsoon', biography: 'Rains of Sahyadri (Main Theme)', status: 'ACTIVE', active: true },
-        { name: 'Shreya Ghoshal', email: 'shreya@loopstream.media', phone: '+91 98200 44556', languages: 'Hindi, Tamil, Telugu', voiceType: 'Female Lead Playback', voiceRange: 'City of Echoes', biography: 'Echoes in the Dark', status: 'ACTIVE', active: true }
-      ];
-      for (const s of sampleSingers) {
-        await singerApi.create(s).catch(() => {});
-      }
-      await fetchBackendData();
-      showToast('Singers seeded into backend database successfully!');
-    } catch (e) {
-      showToast('Failed to seed singers: ' + e.message, 'error');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -188,7 +173,7 @@ export default function SingerDubbing() {
     duration: '4 mins 15 secs',
     recordingStudio: 'YRF Studios (Studio A), Mumbai',
     recordingStatus: 'Mastered & Mixed',
-    fee: 1500000,
+    fee: 0,
     isrcCode: '',
     releaseDate: new Date().toISOString().split('T')[0],
     platform: 'LoopNexus',
@@ -200,6 +185,7 @@ export default function SingerDubbing() {
     characterName: '',
     targetLanguage: 'Tamil',
     voiceArtist: '',
+    singerId: '',
     dubbingDirector: '',
     studioFacility: 'Sound & Vision India, Andheri',
     sessionDate: new Date().toISOString().split('T')[0],
@@ -297,6 +283,7 @@ export default function SingerDubbing() {
     } else {
       setDubbingFormData({
         ...initialDubbingForm,
+        singerId: singers[0]?.id || '',
         project: projects[0]?.name || 'The Last Monsoon',
         sessionDate: new Date().toISOString().split('T')[0]
       });
@@ -313,14 +300,19 @@ export default function SingerDubbing() {
         if (!singerFormData.songTitle.trim()) return;
         const payload = {
           name: singerFormData.singerName.trim() || singerFormData.songTitle.trim(),
-          email: ((singerFormData.singerName || 'singer').toLowerCase().replace(/[^a-z0-9]/g, '') + '@loopstream.media'),
-          phone: '+91 98200 12345',
           languages: singerFormData.language || 'Hindi',
           voiceType: singerFormData.vocalType || 'Lead Vocalist',
           voiceRange: singerFormData.project || 'The Last Monsoon',
           biography: singerFormData.songTitle || 'Original Soundtrack',
           status: 'ACTIVE',
-          active: true
+          active: true,
+          musicDirector: singerFormData.musicDirector || null,
+          lyricist: singerFormData.lyricist || null,
+          duration: singerFormData.duration || null,
+          recordingStudio: singerFormData.recordingStudio || null,
+          fee: Number(singerFormData.fee) || 0,
+          isrcCode: singerFormData.isrcCode || null,
+          releaseDate: singerFormData.releaseDate || null
         };
 
         try {
@@ -332,19 +324,31 @@ export default function SingerDubbing() {
             image: singerFormData.image || resolveSingerPicture(created)
           };
           setSingers(prev => [mappedNew, ...prev]);
-          saveSingers([mappedNew, ...getStoredSingers()]);
           showToast('Singer profile and track registered on backend successfully!');
         } catch (apiErr) {
-          console.warn('Backend create failed, storing locally:', apiErr);
-          const { all } = createSinger(singerFormData);
-          setSingers(all);
-          showToast('Track saved locally.', 'info');
+          setApiError(apiErr.message || 'Unable to create the singer profile.');
+          showToast(apiErr.message || 'Unable to create the singer profile.', 'error');
+          return;
         }
       } else {
         if (!dubbingFormData.characterName.trim()) return;
-        const scheduledAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T10:00:00';
-        const endsAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T14:00:00';
-        const singerRefId = typeof singers[0]?.id === 'number' ? singers[0].id : 1;
+        const [startTime, endTime] = (dubbingFormData.sessionTime || '').split(/\s*[-–]\s*/);
+        const start = normalizeSessionTime(startTime || '');
+        const end = normalizeSessionTime(endTime || '');
+        if (!start || !end || end <= start) {
+          setApiError('Enter a valid dubbing time range with the end later than the start.');
+          showToast('Enter a valid dubbing time range with the end later than the start.', 'error');
+          return;
+        }
+        const date = dubbingFormData.sessionDate || new Date().toISOString().split('T')[0];
+        const scheduledAt = `${date}T${start}:00`;
+        const endsAt = `${date}T${end}:00`;
+        const singerRefId = Number(dubbingFormData.singerId);
+        if (!Number.isInteger(singerRefId) || singerRefId <= 0) {
+          setApiError('Create or select a singer profile before scheduling a dubbing session.');
+          showToast('Create or select a singer profile before scheduling a dubbing session.', 'error');
+          return;
+        }
 
         const payload = {
           name: dubbingFormData.characterName.trim(),
@@ -369,13 +373,11 @@ export default function SingerDubbing() {
             image: dubbingFormData.image || resolveDubbingPicture(created)
           };
           setDubbingSessions(prev => [mappedNew, ...prev]);
-          saveDubbing([mappedNew, ...getStoredDubbing()]);
           showToast('Dubbing session scheduled on backend successfully!');
         } catch (apiErr) {
-          console.warn('Backend create failed, storing locally:', apiErr);
-          const { all } = createDubbing(dubbingFormData);
-          setDubbingSessions(all);
-          showToast('Session saved locally.', 'info');
+          setApiError(apiErr.message || 'Unable to schedule the dubbing session.');
+          showToast(apiErr.message || 'Unable to schedule the dubbing session.', 'error');
+          return;
         }
       }
       setCreateModalOpen(false);
@@ -411,6 +413,7 @@ export default function SingerDubbing() {
         characterName: item.characterName,
         targetLanguage: item.targetLanguage,
         voiceArtist: item.voiceArtist,
+        singerId: item.singerId,
         dubbingDirector: item.dubbingDirector,
         studioFacility: item.studioFacility,
         sessionDate: item.sessionDate,
@@ -436,14 +439,19 @@ export default function SingerDubbing() {
       if (activeTab === 'singers') {
         const payload = {
           name: singerFormData.singerName.trim() || singerFormData.songTitle.trim(),
-          email: ((singerFormData.singerName || 'singer').toLowerCase().replace(/[^a-z0-9]/g, '') + '@loopstream.media'),
-          phone: '+91 98200 12345',
           languages: singerFormData.language || 'Hindi',
           voiceType: singerFormData.vocalType || 'Lead Vocalist',
           voiceRange: singerFormData.project || 'The Last Monsoon',
           biography: singerFormData.songTitle || 'Original Soundtrack',
           status: 'ACTIVE',
-          active: true
+          active: true,
+          musicDirector: singerFormData.musicDirector || null,
+          lyricist: singerFormData.lyricist || null,
+          duration: singerFormData.duration || null,
+          recordingStudio: singerFormData.recordingStudio || null,
+          fee: Number(singerFormData.fee) || 0,
+          isrcCode: singerFormData.isrcCode || null,
+          releaseDate: singerFormData.releaseDate || null
         };
 
         if (isNumericId) {
@@ -452,20 +460,33 @@ export default function SingerDubbing() {
             setSingers(prev => prev.map(s => (s.id === editItem.id ? { ...s, ...singerFormData } : s)));
             showToast('Singer record updated successfully on backend!');
           } catch (apiErr) {
-            console.warn('Backend update failed, updating locally:', apiErr);
-            const updated = updateSinger(editItem.id, singerFormData);
-            setSingers(updated);
-            showToast('Record updated locally.', 'info');
+            setApiError(apiErr.message || 'Unable to update the singer profile.');
+            showToast(apiErr.message || 'Unable to update the singer profile.', 'error');
+            return;
           }
         } else {
-          const updated = updateSinger(editItem.id, singerFormData);
-          setSingers(updated);
-          showToast('Record updated locally.');
+          setApiError('This singer does not have a backend record ID.');
+          showToast('This singer cannot be updated because it has no backend record ID.', 'error');
+          return;
         }
       } else {
-        const scheduledAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T10:00:00';
-        const endsAt = (dubbingFormData.sessionDate || new Date().toISOString().split('T')[0]) + 'T14:00:00';
-        const singerRefId = typeof singers[0]?.id === 'number' ? singers[0].id : 1;
+        const [startTime, endTime] = (dubbingFormData.sessionTime || '').split(/\s*[-–]\s*/);
+        const start = normalizeSessionTime(startTime || '');
+        const end = normalizeSessionTime(endTime || '');
+        if (!start || !end || end <= start) {
+          setApiError('Enter a valid dubbing time range with the end later than the start.');
+          showToast('Enter a valid dubbing time range with the end later than the start.', 'error');
+          return;
+        }
+        const date = dubbingFormData.sessionDate || new Date().toISOString().split('T')[0];
+        const scheduledAt = `${date}T${start}:00`;
+        const endsAt = `${date}T${end}:00`;
+        const singerRefId = Number(dubbingFormData.singerId);
+        if (!Number.isInteger(singerRefId) || singerRefId <= 0) {
+          setApiError('Select a singer profile before saving the dubbing session.');
+          showToast('Select a singer profile before saving the dubbing session.', 'error');
+          return;
+        }
 
         const payload = {
           name: dubbingFormData.characterName.trim(),
@@ -487,15 +508,14 @@ export default function SingerDubbing() {
             setDubbingSessions(prev => prev.map(d => (d.id === editItem.id ? { ...d, ...dubbingFormData } : d)));
             showToast('Dubbing session updated successfully on backend!');
           } catch (apiErr) {
-            console.warn('Backend update failed, updating locally:', apiErr);
-            const updated = updateDubbing(editItem.id, dubbingFormData);
-            setDubbingSessions(updated);
-            showToast('Session updated locally.', 'info');
+            setApiError(apiErr.message || 'Unable to update the dubbing session.');
+            showToast(apiErr.message || 'Unable to update the dubbing session.', 'error');
+            return;
           }
         } else {
-          const updated = updateDubbing(editItem.id, dubbingFormData);
-          setDubbingSessions(updated);
-          showToast('Session updated locally.');
+          setApiError('This dubbing session does not have a backend record ID.');
+          showToast('This session cannot be updated because it has no backend record ID.', 'error');
+          return;
         }
       }
       setEditItem(null);
@@ -518,15 +538,14 @@ export default function SingerDubbing() {
             setSingers(prev => prev.filter(s => s.id !== deleteTarget.id));
             showToast('Singer track deleted from backend.');
           } catch (apiErr) {
-            console.warn('Backend delete failed, removing locally:', apiErr);
-            const updated = deleteSinger(deleteTarget.id);
-            setSingers(updated);
-            showToast('Track removed locally.', 'info');
+            setApiError(apiErr.message || 'Unable to delete the singer profile.');
+            showToast(apiErr.message || 'Unable to delete the singer profile.', 'error');
+            return;
           }
         } else {
-          const updated = deleteSinger(deleteTarget.id);
-          setSingers(updated);
-          showToast('Track deleted successfully.');
+          setApiError('This singer does not have a backend record ID.');
+          showToast('This singer cannot be deleted because it has no backend record ID.', 'error');
+          return;
         }
       } else {
         if (isNumericId) {
@@ -535,15 +554,14 @@ export default function SingerDubbing() {
             setDubbingSessions(prev => prev.filter(d => d.id !== deleteTarget.id));
             showToast('Dubbing session deleted from backend.');
           } catch (apiErr) {
-            console.warn('Backend delete failed, removing locally:', apiErr);
-            const updated = deleteDubbing(deleteTarget.id);
-            setDubbingSessions(updated);
-            showToast('Session removed locally.', 'info');
+            setApiError(apiErr.message || 'Unable to delete the dubbing session.');
+            showToast(apiErr.message || 'Unable to delete the dubbing session.', 'error');
+            return;
           }
         } else {
-          const updated = deleteDubbing(deleteTarget.id);
-          setDubbingSessions(updated);
-          showToast('Session deleted successfully.');
+          setApiError('This dubbing session does not have a backend record ID.');
+          showToast('This session cannot be deleted because it has no backend record ID.', 'error');
+          return;
         }
       }
 
@@ -1120,6 +1138,9 @@ export default function SingerDubbing() {
           </button>
         </div>
       </div>
+
+      {apiError && <div className="empty-state" role="alert">{apiError}</div>}
+      {loading && <div className="empty-state">Loading singers and dubbing sessions…</div>}
 
       {/* Mini Stats KPI */}
       <div className="mini-stats">
@@ -2079,12 +2100,21 @@ export default function SingerDubbing() {
                   </label>
                   <label>
                     Voice Talent / Artist *
-                    <input
+                    <select
                       required
-                      placeholder="e.g. P. Ravi Shankar"
-                      value={dubbingFormData.voiceArtist}
-                      onChange={e => setDubbingFormData({ ...dubbingFormData, voiceArtist: e.target.value })}
-                    />
+                      value={dubbingFormData.singerId}
+                      onChange={e => {
+                        const singer = singers.find(item => String(item.id) === e.target.value);
+                        setDubbingFormData({
+                          ...dubbingFormData,
+                          singerId: e.target.value,
+                          voiceArtist: singer?.singerName || ''
+                        });
+                      }}
+                    >
+                      <option value="">Select a singer</option>
+                      {singers.map(singer => <option key={singer.id} value={singer.id}>{singer.singerName}</option>)}
+                    </select>
                   </label>
                   <label>
                     Dubbing Director
@@ -2276,11 +2306,21 @@ export default function SingerDubbing() {
                   </label>
                   <label>
                     Voice Talent
-                    <input
+                    <select
                       required
-                      value={dubbingFormData.voiceArtist}
-                      onChange={e => setDubbingFormData({ ...dubbingFormData, voiceArtist: e.target.value })}
-                    />
+                      value={dubbingFormData.singerId}
+                      onChange={e => {
+                        const singer = singers.find(item => String(item.id) === e.target.value);
+                        setDubbingFormData({
+                          ...dubbingFormData,
+                          singerId: e.target.value,
+                          voiceArtist: singer?.singerName || ''
+                        });
+                      }}
+                    >
+                      <option value="">Select a singer</option>
+                      {singers.map(singer => <option key={singer.id} value={singer.id}>{singer.singerName}</option>)}
+                    </select>
                   </label>
                 </div>
 

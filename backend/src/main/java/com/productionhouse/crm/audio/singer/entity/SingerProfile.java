@@ -7,4 +7,11 @@ public class SingerProfile extends Task5RecordBase{
 @Column(name="language",length=500) private String languages;
 @Column(name="voice_type",length=80) private String voiceType;
 @Column(name="voice_range",length=80) private String voiceRange;
+@Column(name="music_director",length=200) private String musicDirector;
+@Column(length=200) private String lyricist;
+@Column(name="track_duration",length=80) private String duration;
+@Column(name="recording_studio",length=200) private String recordingStudio;
+@Column(name="artist_fee",precision=19,scale=2) private java.math.BigDecimal fee;
+@Column(name="isrc_code",length=40) private String isrcCode;
+@Column(name="release_date") private java.time.LocalDate releaseDate;
 }
