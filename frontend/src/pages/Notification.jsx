@@ -39,6 +39,7 @@ export default function NotificationsPage() {
     try {
       setActionError('');
       await action();
+      window.dispatchEvent(new Event('notifications:changed'));
     } catch (err) {
       setActionError(err.message);
     }
