@@ -287,7 +287,13 @@ export default function VendorsEquipment() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredVendors.map(v => (
+                                {filteredVendors.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: 'center', color: '#a7a09a', padding: '42px 20px' }}>
+                                            {q.trim() ? 'No vendors match your search.' : 'No vendor records found. Click Add vendor to create one.'}
+                                        </td>
+                                    </tr>
+                                ) : filteredVendors.map(v => (
                                     <tr key={v.id}>
                                         <td><div className="project-name"><div className="department-icon blue"><Truck size={18} /></div><div><strong>{v.name}</strong></div></div></td>
                                         <td>
@@ -320,7 +326,11 @@ export default function VendorsEquipment() {
                     </div>
                 ) : (
                     <div className="resource-cards">
-                        {filteredEquipment.map(x => (
+                        {filteredEquipment.length === 0 ? (
+                            <div style={{ gridColumn: '1 / -1', width: '100%', textAlign: 'center', color: '#a7a09a', padding: '48px 20px', boxSizing: 'border-box' }}>
+                                {q.trim() ? 'No equipment matches your search.' : 'No equipment records found. Click Add equipment to create one.'}
+                            </div>
+                        ) : filteredEquipment.map(x => (
                             <div
                                 className="resource-card"
                                 key={x.id}
@@ -517,4 +527,3 @@ export default function VendorsEquipment() {
         </>
     );
 }
-

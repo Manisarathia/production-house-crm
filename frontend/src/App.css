@@ -2520,20 +2520,21 @@ body {
 /* Projects & Productions + Movies & Web Series Module Extensions */
 .production-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 16px;
-    padding: 0 20px 20px
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    align-items: stretch;
 }
 
 .prod-card {
-    border: 1px solid #303030;
-    background: #191919;
-    border-radius: 14px;
-    padding: 18px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    transition: transform .18s ease, border-color .18s ease
+    height: 100%;
+    overflow: hidden;
+    padding: 18px !important;
+    background: #191919;
+    border: 1px solid #303030;
+    border-radius: 12px;
+    box-sizing: border-box;
 }
 
 .prod-card:hover {
@@ -2615,13 +2616,8 @@ body {
 }
 
 .prod-progress-block {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    background: #202020;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #2d2d2d
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 .prod-progress-head {
@@ -2659,13 +2655,12 @@ body {
 }
 
 .prod-card-foot {
+    margin-top: auto !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid #2c2c2c;
-    padding-top: 12px;
-    margin-top: auto;
-    gap: 10px
+    padding-top: 14px;
+    border-top: 1px solid #2a2a2a;
 }
 
 .prod-foot-crew {
@@ -2833,4 +2828,29 @@ body {
     color: #ff8989;
     display: block;
     margin-bottom: 4px
+}
+
+.prod-card-poster-wrap {
+    position: relative;
+    width: calc(100% + 36px);
+    margin: -18px -18px 14px -18px !important;
+    aspect-ratio: 16 / 11;
+    overflow: hidden;
+    background: #111;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+}
+
+.prod-card-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+    filter: brightness(0.85) contrast(1.08);
+}
+
+.prod-card:hover .prod-card-poster-img {
+    transform: scale(1.08);
+    filter: brightness(1.02) contrast(1.15);
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Users,
   UserPlus,
@@ -24,37 +24,47 @@ import {
   AlertCircle,
   Film
 } from 'lucide-react';
-import {
-  getStoredCastCrew,
-  getStoredProjects,
-  createCastCrew,
-  updateCastCrew,
-  deleteCastCrew,
-  formatCurrency
-} from '../utils/productionStorage.js';
+import { list, create, update, remove, formatCurrency } from '../utils/productionApi.js';
+const listCrew = () => list('crew'); const listProjects = () => list('projects');
+const listMedia = () => list('media-items');
+const createCrew = (data) => create('crew', data);
+const updateCrew = (id, data) => update('crew', id, data);
+const removeCrew = (id) => remove('crew', id);
 
 export default function CastCrewManagement() {
-  const [castCrew, setCastCrew] = useState(() => getStoredCastCrew());
-  const [projects] = useState(() => getStoredProjects());
+  const [castCrew, setCastCrew] = useState([]);
+  const [mediaItems, setMediaItems] = useState([]);
+  const [apiError, setApiError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const reload = async () => {
+    try {
+      setApiError('');
+      const [crew, projectRows, mediaRows] = await Promise.all([listCrew(), listProjects(), listMedia()]);
+      setCastCrew(crew);
+      setProjects(projectRows);
+      setMediaItems(mediaRows);
+    } catch (e) { setApiError(e.message); }
+  };
+  useEffect(() => { reload(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL'); // 'ALL' | 'Cast' | 'Crew'
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [deptFilter, setDeptFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
+  const [viewMode, setViewMode] = useState('grid');
 
-  // Modals state
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalMember, setEditModalMember] = useState(null);
   const [detailModalMember, setDetailModalMember] = useState(null);
   const [deleteTargetMember, setDeleteTargetMember] = useState(null);
 
-  // Form State
   const initialFormState = {
     name: '',
     category: 'Cast',
     department: 'Acting / Cast',
     role: '',
-    project: projects[0]?.name || 'The Last Monsoon',
+    project: projects[0]?.title || '',
     email: '',
     phone: '',
     rate: '',
@@ -65,12 +75,12 @@ export default function CastCrewManagement() {
     agent: 'Direct',
     daysBooked: 25,
     dietaryNotes: 'Standard',
-    tone: 'blue'
+    tone: 'blue',
+    mediaItemId: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // Available departments
   const departmentsList = [
     'ALL',
     'Acting / Cast',
@@ -83,7 +93,6 @@ export default function CastCrewManagement() {
     'Editing'
   ];
 
-  // Filtered List
   const filteredList = useMemo(() => {
     return castCrew.filter(item => {
       const matchSearch =
@@ -104,23 +113,23 @@ export default function CastCrewManagement() {
     });
   }, [castCrew, searchQuery, categoryFilter, deptFilter, statusFilter]);
 
-  // KPI Metrics
   const totalCount = castCrew.length;
   const castCount = castCrew.filter(c => c.category === 'Cast').length;
   const onSetCount = castCrew.filter(c => c.status === 'On Set').length;
   const contractsSignedCount = castCrew.filter(c => c.contractStatus === 'Contract Signed').length;
 
-  // Open Create
   const handleOpenCreate = () => {
+    setFormError('');
     setFormData({
       ...initialFormState,
-      project: projects[0]?.name || 'The Last Monsoon'
+      project: projects[0]?.title || '',
+      mediaItemId: ''
     });
     setCreateModalOpen(true);
   };
 
-  // Open Edit
   const handleOpenEdit = (member) => {
+    setFormError('');
     setFormData({
       name: member.name,
       category: member.category,
@@ -137,52 +146,80 @@ export default function CastCrewManagement() {
       agent: member.agent || 'Direct',
       daysBooked: member.daysBooked || 0,
       dietaryNotes: member.dietaryNotes || 'Standard',
-      tone: member.tone || 'blue'
+      tone: member.tone || 'blue',
+      mediaItemId: member.mediaItemId || ''
     });
     setEditModalMember(member);
   };
 
-  // Submit Create
-  const handleCreateSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    const { all } = createCastCrew({
-      ...formData,
-      rate: Number(formData.rate),
-      daysBooked: Number(formData.daysBooked)
-    });
-
-    setCastCrew(all);
-    setCreateModalOpen(false);
+  const normalizedPhone = () => {
+    const digits = String(formData.phone ?? '').replace(/\D/g, '');
+    return digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
+  };
+  const validatePhone = () => {
+    if (!/^[0-9]{10}$/.test(normalizedPhone())) {
+      setFormError('Phone number is required. Enter a valid 10-digit Indian mobile number.');
+      return false;
+    }
+    setFormError('');
+    return true;
   };
 
-  // Submit Edit
-  const handleEditSubmit = (e) => {
+  const payloadFromForm = () => ({
+    ...formData,
+    phone: normalizedPhone(),
+    rate: Number(formData.rate || 0),
+    daysBooked: Number(formData.daysBooked || 0),
+    mediaItemId: formData.mediaItemId || null
+  });
+
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (!editModalMember || !formData.name.trim()) return;
+    if (!formData.name.trim() || !validatePhone()) return;
+    setBusy(true);
+    setFormError('');
+    try {
+      await createCrew(payloadFromForm());
+      await reload(); setCreateModalOpen(false);
+    }
+    catch (err) {
+      setFormError(err.message || 'Unable to save member.');
+    }
+    finally {
+      setBusy(false);
 
-    const updated = updateCastCrew(editModalMember.id, {
-      ...formData,
-      rate: Number(formData.rate),
-      daysBooked: Number(formData.daysBooked)
-    });
-
-    setCastCrew(updated);
-    setEditModalMember(null);
-    if (detailModalMember && detailModalMember.id === editModalMember.id) {
-      setDetailModalMember(updated.find(m => m.id === editModalMember.id));
     }
   };
 
-  // Delete
-  const handleConfirmDelete = () => {
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editModalMember || !formData.name.trim() || !validatePhone()) return;
+    setBusy(true); setFormError('');
+    try {
+      await updateCrew(editModalMember.id, payloadFromForm());
+      await reload(); setEditModalMember(null); setDetailModalMember(null);
+    } catch (err) {
+      setFormError(err.message || 'Unable to update member.');
+    }
+    finally {
+      setBusy(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
     if (!deleteTargetMember) return;
-    const updated = deleteCastCrew(deleteTargetMember.id);
-    setCastCrew(updated);
-    setDeleteTargetMember(null);
-    if (detailModalMember && detailModalMember.id === deleteTargetMember.id) {
+    setBusy(true); setApiError('');
+    try {
+      await removeCrew(deleteTargetMember.id);
+      await reload();
+      setDeleteTargetMember(null);
       setDetailModalMember(null);
+    }
+    catch (err) {
+      setApiError(err.message);
+    }
+    finally {
+      setBusy(false);
     }
   };
 
@@ -205,7 +242,6 @@ export default function CastCrewManagement() {
 
   return (
     <>
-      {/* Premium Cinematic Hover & Interaction Styles for Cast & Crew */}
       <style>{`
         /* Smooth Scrolling & Refined Scrollbars */
         html {
@@ -383,8 +419,8 @@ export default function CastCrewManagement() {
         .page-heading h1 { font-size: 29px !important; }
         .page-heading p { font-size: 13.5px !important; }
         .eyebrow { font-size: 10.5px !important; letter-spacing: 1.4px !important; }
-        .mini-stat span { font-size: 11.5px !important; color: #a7a09a; }
-        .mini-stat strong { font-size: 24px !important; color: #f4f0eb; }
+        .mini-stat span { font-size: 11.5px !important; }
+        .mini-stat strong { font-size: 24px !important; }
         .panel-head h2 { font-size: 16px !important; }
         .panel-head p { font-size: 12px !important; }
         .segmented button { font-size: 11px !important; padding: 7px 11px !important; }
@@ -416,6 +452,7 @@ export default function CastCrewManagement() {
         .detail-item strong { font-size: 13px !important; }
       `}</style>
 
+      {apiError && <div role="alert" style={{ padding: 12, marginBottom: 12, background: '#43211e', color: '#fff' }}>{apiError}</div>}
       {/* Top Heading */}
       <div className="page-heading">
         <div>
@@ -452,7 +489,6 @@ export default function CastCrewManagement() {
         </div>
       </div>
 
-      {/* Main Panel */}
       <div className="panel page-panel">
         <div className="panel-head" style={{ flexWrap: 'wrap', gap: '14px' }}>
           <div>
@@ -461,7 +497,6 @@ export default function CastCrewManagement() {
           </div>
 
           <div className="inline-actions" style={{ flexWrap: 'wrap' }}>
-            {/* View Mode Toggle */}
             <div className="segmented">
               <button
                 type="button"
@@ -489,7 +524,6 @@ export default function CastCrewManagement() {
               </button>
             </div>
 
-            {/* Search */}
             <label className="table-search">
               <Search size={16} />
               <input
@@ -502,9 +536,7 @@ export default function CastCrewManagement() {
           </div>
         </div>
 
-        {/* Filter Bar */}
         <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Category Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>
               CATEGORY:
@@ -523,7 +555,6 @@ export default function CastCrewManagement() {
             </div>
           </div>
 
-          {/* Department Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>
               DEPARTMENT:
@@ -542,7 +573,6 @@ export default function CastCrewManagement() {
             </div>
           </div>
 
-          {/* Status Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#8a96a8', letterSpacing: '1px' }}>
               STATUS:
@@ -562,7 +592,6 @@ export default function CastCrewManagement() {
           </div>
         </div>
 
-        {/* Cards Grid */}
         {viewMode === 'grid' && (
           <div className="production-grid">
             {filteredList.map(member => {
@@ -576,7 +605,6 @@ export default function CastCrewManagement() {
 
               return (
                 <div className="prod-card" key={member.id}>
-                  {/* Card Top */}
                   <div className="prod-card-top">
                     <div className="prod-card-title-group">
                       <div className={`avatar avatar-${member.category === 'Cast' ? 'blue' : 'orange'}`} style={{ width: '38px', height: '38px', fontSize: '12px' }}>
@@ -590,7 +618,6 @@ export default function CastCrewManagement() {
                     <span className={`status-pill ${tone}`}>{member.status}</span>
                   </div>
 
-                  {/* Character/Role Box */}
                   <div style={{ background: '#202020', padding: '10px 12px', borderRadius: '8px', border: '1px solid #2d2d2d' }}>
                     <span style={{ fontSize: '8.5px', color: '#a7a09a', display: 'block', marginBottom: '2px' }}>
                       ASSIGNED DESIGNATION / ROLE
@@ -598,7 +625,6 @@ export default function CastCrewManagement() {
                     <strong style={{ fontSize: '11px', color: '#f4f0eb' }}>{member.role}</strong>
                   </div>
 
-                  {/* Badges */}
                   <div className="prod-meta-tags">
                     <span className="badge-tag platform">{member.project}</span>
                     <span className="badge-tag rating">{member.guild}</span>
@@ -607,7 +633,6 @@ export default function CastCrewManagement() {
                     </span>
                   </div>
 
-                  {/* Compensation & Shoot Days */}
                   <div className="prod-finance-row">
                     <div className="prod-finance-item">
                       <span>Rate ({member.rateType})</span>
@@ -619,7 +644,6 @@ export default function CastCrewManagement() {
                     </div>
                   </div>
 
-                  {/* Card Foot */}
                   <div className="prod-card-foot">
                     <div className="prod-foot-crew">
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -661,7 +685,6 @@ export default function CastCrewManagement() {
           </div>
         )}
 
-        {/* List Grid View */}
         {viewMode === 'list' && (
           <div className="production-list-grid" style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {filteredList.map(member => {
@@ -689,7 +712,6 @@ export default function CastCrewManagement() {
                     flexWrap: 'wrap'
                   }}
                 >
-                  {/* Left: Avatar + Name + Category + Project */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '13px', minWidth: '220px', flex: '1.2' }}>
                     <div className={`avatar avatar-${member.category === 'Cast' ? 'blue' : 'orange'}`} style={{ width: '36px', height: '36px', fontSize: '11px', flexShrink: 0 }}>
                       {initials}
@@ -710,14 +732,12 @@ export default function CastCrewManagement() {
                     </div>
                   </div>
 
-                  {/* Role / Character */}
                   <div style={{ minWidth: '150px', flex: '1' }}>
                     <span style={{ display: 'block', fontSize: '10.5px', color: '#8a96a8' }}>ASSIGNED DESIGNATION</span>
                     <strong style={{ fontSize: '13px', color: '#f4f0eb', display: 'block' }}>{member.role}</strong>
                     <span className="badge-tag rating" style={{ marginTop: '3px', display: 'inline-block' }}>{member.guild}</span>
                   </div>
 
-                  {/* Compensation & Contract */}
                   <div style={{ minWidth: '130px', flex: '0.9' }}>
                     <span style={{ display: 'block', fontSize: '10.5px', color: '#8a96a8' }}>RATE / CONTRACT</span>
                     <strong style={{ fontSize: '13px', color: '#67d7a3', display: 'block' }}>{formatCurrency(member.rate)}</strong>
@@ -726,14 +746,12 @@ export default function CastCrewManagement() {
                     </span>
                   </div>
 
-                  {/* Representative / Contact */}
                   <div style={{ minWidth: '130px', flex: '0.8' }}>
                     <span style={{ display: 'block', fontSize: '10.5px', color: '#8a96a8' }}>REPRESENTATIVE</span>
                     <div style={{ fontSize: '12px', color: '#ded7d0', fontWeight: 600 }}>{member.agent || 'Direct'}</div>
                     <div style={{ fontSize: '10.5px', color: '#8a96a8' }}>{member.daysBooked} Days Booked</div>
                   </div>
 
-                  {/* Actions */}
                   <div className="prod-card-actions" style={{ flexShrink: 0 }}>
                     <button
                       className="icon-button"
@@ -764,7 +782,6 @@ export default function CastCrewManagement() {
           </div>
         )}
 
-        {/* Tabular View */}
         {viewMode === 'table' && (
           <div className="table-wrap">
             <table>
@@ -881,7 +898,6 @@ export default function CastCrewManagement() {
         )}
       </div>
 
-      {/* ================= MODAL: CREATE MEMBER ================= */}
       {createModalOpen && (
         <div className="modal-backdrop" onClick={() => setCreateModalOpen(false)}>
           <form
@@ -971,8 +987,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name} ({p.code})
+                    <option key={p.id} value={p.title}>
+                      {p.title}
                     </option>
                   ))}
                   <option value="General Roster">General Roster (Unassigned)</option>
@@ -1077,9 +1093,12 @@ export default function CastCrewManagement() {
                 Emergency / Direct Phone
                 <input
                   value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 98200 00000"
+                  onChange={e => { setFormData({ ...formData, phone: e.target.value }); setFormError(''); }}
+                  placeholder="9876543210"
+                  inputMode="tel"
+                  required
                 />
+                {formError && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{formError}</span>}
               </label>
             </div>
 
@@ -1108,7 +1127,6 @@ export default function CastCrewManagement() {
         </div>
       )}
 
-      {/* ================= MODAL: EDIT MEMBER ================= */}
       {editModalMember && (
         <div className="modal-backdrop" onClick={() => setEditModalMember(null)}>
           <form
@@ -1189,8 +1207,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name} ({p.code})
+                    <option key={p.id} value={p.title}>
+                      {p.title}
                     </option>
                   ))}
                   <option value="General Roster">General Roster</option>
@@ -1291,8 +1309,11 @@ export default function CastCrewManagement() {
                 Direct Phone
                 <input
                   value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => { setFormData({ ...formData, phone: e.target.value }); setFormError(''); }}
+                  inputMode="tel"
+                  required
                 />
+                {formError && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{formError}</span>}
               </label>
             </div>
 
@@ -1320,7 +1341,6 @@ export default function CastCrewManagement() {
         </div>
       )}
 
-      {/* ================= MODAL: VIEW DETAILS ================= */}
       {detailModalMember && (
         <div className="modal-backdrop" onClick={() => setDetailModalMember(null)}>
           <div
@@ -1355,7 +1375,6 @@ export default function CastCrewManagement() {
               </button>
             </div>
 
-            {/* Role & Assignment */}
             <div className="detail-section">
               <h4>Role & Production Assignment</h4>
               <div className="detail-grid">
@@ -1380,7 +1399,6 @@ export default function CastCrewManagement() {
               </div>
             </div>
 
-            {/* Compensation & Contract */}
             <div className="detail-section">
               <h4>Financial Agreement & Legal Terms</h4>
               <div className="detail-grid">
@@ -1407,7 +1425,6 @@ export default function CastCrewManagement() {
               </div>
             </div>
 
-            {/* Logistics & Contact */}
             <div className="detail-section">
               <h4>Logistics & Emergency Contacts</h4>
               <div className="detail-grid">
@@ -1430,7 +1447,6 @@ export default function CastCrewManagement() {
               </div>
             </div>
 
-            {/* Modal Actions */}
             <div className="modal-actions" style={{ marginTop: '10px' }}>
               <button
                 type="button"
@@ -1497,4 +1513,3 @@ export default function CastCrewManagement() {
     </>
   );
 }
-

@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Wallet, X } from 'lucide-react';
 
+const PROJECTS_API = 'http://localhost:8080/api/production/projects';
+
 const API_BASE_URL = 'http://localhost:8080/api/finance/budgets';
 
 const money = n => '₹' + Number(n).toLocaleString('en-IN');
 
 export default function BudgetExpenses() {
+    const [projects, setProjects] = useState([]);
+    const [projectLoadError, setProjectLoadError] = useState('');
+    useEffect(() => {
+        fetch(PROJECTS_API).then(async r => {
+            if (!r.ok) throw new Error('Projects API returned ' + r.status);
+            return r.json();
+        })
+            .then(data => setProjects(Array.isArray(data) ? data : []))
+            .catch(err => {
+                console.error(err);
+                setProjectLoadError('Unable to load production projects');
+            });
+    }, []);
     const [expenses, setExpenses] = useState([]);
     const [q, setQ] = useState('');
     const [show, setShow] = useState(false);
@@ -15,7 +30,7 @@ export default function BudgetExpenses() {
     const [totalSpent, setTotalSpent] = useState(0);
 
     const [title, setTitle] = useState('');
-    const [projectId, setProjectId] = useState('proj-uuid-101');
+    const [projectId, setProjectId] = useState('');
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState('Production');
     const [loggedBy, setLoggedBy] = useState('Production Manager');
@@ -35,9 +50,10 @@ export default function BudgetExpenses() {
     const fetchBudgetDetails = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/project/${projectId}`);
+            if (response.status === 404) { setTotalAllocated(0); setTotalSpent(0); return; }
             if (response.ok) {
                 const data = await response.json();
-                setTotalAllocated(Number(data.totalAllocated));
+                setTotalAllocated(Number(data.totalAllocated || 0));
                 setTotalSpent(Number(data.totalSpent));
             }
         } catch (error) {
@@ -48,7 +64,8 @@ export default function BudgetExpenses() {
     useEffect(() => {
         const syncDataGrid = async () => {
             setLoading(true);
-            await Promise.all([fetchExpenses(), fetchBudgetDetails()]);
+            await fetchExpenses();
+            if (projectId) await fetchBudgetDetails();
             setLoading(false);
         };
         syncDataGrid();
@@ -56,6 +73,7 @@ export default function BudgetExpenses() {
 
     async function submitExpense(e) {
         e.preventDefault();
+        if (!projectId) { alert("Select a production project first."); return; }
 
         const payload = {
             amount: parseFloat(amount),
@@ -79,6 +97,7 @@ export default function BudgetExpenses() {
             if (response.ok) {
                 await fetchExpenses();
                 setShow(false);
+                await fetchBudgetDetails();
                 setTitle('');
                 setAmount('');
             } else {
@@ -96,7 +115,8 @@ export default function BudgetExpenses() {
             });
 
             if (response.ok) {
-                await Promise.all([fetchExpenses(), fetchBudgetDetails()]);
+                await fetchExpenses();
+                if (projectId) await fetchBudgetDetails();
             } else {
                 alert("Status transaction execution failed.");
             }
@@ -230,6 +250,7 @@ export default function BudgetExpenses() {
                 </div>
             </div>
 
+            {projectLoadError && <p role="alert">{projectLoadError}</p>}
             {show && (
                 <div className="modal-backdrop" onClick={() => setShow(false)}>
                     <form className="modal-card" onSubmit={submitExpense} onClick={e => e.stopPropagation()}>
@@ -245,10 +266,9 @@ export default function BudgetExpenses() {
 
                         <label>
                             Project Context Selection Key
-                            <select value={projectId} onChange={e => setProjectId(e.target.value)}>
-                                <option value="proj-uuid-101">The Last Monsoon (ID: 101)</option>
-                                <option value="proj-uuid-102">City of Echoes (ID: 102)</option>
-                                <option value="proj-uuid-103">Beyond The Frame (ID: 103)</option>
+                            <select required value={projectId} onChange={e => setProjectId(e.target.value)}>
+                                <option value="">-- Select production project --</option>
+                                {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                             </select>
                         </label>
 

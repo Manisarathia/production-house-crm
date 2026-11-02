@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, ReceiptText, X, Download } from 'lucide-react';
 
+const PROJECTS_API = 'http://localhost:8080/api/production/projects';
+
 const API_BASE_URL = 'http://localhost:8080/api/finance/invoices';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 export default function InvoicesPayments() {
+  const [projects, setProjects] = useState([]);
+  const [projectLoadError, setProjectLoadError] = useState('');
+  useEffect(() => {
+    fetch(PROJECTS_API).then(async r => {
+      if (!r.ok) throw new Error('Projects API returned ' + r.status);
+      return r.json();
+    })
+      .then(data => setProjects(Array.isArray(data) ? data : []))
+      .catch(err => {
+        console.error(err);
+        setProjectLoadError('Unable to load production projects');
+      });
+  }, []);
   const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
   const [show, setShow] = useState(false);
@@ -13,23 +28,23 @@ export default function InvoicesPayments() {
 
   const [issuedTo, setIssuedTo] = useState('');
   const [amountDue, setAmountDue] = useState('');
-  const [projectId, setProjectId] = useState('ALL');
+  const [projectId, setProjectId] = useState('');
 
 
   const fetchInvoices = async () => {
-  try {
-    const response = await fetch(API_BASE_URL); 
-    if (response.ok) {
-      const data = await response.json();
-      console.log("Live API Data Array payload:", data); // Check your browser inspector console!
-      setItems(data);
-    } else {
-      console.error("Failed to query invoice logs matrix from server.");
+    try {
+      const response = await fetch(API_BASE_URL);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Live API Data Array payload:", data);
+        setItems(data);
+      } else {
+        console.error("Failed to query invoice logs matrix from server.");
+      }
+    } catch (error) {
+      console.error("Network interface connection failure fetching invoices:", error);
     }
-  } catch (error) {
-    console.error("Network interface connection failure fetching invoices:", error);
-  }
-};
+  };
 
 
   useEffect(() => {
@@ -42,45 +57,45 @@ export default function InvoicesPayments() {
   }, []);
 
   async function addInvoice(e) {
-  e.preventDefault();
-  
-  const currentYear = new Date().getFullYear();
-  const generatedInvoiceNum = `INV-${currentYear}-${String(items.length + 42).padStart(3, '0')}`;
+    e.preventDefault();
 
-  // Use a local constant for the payload calculation to avoid stale states
-  const targetProject = projectId === 'ALL' ? 'proj-uuid-101' : projectId;
+    const currentYear = new Date().getFullYear();
+    const generatedInvoiceNum = `INV-${currentYear}-${String(items.length + 42).padStart(3, '0')}`;
 
-  const payload = {
-    projectId: targetProject, // Resolves structural tracking conflicts
-    invoiceNumber: generatedInvoiceNum,
-    issuedTo: issuedTo,
-    amountDue: parseFloat(amountDue),
-    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'UNPAID'
-  };
+    if (!projectId) { alert('Select a production project first.'); return; }
+    const targetProject = projectId;
 
-  try {
-    const response = await fetch(API_BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const payload = {
+      projectId: targetProject,
+      invoiceNumber: generatedInvoiceNum,
+      issuedTo: issuedTo,
+      amountDue: parseFloat(amountDue),
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'UNPAID'
+    };
 
-    if (response.ok) {
-      setIssuedTo('');
-      setAmountDue('');
-      setShow(false);
-      
-      setProjectId('ALL'); 
-      
-      await fetchInvoices(); 
-    } else {
-      alert("Failed to submit billing invoice payload to database.");
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setIssuedTo('');
+        setAmountDue('');
+        setShow(false);
+
+        setProjectId('');
+
+        await fetchInvoices();
+      } else {
+        alert("Failed to submit billing invoice payload to database.");
+      }
+    } catch (error) {
+      console.error("Failure processing invoice registration stream:", error);
     }
-  } catch (error) {
-    console.error("Failure processing invoice registration stream:", error);
   }
-}
 
   async function processPayment(invoiceId, totalValueAmount) {
     const payload = {
@@ -114,7 +129,10 @@ export default function InvoicesPayments() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `invoice_register_project_${projectId}.csv`;
+    const timestamp = new Date();
+    const pad = (value) => String(value).padStart(2, '0');
+    const exportStamp = `${timestamp.getFullYear()}-${pad(timestamp.getMonth() + 1)}-${pad(timestamp.getDate())}_${pad(timestamp.getHours())}-${pad(timestamp.getMinutes())}-${pad(timestamp.getSeconds())}`;
+    link.download = `Invoice_Register_All_Projects_${exportStamp}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -196,7 +214,7 @@ export default function InvoicesPayments() {
                 <th>AMOUNT DUE</th>
                 <th>DUE DATE</th>
                 <th>STATUS</th>
-                <th> ACTION</th>
+                <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
@@ -234,7 +252,7 @@ export default function InvoicesPayments() {
         </div>
       </div>
 
-      {/* INPUT FORM MODAL: REGISTER INVOICE */}
+      {projectLoadError && <p role="alert">{projectLoadError}</p>}
       {show && (
         <div className="modal-backdrop" onClick={() => setShow(false)}>
           <form className="modal-card" onSubmit={addInvoice} onClick={(e) => e.stopPropagation()}>
@@ -261,12 +279,12 @@ export default function InvoicesPayments() {
             <label>
               Associated Production Project
               <select
-                value={projectId === 'ALL' ? 'proj-uuid-101' : projectId}
+                required
+                value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
               >
-                <option value="proj-uuid-101">The Last Monsoon (ID: 101)</option>
-                <option value="proj-uuid-102">City of Echoes (ID: 102)</option>
-                <option value="proj-uuid-103">Beyond The Frame (ID: 103)</option>
+                <option value="">-- Select production project --</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
               </select>
             </label>
 
@@ -292,4 +310,3 @@ export default function InvoicesPayments() {
     </>
   );
 }
-

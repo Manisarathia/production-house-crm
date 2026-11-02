@@ -27,22 +27,26 @@ import {
   ChevronRight,
   ChevronDown
 } from 'lucide-react';
-import {
-  getStoredEpisodes,
-  getStoredScenes,
-  getStoredProjects,
-  createEpisode,
-  updateEpisode,
-  deleteEpisode,
-  createScene,
-  updateScene,
-  deleteScene
-} from '../utils/productionStorage.js';
+import { useEffect } from 'react';
+import { list, create, update, remove } from '../utils/productionApi.js';
 
 export default function EpisodesScenes() {
-  const [episodes, setEpisodes] = useState(() => getStoredEpisodes());
-  const [scenes, setScenes] = useState(() => getStoredScenes());
-  const [projects] = useState(() => getStoredProjects());
+  const [episodes, setEpisodes] = useState([]);
+  const [scenes, setScenes] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [mediaItems, setMediaItems] = useState([]);
+  const [apiError, setApiError] = useState('');
+  const reload = async () => {
+    try {
+      const [ep, sc, pr, mi] = await Promise.all([list('episodes'), list('scenes'), list('projects'), list('media-items')]);
+      setMediaItems(mi);
+      setEpisodes(ep);
+      setScenes(sc);
+      setProjects(pr.map(p => ({ ...p, name: p.title })));
+      setApiError('');
+    } catch (error) { setApiError(error.message); }
+  };
+  useEffect(() => { reload(); }, []);
 
   // Active view tab: 'episodes' (Series / Episode breakdown) or 'stripboard' (Master scene stripboard)
   const [activeTab, setActiveTab] = useState('episodes');
@@ -66,7 +70,8 @@ export default function EpisodesScenes() {
 
   // Forms State
   const initialEpisodeForm = {
-    project: projects[0]?.name || 'The Last Monsoon',
+    project: projects[0]?.name || '',
+    mediaItemId: '',
     episodeNumber: 1,
     title: '',
     runtime: '50 mins',
@@ -158,7 +163,8 @@ export default function EpisodesScenes() {
     setEpisodeForm({
       ...initialEpisodeForm,
       episodeNumber: episodes.length + 1,
-      project: projects[0]?.name || 'The Last Monsoon'
+      project: projects[0]?.name || '',
+      mediaItemId: ''
     });
     setCreateEpisodeModalOpen(true);
   };
@@ -167,6 +173,7 @@ export default function EpisodesScenes() {
   const handleOpenEditEpisode = (ep) => {
     setEpisodeForm({
       project: ep.project,
+      mediaItemId: ep.mediaItemId || '',
       episodeNumber: ep.episodeNumber,
       title: ep.title,
       runtime: ep.runtime,
@@ -182,43 +189,52 @@ export default function EpisodesScenes() {
   };
 
   // Submit Create Episode
-  const handleCreateEpisodeSubmit = (e) => {
+  const handleCreateEpisodeSubmit = async (e) => {
+    try {
     e.preventDefault();
-    if (!episodeForm.title.trim()) return;
+    if (!episodeForm.title.trim() || !episodeForm.mediaItemId) { setApiError('Select a Movie / Web Series before saving the episode.'); return; }
 
-    const { all } = createEpisode({
+    await create('episodes', {
       ...episodeForm,
       episodeNumber: Number(episodeForm.episodeNumber),
       scenesCount: Number(episodeForm.scenesCount),
       scenesCompleted: Number(episodeForm.scenesCompleted)
     });
 
-    setEpisodes(all);
+    await reload();
     setCreateEpisodeModalOpen(false);
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   // Submit Edit Episode
-  const handleEditEpisodeSubmit = (e) => {
+  const handleEditEpisodeSubmit = async (e) => {
+    try {
     e.preventDefault();
     if (!editEpisodeModalItem || !episodeForm.title.trim()) return;
 
-    const updated = updateEpisode(editEpisodeModalItem.id, {
+    await update('episodes', editEpisodeModalItem.id, {
       ...episodeForm,
       episodeNumber: Number(episodeForm.episodeNumber),
       scenesCount: Number(episodeForm.scenesCount),
       scenesCompleted: Number(episodeForm.scenesCompleted)
     });
 
-    setEpisodes(updated);
+    await reload();
     setEditEpisodeModalItem(null);
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   // Confirm Delete Episode
-  const handleConfirmDeleteEpisode = () => {
+  const handleConfirmDeleteEpisode = async () => {
+    try {
     if (!deleteTargetEpisode) return;
-    const updated = deleteEpisode(deleteTargetEpisode.id);
-    setEpisodes(updated);
+    await remove('episodes', deleteTargetEpisode.id);
+    await reload();
     setDeleteTargetEpisode(null);
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   // Open Create Scene (optionally pre-selected for an episode)
@@ -255,50 +271,60 @@ export default function EpisodesScenes() {
   };
 
   // Submit Create Scene
-  const handleCreateSceneSubmit = (e) => {
+  const handleCreateSceneSubmit = async (e) => {
+    try {
     e.preventDefault();
     if (!sceneForm.heading.trim()) return;
 
-    const { all } = createScene(sceneForm);
-    setScenes(all);
+    await create('scenes', sceneForm);
+    await reload();
 
     // If linked to an episode, update episode scene counter
     if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
       const ep = episodes.find(e => e.id === sceneForm.episodeId);
       if (ep) {
-        updateEpisode(ep.id, {
+        await update('episodes', ep.id, {
+          ...ep,
           scenesCount: (Number(ep.scenesCount) || 0) + 1,
           scenesCompleted: sceneForm.status === 'Shot / Done' ? (Number(ep.scenesCompleted) || 0) + 1 : (Number(ep.scenesCompleted) || 0)
         });
-        setEpisodes(getStoredEpisodes());
+        await reload();
       }
     }
 
     setCreateSceneModalOpen(false);
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   // Submit Edit Scene
-  const handleEditSceneSubmit = (e) => {
+  const handleEditSceneSubmit = async (e) => {
+    try {
     e.preventDefault();
     if (!editSceneModalItem || !sceneForm.heading.trim()) return;
 
-    const updated = updateScene(editSceneModalItem.id, sceneForm);
-    setScenes(updated);
+    const updatedScene = await update('scenes', editSceneModalItem.id, sceneForm);
+    await reload();
     setEditSceneModalItem(null);
     if (detailModalScene && detailModalScene.id === editSceneModalItem.id) {
-      setDetailModalScene(updated.find(s => s.id === editSceneModalItem.id));
+      setDetailModalScene(updatedScene);
     }
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   // Confirm Delete Scene
-  const handleConfirmDeleteScene = () => {
+  const handleConfirmDeleteScene = async () => {
+    try {
     if (!deleteTargetScene) return;
-    const updated = deleteScene(deleteTargetScene.id);
-    setScenes(updated);
+    await remove('scenes', deleteTargetScene.id);
+    await reload();
     setDeleteTargetScene(null);
     if (detailModalScene && detailModalScene.id === deleteTargetScene.id) {
       setDetailModalScene(null);
     }
+  
+    } catch (error) { setApiError(error.message); }
   };
 
   const getSceneStatusTone = (status) => {
@@ -333,6 +359,7 @@ export default function EpisodesScenes() {
 
   return (
     <>
+      {apiError && <div role="alert" style={{ padding: 12, color: '#fff', background: '#792c2c' }}>{apiError}</div>}
       {/* Premium Cinematic Hover & Interaction Styles for Episodes & Scenes */}
       <style>{`
         /* Smooth Scrolling & Refined Scrollbars */
@@ -478,8 +505,8 @@ export default function EpisodesScenes() {
         .page-heading h1 { font-size: 29px !important; }
         .page-heading p { font-size: 13.5px !important; }
         .eyebrow { font-size: 10.5px !important; letter-spacing: 1.4px !important; }
-        .mini-stat span { font-size: 11.5px !important; color: #a7a09a; }
-        .mini-stat strong { font-size: 24px !important; color: #f4f0eb; }
+        .mini-stat span { font-size: 11.5px !important; }
+        .mini-stat strong { font-size: 24px !important; }
         .panel-head h2 { font-size: 16px !important; }
         .panel-head p { font-size: 12px !important; }
         .segmented button { font-size: 11px !important; padding: 7px 11px !important; }
@@ -1026,12 +1053,25 @@ export default function EpisodesScenes() {
                 Parent Web Series *
                 <select
                   value={episodeForm.project}
-                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value })}
+                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value, mediaItemId: '' })}
                 >
                   {projects.map(p => (
                     <option key={p.id} value={p.name}>
                       {p.name} ({p.code})
                     </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Movie / Web Series *
+                <select required value={episodeForm.mediaItemId || ''} onChange={e => {
+                  const selected = mediaItems.find(item => item.id === e.target.value);
+                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || prev.project }));
+                }}>
+                  <option value="">Select Movie / Web Series</option>
+                  {mediaItems.filter(item => !episodeForm.project || item.project?.title === episodeForm.project).map(item => (
+                    <option key={item.id} value={item.id}>{item.title}</option>
                   ))}
                 </select>
               </label>
@@ -1187,12 +1227,25 @@ export default function EpisodesScenes() {
                 Parent Web Series
                 <select
                   value={episodeForm.project}
-                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value })}
+                  onChange={e => setEpisodeForm({ ...episodeForm, project: e.target.value, mediaItemId: '' })}
                 >
                   {projects.map(p => (
                     <option key={p.id} value={p.name}>
                       {p.name}
                     </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Movie / Web Series *
+                <select required value={episodeForm.mediaItemId || ''} onChange={e => {
+                  const selected = mediaItems.find(item => item.id === e.target.value);
+                  setEpisodeForm(prev => ({ ...prev, mediaItemId: e.target.value, project: selected?.project?.title || prev.project }));
+                }}>
+                  <option value="">Select Movie / Web Series</option>
+                  {mediaItems.filter(item => !episodeForm.project || item.project?.title === episodeForm.project).map(item => (
+                    <option key={item.id} value={item.id}>{item.title}</option>
                   ))}
                 </select>
               </label>
@@ -1910,4 +1963,3 @@ export default function EpisodesScenes() {
     </>
   );
 }
-
