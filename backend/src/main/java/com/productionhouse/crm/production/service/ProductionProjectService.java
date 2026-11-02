@@ -1,32 +1,40 @@
 package com.productionhouse.crm.production.service;
 
-import com.productionhouse.crm.production.model.*;
-import com.productionhouse.crm.production.repository.*;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-import java.time.LocalDate;
-import java.util.*;
+
+import com.productionhouse.crm.production.model.ProductionStage;
+import com.productionhouse.crm.production.model.Project;
+import com.productionhouse.crm.production.model.ProjectRequest;
+import com.productionhouse.crm.production.model.ProjectType;
+import com.productionhouse.crm.production.repository.ProjectRepository;
 
 @Service
 public class ProductionProjectService {
-	
-	private final ProjectRepository projectRepository;
+	private final ProjectRepository repo;
+	private final JdbcTemplate jdbc;
 
-	public ProductionProjectService(ProjectRepository projectRepository) {
-		this.projectRepository = projectRepository;
+	public ProductionProjectService(ProjectRepository repo, JdbcTemplate jdbc) {
+		this.repo = repo;
+		this.jdbc = jdbc;
 	}
 
 	@Transactional(readOnly = true)
-	public List<Project> all() {
-		return projectRepository.findAll();
+	public List<Map<String, Object>> all() {
+		return repo.findAll().stream().map(ProductionProjectService::toResponse).toList();
 	}
 
-	@Transactional(readOnly = true)
-	public Project one(String id) {
-		return projectRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+	public ResponseEntity<Map<String, Object>> one(String id) {
+		return repo.findById(id).map(p -> ResponseEntity.ok(toResponse(p)))
+				.orElseGet(() -> ResponseEntity.status(404).body(Map.of("error", "Project not found")));
 	}
 
 	private void apply(Project p, ProjectRequest r) {
@@ -41,35 +49,70 @@ public class ProductionProjectService {
 	}
 
 	@Transactional
-	public Project create(ProjectRequest request) {
+	public ResponseEntity<Map<String, Object>> create(ProjectRequest r) {
 		try {
-			Project record = new Project();
-			if (request.title == null || request.title.isBlank())
-				throw new IllegalArgumentException("Title required");
-			apply(record, request);
-			return projectRepository.save(record);
-		} catch (IllegalArgumentException ex) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+			Project p = new Project();
+			apply(p, r);
+			return ResponseEntity.status(201).body(toResponse(repo.save(p)));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("error", e.getMessage() == null ? "Invalid project" : e.getMessage()));
 		}
 	}
 
 	@Transactional
-	public Project update(String id, ProjectRequest request) {
-		Project record = one(id);
+	public ResponseEntity<Map<String, Object>> update(String id, ProjectRequest r) {
+		Optional<Project> found = repo.findById(id);
+		if (found.isEmpty())
+			return ResponseEntity.status(404).body(Map.of("error", "Project not found"));
 		try {
-			if (request.title == null || request.title.isBlank())
-				throw new IllegalArgumentException("Title required");
-			apply(record, request);
-			return projectRepository.save(record);
-		} catch (IllegalArgumentException ex) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+			Project p = found.get();
+			apply(p, r);
+			return ResponseEntity.ok(toResponse(repo.save(p)));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("error", e.getMessage() == null ? "Invalid project" : e.getMessage()));
 		}
 	}
 
 	@Transactional
-	public void delete(String id) {
-		if (!projectRepository.existsById(id))
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found");
-		projectRepository.deleteById(id);
+	public ResponseEntity<Map<String, Object>> delete(String id) {
+		if (!repo.existsById(id))
+			return ResponseEntity.status(404).body(Map.of("error", "Project not found"));
+
+		// Native SQL is used because Scene.episodeId and finance projectId
+		// are plain strings, not cascading JPA associations.
+		// Remove grandchildren before their parents.
+		jdbc.update("DELETE p FROM payments p INNER JOIN invoices i ON p.invoice_id = i.id WHERE i.project_id = ?", id);
+		jdbc.update("DELETE FROM invoices WHERE project_id = ?", id);
+		jdbc.update("DELETE FROM equipment_bookings WHERE project_id = ?", id);
+		jdbc.update("DELETE FROM expenses WHERE project_id = ?", id);
+		jdbc.update("DELETE FROM budgets WHERE project_id = ?", id);
+
+		jdbc.update("DELETE s FROM production_scenes s INNER JOIN production_episodes e "
+				+ "ON s.episode_id = e.id LEFT JOIN media_items m ON e.media_item_id = m.id "
+				+ "WHERE m.project_id = ? OR e.project = ?", id, id);
+		jdbc.update("DELETE FROM production_scenes WHERE project = ?", id);
+		jdbc.update("DELETE FROM production_crew_members WHERE project = ? OR media_item_id IN "
+				+ "(SELECT id FROM media_items WHERE project_id = ?)", id, id);
+		jdbc.update("DELETE FROM project_cast_crew WHERE media_item_id IN "
+				+ "(SELECT id FROM media_items WHERE project_id = ?)", id);
+		jdbc.update("DELETE FROM production_episodes WHERE project = ? OR media_item_id IN "
+				+ "(SELECT id FROM media_items WHERE project_id = ?)", id, id);
+		jdbc.update("DELETE FROM media_items WHERE project_id = ?", id);
+		jdbc.update("DELETE FROM projects WHERE id = ?", id);
+		return ResponseEntity.ok(Map.of("message", "Project and associated records deleted successfully"));
+	}
+
+	private static Map<String, Object> toResponse(Project p) {
+		Map<String, Object> m = new LinkedHashMap<>();
+		m.put("id", p.getId());
+		m.put("title", p.getTitle());
+		m.put("type", p.getType());
+		m.put("stage", p.getStage());
+		m.put("startDate", p.getStartDate());
+		m.put("endDate", p.getEndDate());
+		m.put("posterUrl", p.getPosterUrl());
+		return m;
 	}
 }

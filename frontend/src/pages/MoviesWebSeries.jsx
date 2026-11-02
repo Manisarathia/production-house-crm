@@ -307,7 +307,7 @@ export default function MoviesWebSeries() {
             </div>
             <label className="table-search">
               <Search size={16} />
-              <input placeholder="Search library catalogs..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <input placeholder="Search Movie, Web Series..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </label>
           </div>
         </div>
@@ -419,6 +419,20 @@ export default function MoviesWebSeries() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!loading && filteredTitles.length === 0 && (
+          <div className="empty-state" role="status">
+            <Film size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+            <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
+              {titles.length === 0 ? 'No Movies or Web Series Found' : 'No Matching Movies or Web Series'}
+            </strong>
+            <p style={{ margin: 0 }}>
+              {titles.length === 0
+                ? 'There are no movies or web series to display. Click Add Title to create a new record.'
+                : 'No records match your search or selected filters.'}
+            </p>
           </div>
         )}
       </div>

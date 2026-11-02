@@ -29,6 +29,9 @@ export default function ProjectsProductions() {
   const [editModalProject, setEditModalProject] = useState(null);
   const [detailModalProject, setDetailModalProject] = useState(null);
   const [validationError, setValidationError] = useState('');
+  const [deleteTargetProject, setDeleteTargetProject] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const initialFormState = {
     name: '',
@@ -167,21 +170,56 @@ export default function ProjectsProductions() {
     }
   };
 
-  const handleDeleteProject = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this production project?")) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) {
-        await fetchProjectsFromServer();
-      } else {
-        alert("Failed to delete project.");
-      }
-    } catch (error) {
-      console.error("Error during deletion:", error);
-    }
+ 
+const handleDeleteProject = (id) => {
+    const project = projects.find(item => item.id === id);
+    if (!project) return;
+    setDeleteError('');
+    setDeleteTargetProject(project);
   };
+
+  const confirmDeleteProject = async () => {
+  if (!deleteTargetProject || deleting) return;
+
+  setDeleting(true);
+  setDeleteError("");
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/${deleteTargetProject.id}`,
+      { method: "DELETE" }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      if (response.status === 409) {
+        setDeleteError(
+          result.error ||
+          "Project deletion failed because a linked record could not be removed. No records were deleted."
+        );
+        return;
+      }
+
+      throw new Error(
+        result.error ||
+        result.message ||
+        `Delete failed (HTTP ${response.status})`
+      );
+    }
+
+    setDeleteTargetProject(null);
+    await fetchProjectsFromServer();
+
+  } catch (error) {
+    setDeleteError(
+      error.message || "Unable to delete this project."
+    );
+  } finally {
+    setDeleting(false);
+  }
+};
+
 
   const handleOpenEdit = (project) => {
     setFormData({
@@ -361,6 +399,28 @@ export default function ProjectsProductions() {
           </div>
         )}
       </div>
+
+      {deleteTargetProject && (
+        <div className="modal-backdrop" onClick={() => { if (!deleting) { setDeleteTargetProject(null); setDeleteError(''); } }}>
+          <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="project-delete-title" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <h2 id="project-delete-title">Delete Production Project?</h2>
+              <button type="button" className="icon-button" disabled={deleting} onClick={() => { setDeleteTargetProject(null); setDeleteError(''); }} aria-label="Close"><X size={18} /></button>
+            </div>
+            <p>Are you sure you want to permanently delete <strong>{deleteTargetProject.name}</strong> and all its associated Movies/Web Series, Episodes, Scenes, Cast &amp; Crew, Budgets, Expenses, Invoices, Payments and Equipment Bookings? This cannot be undone.</p>
+            {deleteError && (
+              <div role="alert" style={{ color: '#ff6b6b', background: 'rgba(255, 107, 107, 0.1)', padding: '12px', borderRadius: '8px', marginTop: '12px' }}>
+                <strong>Cannot Delete Project</strong>
+                <p style={{ marginBottom: 0 }}>{deleteError}</p>
+              </div>
+            )}
+            <div className="modal-actions" style={{ marginTop: '20px' }}>
+              <button type="button" className="btn btn-light" disabled={deleting} onClick={() => { setDeleteTargetProject(null); setDeleteError(''); }}>Cancel</button>
+              <button type="button" className="btn btn-primary" disabled={deleting} onClick={confirmDeleteProject}>{deleting ? 'Deleting...' : 'Yes, Delete'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {createModalOpen && (
         <div className="modal-backdrop" onClick={() => setCreateModalOpen(false)}>
