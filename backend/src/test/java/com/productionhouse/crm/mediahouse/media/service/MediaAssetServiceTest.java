@@ -1,0 +1,7 @@
+package com.productionhouse.crm.mediahouse.media.service;
+import com.productionhouse.crm.mediahouse.media.dto.MediaAssetRequest;import com.productionhouse.crm.mediahouse.media.entity.MediaAsset;import com.productionhouse.crm.mediahouse.media.repository.MediaAssetRepository;import org.junit.jupiter.api.Test;import org.springframework.data.domain.Sort;import java.util.List;import static org.junit.jupiter.api.Assertions.*;import static org.mockito.ArgumentMatchers.any;import static org.mockito.Mockito.*;
+class MediaAssetServiceTest{
+@Test void createsFeatureSpecificMediaMetadata(){var repo=mock(MediaAssetRepository.class);when(repo.save(any(MediaAsset.class))).thenAnswer(i->i.getArgument(0));var service=new MediaAssetService(repo);var out=service.create(new MediaAssetRequest("Trailer",null,"P-1","VIDEO","READY","vault://x","MP4",100L,90L,null,true));assertEquals("VIDEO",out.assetType());assertEquals(90L,out.durationSeconds());}
+@Test void filtersMediaByTypeStatusAndProjectBeforePagination(){var repo=mock(MediaAssetRepository.class);var a=new MediaAsset();a.setName("A");a.setAssetType("VIDEO");a.setStatus("READY");a.setProjectRef("P1");var b=new MediaAsset();b.setName("B");b.setAssetType("AUDIO");b.setStatus("READY");b.setProjectRef("P2");when(repo.findAll(any(Sort.class))).thenReturn(List.of(a,b));var result=new MediaAssetService(repo).list(null,"VIDEO","READY","P1",0,10,"name","asc");assertEquals(1,result.getTotalElements());assertEquals("A",result.getContent().get(0).name());}
+}
+
