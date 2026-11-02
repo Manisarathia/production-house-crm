@@ -3,8 +3,10 @@ import com.productionhouse.crm.mediahouse.media.entity.MediaAsset;import com.pro
 @Entity @Table(name="crm_media_contracts",indexes={@Index(name="ix_crm_media_contract_status",columnList="status"),@Index(name="ix_crm_media_contract_end",columnList="ends_at")}) @Getter @Setter @NoArgsConstructor
 public class ContractRecord extends Task5RecordBase{
 @Column(name="type",length=80) private String contractType;
+@Column(name="contract_value",precision=19,scale=2) private java.math.BigDecimal contractValue;
 @Column(name="party_one",nullable=false,length=200) private String partyOne;
 @Column(name="party_two",length=200) private String partyTwo;
+@Column(name="governing_law",length=200) private String governingLaw;
 @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="media_asset_id") private MediaAsset mediaAsset;
 @Column(name="starts_at") private java.time.LocalDate startsAt;
 @Column(name="ends_at") private java.time.LocalDate endsAt;

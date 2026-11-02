@@ -8,6 +8,9 @@ public class ContentRight extends Task5RecordBase{
 @Column(length=120) private String territory;
 @Column(length=500) private String platforms;
 @Column(length=500) private String languages;
+@Column(name="rights_period",length=120) private String rightsPeriod;
+@Column(name="license_fee",precision=19,scale=2) private java.math.BigDecimal licenseFee;
+@Column(name="revenue_share",length=100) private String revenueSharePct;
 @Column(name="is_exclusive",nullable=false) private boolean exclusive;
 @Column(name="starts_at") private java.time.LocalDate startsAt;
 @Column(name="ends_at") private java.time.LocalDate endsAt;

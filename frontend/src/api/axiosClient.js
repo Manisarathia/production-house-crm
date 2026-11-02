@@ -14,8 +14,9 @@ const axiosClient = axios.create({
 // Request interceptor: attach Authorization header if token exists in localStorage
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const publicAuthEndpoint = ['/auth/login', '/auth/invitations/accept'].includes(config.url);
+    if (token && !publicAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -31,7 +32,23 @@ axiosClient.interceptors.response.use(
       error.response?.data?.message ||
       error.message ||
       'Network or server error occurred';
-    return Promise.reject(new Error(message));
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('frameflow-auth');
+      localStorage.removeItem('frameflow-user');
+      localStorage.removeItem('frameflow-permissions');
+      localStorage.removeItem('frameflow-roles');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('frameflow-auth');
+      sessionStorage.removeItem('frameflow-user');
+      sessionStorage.removeItem('frameflow-permissions');
+      sessionStorage.removeItem('frameflow-roles');
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
+    error.message = message;
+    return Promise.reject(error);
   }
 );
 
