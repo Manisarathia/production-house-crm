@@ -60,8 +60,8 @@ export default function PostProductionMedia() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list' | 'table'
 
   // Data states
-  const [postTasks, setPostTasks] = useState(() => getStoredPostProduction());
-  const [mediaAssets, setMediaAssets] = useState(() => getStoredMediaAssets());
+  const [postTasks, setPostTasks] = useState([]);
+  const [mediaAssets, setMediaAssets] = useState([]);
 
   // Live API States
   const [loading, setLoading] = useState(true);
@@ -78,61 +78,83 @@ export default function PostProductionMedia() {
     setLoading(true);
     setApiError(null);
     try {
-      const [tasksRes, assetsRes] = await Promise.allSettled([
+      const [tasksRes, assetsRes] = await Promise.all([
         postProductionApi.list({ size: 100 }),
         mediaAssetApi.list({ size: 100 })
       ]);
 
-      if (tasksRes.status === 'fulfilled' && tasksRes.value) {
-        const items = extractPageItems(tasksRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            title: item.name || item.title,
-            project: item.projectRef || item.project,
-            stage: item.description || item.stage || 'Color Grading (DI)',
-            status: normalizePostProductionStatusToFrontend(item.status),
-            targetDeliveryDate: item.dueAt || item.targetDeliveryDate || '',
-            supervisor: item.assigneeName || item.supervisor || 'Red Chillies Color',
-            leadArtist: item.assigneeName || item.leadArtist || 'Makarand Surte',
-            facility: item.facility || 'Red Chillies Color Lab, Mumbai',
-            progress: item.progress ?? (item.status === 'COMPLETED' ? 100 : 75),
-            reelsCount: item.reelsCount || '8 Episodes · 16 Reels',
-            qcStatus: item.qcStatus || 'Passed Initial QC',
-            platform: item.platform || 'LoopNexus',
-            tone: item.status === 'COMPLETED' ? 'green' : 'orange',
-            image: item.image || getPostProductionImage(item.id)
-          }));
-          setPostTasks(mapped);
-        }
-      }
+      const items = extractPageItems(tasksRes);
+      const mapped = items.map(item => ({
+        id: item.id,
+        title: item.name || 'Untitled Milestone',
+        project: item.projectRef || 'General',
+        stage: item.description || 'Color Grading (DI)',
+        status: normalizePostProductionStatusToFrontend(item.status),
+        targetDeliveryDate: item.dueAt || '',
+        supervisor: item.assigneeName || 'Red Chillies Color',
+        leadArtist: item.assigneeName || 'Makarand Surte',
+        facility: item.facility || 'Red Chillies Color Lab, Mumbai',
+        progress: item.progress ?? (item.status === 'COMPLETED' ? 100 : 75),
+        reelsCount: item.reelsCount || '8 Episodes · 16 Reels',
+        qcStatus: item.qcStatus || 'Passed Initial QC',
+        platform: item.platform || 'LoopNexus',
+        tone: item.status === 'COMPLETED' ? 'green' : 'orange',
+        image: item.image || getPostProductionImage(item.id)
+      }));
+      setPostTasks(mapped);
 
-      if (assetsRes.status === 'fulfilled' && assetsRes.value) {
-        const items = extractPageItems(assetsRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            title: item.name || item.title,
-            project: item.projectRef || item.project,
-            assetType: item.assetType || 'Master Cut',
-            status: normalizeMediaStatusToFrontend(item.status),
-            storageLocation: item.storageReference || item.storageLocation || 'Loop Cloud Vault',
-            codecFormat: item.format || item.codecFormat || 'Apple ProRes 4444 XQ',
-            fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : (item.fileSize || '150.0 GB'),
-            duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : (item.duration || '8h 24m'),
-            resolution: item.resolution || '4K UHD (3840x2160)',
-            platform: item.platform || 'LoopNexus',
-            uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : (item.uploadDate || new Date().toISOString().split('T')[0]),
-            image: item.image || getMediaAssetImage(item.id)
-          }));
-          setMediaAssets(mapped);
-        }
-      }
+      const assetItems = extractPageItems(assetsRes);
+      const mappedAssets = assetItems.map(item => ({
+        id: item.id,
+        title: item.name || 'Master Deliverable',
+        project: item.projectRef || 'General',
+        assetType: item.assetType || 'Master Cut',
+        status: normalizeMediaStatusToFrontend(item.status),
+        storageLocation: item.storageReference || 'Loop Cloud Vault',
+        codecFormat: item.format || 'Apple ProRes 4444 XQ',
+        fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : '150.0 GB',
+        duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : '8h 24m',
+        resolution: item.resolution || '4K UHD (3840x2160)',
+        platform: item.platform || 'LoopNexus',
+        uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
+        image: item.image || getMediaAssetImage(item.id)
+      }));
+      setMediaAssets(mappedAssets);
     } catch (err) {
       console.warn('Backend fetch error in PostProductionMedia:', err);
       setApiError(err.message || 'Could not connect to live backend.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeedBackend = async () => {
+    setIsSubmitting(true);
+    try {
+      showToast('Seeding initial records to Spring Boot backend database...', 'info');
+      const sampleTasks = [
+        { name: 'Dolby Vision Color Grading & DI Master', description: 'Color Grading (DI)', projectRef: 'The Last Monsoon', status: 'IN_PROGRESS', priority: 'High', dueAt: '2026-11-08', startedAt: '2026-10-01', notes: 'Dolby Vision pass' },
+        { name: 'Dolby Atmos 7.1.4 Surround Sound Mix', description: 'Sound Design & Atmos Mix', projectRef: 'City of Echoes', status: 'IN_REVIEW', priority: 'High', dueAt: '2026-11-06', startedAt: '2026-10-05', notes: 'Surround mix' },
+        { name: 'Archival 35mm Celluloid Restoration', description: 'Offline Edit', projectRef: 'Beyond The Frame', status: 'IN_PROGRESS', priority: 'Normal', dueAt: '2026-11-15', startedAt: '2026-10-10', notes: 'Scratch removal' }
+      ];
+      for (const t of sampleTasks) {
+        await postProductionApi.create(t).catch(() => {});
+      }
+
+      const sampleAssets = [
+        { name: 'Apple ProRes 4444 XQ Master Deliverable', description: 'Master Video File', projectRef: 'The Last Monsoon', assetType: 'MASTER_VIDEO', status: 'READY', storageReference: 's3://loopstream-vault-prod/masters/', format: 'ProRes 4444 XQ', sizeBytes: 156000000000, durationSeconds: 30240 },
+        { name: 'Dolby Atmos 7.1.4 PrintMaster WAV Stems', description: 'Audio Deliverable', projectRef: 'City of Echoes', assetType: 'AUDIO_STEMS', status: 'READY', storageReference: 's3://loopstream-vault-prod/audio/', format: 'Broadcast WAV 24-bit/48kHz', sizeBytes: 88000000000, durationSeconds: 8400 }
+      ];
+      for (const a of sampleAssets) {
+        await mediaAssetApi.create(a).catch(() => {});
+      }
+
+      await fetchBackendData();
+      showToast('Backend database seeded successfully!');
+    } catch (e) {
+      showToast('Failed to seed backend: ' + e.message, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1612,14 +1634,25 @@ export default function PostProductionMedia() {
             <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
               No post-production records found
             </strong>
-            <p style={{ margin: 0 }}>Try clearing your search query or reset filter selections.</p>
-            <button
-              className="btn btn-primary"
-              style={{ marginTop: '16px' }}
-              onClick={handleOpenCreate}
-            >
-              <Plus size={16} /> {activeTab === 'pipeline' ? 'Create Post Milestone' : 'Ingest Media Asset'}
-            </button>
+            <p style={{ margin: 0 }}>Try clearing your search query or connect live records to Spring Boot database.</p>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'center' }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleOpenCreate}
+              >
+                <Plus size={16} /> {activeTab === 'pipeline' ? 'Create Post Milestone' : 'Ingest Media Asset'}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                style={{ background: '#25201d', border: '1px solid #4a3830', color: '#f07842' }}
+                onClick={handleSeedBackend}
+                disabled={isSubmitting}
+              >
+                <Sparkles size={16} /> Seed Initial Records to Backend
+              </button>
+            </div>
+
           </div>
         )}
       </div>

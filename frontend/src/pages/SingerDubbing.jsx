@@ -59,8 +59,8 @@ export default function SingerDubbing() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list' | 'table'
 
   // Data states
-  const [singers, setSingers] = useState(() => getStoredSingers());
-  const [dubbingSessions, setDubbingSessions] = useState(() => getStoredDubbing());
+  const [singers, setSingers] = useState([]);
+  const [dubbingSessions, setDubbingSessions] = useState([]);
 
   // Live API States
   const [loading, setLoading] = useState(true);
@@ -77,61 +77,73 @@ export default function SingerDubbing() {
     setLoading(true);
     setApiError(null);
     try {
-      const [singersRes, dubbingRes] = await Promise.allSettled([
+      const [singersRes, dubbingRes] = await Promise.all([
         singerApi.list({ size: 100 }),
         dubbingApi.list({ size: 100 })
       ]);
 
-      if (singersRes.status === 'fulfilled' && singersRes.value) {
-        const items = extractPageItems(singersRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            songTitle: item.biography || item.songTitle || (item.name ? item.name + ' - Theme Track' : 'Original Soundtrack'),
-            singerName: item.name || item.singerName || 'Lead Vocalist',
-            vocalType: item.voiceType || item.vocalType || 'Lead Vocalist (Playback)',
-            language: item.languages || item.language || 'Hindi',
-            project: item.voiceRange || item.project || 'The Last Monsoon',
-            musicDirector: item.musicDirector || 'Pritam Chakraborty',
-            lyricist: item.lyricist || 'Amitabh Bhattacharya',
-            duration: item.duration || '4 mins 20 secs',
-            recordingStudio: item.recordingStudio || 'YRF Studios (Studio A), Mumbai',
-            recordingStatus: normalizeSingerStatusToFrontend(item.status) === 'Active' ? 'Mastered & Mixed' : 'In Studio',
-            fee: item.fee || 1500000,
-            platform: item.platform || 'LoopNexus',
-            image: item.image || getSingerImage(item.id)
-          }));
-          setSingers(mapped);
-        }
-      }
+      const items = extractPageItems(singersRes);
+      const mapped = items.map(item => ({
+        id: item.id,
+        songTitle: item.biography || (item.name ? item.name + ' - Theme Track' : 'Original Soundtrack'),
+        singerName: item.name || 'Lead Vocalist',
+        vocalType: item.voiceType || 'Lead Vocalist (Playback)',
+        language: item.languages || 'Hindi',
+        project: item.voiceRange || 'The Last Monsoon',
+        musicDirector: item.musicDirector || 'Pritam Chakraborty',
+        lyricist: item.lyricist || 'Amitabh Bhattacharya',
+        duration: item.duration || '4 mins 20 secs',
+        recordingStudio: item.recordingStudio || 'YRF Studios (Studio A), Mumbai',
+        recordingStatus: normalizeSingerStatusToFrontend(item.status) === 'Active' ? 'Mastered & Mixed' : 'In Studio',
+        fee: item.fee || 1500000,
+        platform: item.platform || 'LoopNexus',
+        image: item.image || getSingerImage(item.id)
+      }));
+      setSingers(mapped);
 
-      if (dubbingRes.status === 'fulfilled' && dubbingRes.value) {
-        const items = extractPageItems(dubbingRes.value);
-        if (items.length > 0) {
-          const mapped = items.map(item => ({
-            ...item,
-            characterName: item.name || item.characterName || 'Lead Character',
-            project: item.projectRef || item.project || 'The Last Monsoon',
-            targetLanguage: item.language || item.targetLanguage || 'Tamil',
-            voiceArtist: item.singerName || item.voiceArtist || 'Voice Artist',
-            dubbingDirector: item.dubbingDirector || 'Sound Lab Director',
-            studioFacility: item.studio || item.studioFacility || 'Sound & Vision India, Andheri',
-            sessionDate: item.scheduledAt ? item.scheduledAt.slice(0, 10) : (item.sessionDate || new Date().toISOString().split('T')[0]),
-            sessionTime: item.sessionTime || '10:00 AM - 02:00 PM',
-            reelsOrEpisodes: item.notes || item.reelsOrEpisodes || 'Episodes 1 to 4',
-            status: normalizeDubbingStatusToFrontend(item.status),
-            lipsyncQuality: item.lipsyncQuality || 'Passed Sync Check',
-            platform: item.platform || 'LoopNexus',
-            image: item.image || getDubbingImage(item.id)
-          }));
-          setDubbingSessions(mapped);
-        }
-      }
+      const dubbingItems = extractPageItems(dubbingRes);
+      const mappedDubbing = dubbingItems.map(item => ({
+        id: item.id,
+        characterName: item.name || 'Lead Character',
+        project: item.projectRef || 'The Last Monsoon',
+        targetLanguage: item.language || 'Tamil',
+        voiceArtist: item.singerName || 'Voice Artist',
+        dubbingDirector: item.dubbingDirector || 'Sound Lab Director',
+        studioFacility: item.studio || 'Sound & Vision India, Andheri',
+        sessionDate: item.scheduledAt ? item.scheduledAt.slice(0, 10) : new Date().toISOString().split('T')[0],
+        sessionTime: item.sessionTime || '10:00 AM - 02:00 PM',
+        reelsOrEpisodes: item.notes || 'Episodes 1 to 4',
+        status: normalizeDubbingStatusToFrontend(item.status),
+        lipsyncQuality: item.lipsyncQuality || 'Passed Sync Check',
+        platform: item.platform || 'LoopNexus',
+        image: item.image || getDubbingImage(item.id)
+      }));
+      setDubbingSessions(mappedDubbing);
     } catch (err) {
       console.warn('Backend fetch error in SingerDubbing:', err);
       setApiError(err.message || 'Could not connect to live backend.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeedBackend = async () => {
+    setIsSubmitting(true);
+    try {
+      showToast('Seeding initial singers to Spring Boot backend database...', 'info');
+      const sampleSingers = [
+        { name: 'Arijit Singh', email: 'arijit@loopstream.media', phone: '+91 98200 11223', languages: 'Hindi, Bengali', voiceType: 'Lead Vocalist (Playback)', voiceRange: 'The Last Monsoon', biography: 'Rains of Sahyadri (Main Theme)', status: 'ACTIVE', active: true },
+        { name: 'Shreya Ghoshal', email: 'shreya@loopstream.media', phone: '+91 98200 44556', languages: 'Hindi, Tamil, Telugu', voiceType: 'Female Lead Playback', voiceRange: 'City of Echoes', biography: 'Echoes in the Dark', status: 'ACTIVE', active: true }
+      ];
+      for (const s of sampleSingers) {
+        await singerApi.create(s).catch(() => {});
+      }
+      await fetchBackendData();
+      showToast('Singers seeded into backend database successfully!');
+    } catch (e) {
+      showToast('Failed to seed singers: ' + e.message, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
