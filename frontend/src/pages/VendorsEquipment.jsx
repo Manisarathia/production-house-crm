@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Truck, Package, X, Calendar } from 'lucide-react';
 import { DeleteActionButton } from '../components/RecordActionButtons';
-import { getStoredProjects } from '../utils/productionStorage.js';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/vendors';
 const PROJECTS_API_URL = 'http://localhost:8080/api/production/projects';
@@ -132,19 +131,19 @@ export default function VendorsEquipment() {
     async function fetchProjects() {
         setProjectsLoading(true);
         setRentError('');
+        setProjects([]);
+        setRentProjectId('');
         try {
-            const response = await fetch(PROJECTS_API_URL);
+            const response = await fetch(PROJECTS_API_URL, { cache: 'no-store' });
             if (!response.ok) throw new Error(`Projects API returned ${response.status}`);
             const data = await response.json();
-            if (!Array.isArray(data) || data.length === 0) throw new Error('Empty projects response');
-            setProjects(data);
-            setRentProjectId(current => data.some(p => p.id === current) ? current : (data[0]?.id || ''));
+            if (!Array.isArray(data)) throw new Error('Invalid projects response');
+            setProjects(data.filter(project => project && project.id));
         } catch (error) {
-            console.warn('Error loading projects, using local storage:', error);
-            const list = getStoredProjects().map(p => ({ ...p, title: p.title || p.name }));
-            setProjects(list);
-            setRentProjectId(list[0]?.id || '');
-            setRentError('');
+            console.error('Unable to load current projects:', error);
+            setProjects([]);
+            setRentProjectId('');
+            setRentError('Unable to load current projects from the server. Check backend connection or login and try again.');
         } finally {
             setProjectsLoading(false);
         }
@@ -385,7 +384,7 @@ export default function VendorsEquipment() {
                                             setSelectedEquipment(x);
                                             setRentProjectId('');
                                             setShowRentModal(true);
-                                            fetchProjects();
+                                            void fetchProjects();
                                         }
                                     }}
                                     style={{ cursor: x.status === 'AVAILABLE' ? 'pointer' : 'not-allowed', flex: 1 }}

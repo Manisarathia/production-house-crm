@@ -77,31 +77,42 @@ public class ProductionProjectService {
 
 	@Transactional
 	public ResponseEntity<Map<String, Object>> delete(String id) {
-		if (!repo.existsById(id))
-			return ResponseEntity.status(404).body(Map.of("error", "Project not found"));
+		Project project = repo.findById(id).orElse(null);
+		if (project == null) return ResponseEntity.status(404).body(Map.of("error", "Project not found"));
 
-		// Native SQL is used because Scene.episodeId and finance projectId
-		// are plain strings, not cascading JPA associations.
-		// Remove grandchildren before their parents.
-		jdbc.update("DELETE p FROM payments p INNER JOIN invoices i ON p.invoice_id = i.id WHERE i.project_id = ?", id);
+		// Legacy scene/episode/crew tables store the project title as plain text.
+		// Refuse ambiguous titles to avoid deleting another project's records.
+		String title = project.getTitle();
+		Integer sameTitleCount = jdbc.queryForObject(
+				"SELECT COUNT(*) FROM projects WHERE title = ?", Integer.class, title);
+		if (sameTitleCount != null && sameTitleCount > 1) {
+			return ResponseEntity.status(409).body(Map.of("error",
+					"Multiple projects share this title. Resolve duplicate project titles before cascading deletion."));
+		}
+
+		// Delete children before parents. @Transactional rolls back on SQL exceptions.
+		jdbc.update("DELETE p FROM payments p JOIN invoices i ON p.invoice_id = i.id WHERE i.project_id = ?", id);
 		jdbc.update("DELETE FROM invoices WHERE project_id = ?", id);
 		jdbc.update("DELETE FROM equipment_bookings WHERE project_id = ?", id);
 		jdbc.update("DELETE FROM expenses WHERE project_id = ?", id);
 		jdbc.update("DELETE FROM budgets WHERE project_id = ?", id);
 
-		jdbc.update("DELETE s FROM production_scenes s INNER JOIN production_episodes e "
-				+ "ON s.episode_id = e.id LEFT JOIN media_items m ON e.media_item_id = m.id "
-				+ "WHERE m.project_id = ? OR e.project = ?", id, id);
-		jdbc.update("DELETE FROM production_scenes WHERE project = ?", id);
-		jdbc.update("DELETE FROM production_crew_members WHERE project = ? OR media_item_id IN "
-				+ "(SELECT id FROM media_items WHERE project_id = ?)", id, id);
+		// Delete scenes linked to episodes of this project, including title-only episodes.
+		jdbc.update("DELETE s FROM production_scenes s JOIN production_episodes e ON s.episode_id = e.id "
+				+ "LEFT JOIN media_items m ON e.media_item_id = m.id "
+				+ "WHERE m.project_id = ? OR e.project = ? OR e.project = ?", id, id, title);
+		// Standalone scenes may have no episode reference.
+		jdbc.update("DELETE FROM production_scenes WHERE project = ? OR project = ?", id, title);
+		jdbc.update("DELETE FROM production_crew_members WHERE project = ? OR project = ? "
+				+ "OR media_item_id IN (SELECT id FROM media_items WHERE project_id = ?)", id, title, id);
 		jdbc.update("DELETE FROM project_cast_crew WHERE media_item_id IN "
 				+ "(SELECT id FROM media_items WHERE project_id = ?)", id);
-		jdbc.update("DELETE FROM production_episodes WHERE project = ? OR media_item_id IN "
-				+ "(SELECT id FROM media_items WHERE project_id = ?)", id, id);
+		jdbc.update("DELETE FROM production_episodes WHERE project = ? OR project = ? "
+				+ "OR media_item_id IN (SELECT id FROM media_items WHERE project_id = ?)", id, title, id);
 		jdbc.update("DELETE FROM media_items WHERE project_id = ?", id);
-		jdbc.update("DELETE FROM projects WHERE id = ?", id);
-		return ResponseEntity.ok(Map.of("message", "Project and associated records deleted successfully"));
+		int deleted = jdbc.update("DELETE FROM projects WHERE id = ?", id);
+		if (deleted != 1) throw new IllegalStateException("Project deletion did not affect exactly one row");
+		return ResponseEntity.ok(Map.of("message", "Project and linked records deleted successfully"));
 	}
 
 	private static Map<String, Object> toResponse(Project p) {
