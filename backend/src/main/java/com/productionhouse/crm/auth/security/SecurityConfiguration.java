@@ -41,7 +41,9 @@ public class SecurityConfiguration {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/api/auth/login", "/api/auth/invitations/accept").permitAll()
+						.requestMatchers("/api/auth/login", "/api/auth/invitations/accept",
+								"/api/production/**",
+								"/api/finance/**").permitAll()
 						.requestMatchers(
 								"/api/auth/**",
 								"/api/dashboard",
