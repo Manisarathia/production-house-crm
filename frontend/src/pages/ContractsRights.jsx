@@ -317,7 +317,8 @@ export default function ContractsRights() {
           renewalAt: null,
           documentReference: contractFormData.fileAttachment || 'doc://legal/vault/contract.pdf',
           notes: contractFormData.paymentTerms || '',
-          active: true
+          active: true,
+          image: contractFormData.image || ''
         };
 
         try {
@@ -363,7 +364,8 @@ export default function ContractsRights() {
           endsAt: rightFormData.endDate || '2031-12-31',
           restrictions: rightFormData.restrictions || '',
           status: normalizeRightsStatusToBackend(rightFormData.status),
-          active: true
+          active: true,
+          image: rightFormData.image || ''
         };
 
         try {
@@ -455,7 +457,8 @@ export default function ContractsRights() {
           renewalAt: null,
           documentReference: contractFormData.fileAttachment || 'doc://legal/vault/contract.pdf',
           notes: contractFormData.paymentTerms || '',
-          active: true
+          active: true,
+          image: contractFormData.image || ''
         };
 
         if (isNumericId) {
@@ -499,7 +502,8 @@ export default function ContractsRights() {
           endsAt: rightFormData.endDate || '2031-12-31',
           restrictions: rightFormData.restrictions || '',
           status: normalizeRightsStatusToBackend(rightFormData.status),
-          active: true
+          active: true,
+          image: rightFormData.image || ''
         };
 
         if (isNumericId) {

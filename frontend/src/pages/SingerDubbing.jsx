@@ -312,7 +312,8 @@ export default function SingerDubbing() {
           recordingStudio: singerFormData.recordingStudio || null,
           fee: Number(singerFormData.fee) || 0,
           isrcCode: singerFormData.isrcCode || null,
-          releaseDate: singerFormData.releaseDate || null
+          releaseDate: singerFormData.releaseDate || null,
+          image: singerFormData.image || ''
         };
 
         try {
@@ -361,7 +362,8 @@ export default function SingerDubbing() {
           language: dubbingFormData.targetLanguage || 'Tamil',
           status: normalizeDubbingStatusToBackend(dubbingFormData.status),
           notes: dubbingFormData.reelsOrEpisodes || '',
-          active: true
+          active: true,
+          image: dubbingFormData.image || ''
         };
 
         try {
@@ -451,7 +453,8 @@ export default function SingerDubbing() {
           recordingStudio: singerFormData.recordingStudio || null,
           fee: Number(singerFormData.fee) || 0,
           isrcCode: singerFormData.isrcCode || null,
-          releaseDate: singerFormData.releaseDate || null
+          releaseDate: singerFormData.releaseDate || null,
+          image: singerFormData.image || ''
         };
 
         if (isNumericId) {
@@ -499,7 +502,8 @@ export default function SingerDubbing() {
           language: dubbingFormData.targetLanguage || 'Tamil',
           status: normalizeDubbingStatusToBackend(dubbingFormData.status),
           notes: dubbingFormData.reelsOrEpisodes || '',
-          active: true
+          active: true,
+          image: dubbingFormData.image || ''
         };
 
         if (isNumericId) {

@@ -311,7 +311,8 @@ export default function PostProductionMedia() {
           startedAt: new Date().toISOString().split('T')[0],
           completedAt: backendStatus === 'COMPLETED' ? (taskFormData.targetDeliveryDate || new Date().toISOString().split('T')[0]) : null,
           notes: taskFormData.notes || '',
-          active: true
+          active: true,
+          image: taskFormData.image || ''
         };
 
         try {
@@ -344,7 +345,8 @@ export default function PostProductionMedia() {
             ? Math.round(Number.parseFloat(assetFormData.fileSize) * 1024 ** 3)
             : null,
           notes: assetFormData.checksum || '',
-          active: true
+          active: true,
+          image: assetFormData.image || ''
         };
 
         try {
@@ -430,7 +432,8 @@ export default function PostProductionMedia() {
           startedAt: editItem.startedAt || new Date().toISOString().split('T')[0],
           completedAt: backendStatus === 'COMPLETED' ? (taskFormData.targetDeliveryDate || new Date().toISOString().split('T')[0]) : null,
           notes: taskFormData.notes || '',
-          active: true
+          active: true,
+          image: taskFormData.image || ''
         };
 
         if (isNumericId) {
@@ -462,7 +465,8 @@ export default function PostProductionMedia() {
             ? Math.round(Number.parseFloat(assetFormData.fileSize) * 1024 ** 3)
             : null,
           notes: assetFormData.checksum || '',
-          active: true
+          active: true,
+          image: assetFormData.image || ''
         };
 
         if (isNumericId) {
