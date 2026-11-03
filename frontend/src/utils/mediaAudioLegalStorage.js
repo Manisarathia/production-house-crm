@@ -1,7 +1,7 @@
 // Storage and Data Service for Media, Audio & Legal Management
 // Pure backend-compatible storage with ZERO mock data.
 
-import { normalizeLoopPlatform } from './productionStorage.js';
+import { formatCurrency, normalizeLoopPlatform } from './productionStorage.js';
 
 export const POST_PROD_STORAGE_KEY = 'loopstream_crm_post_production';
 export const MEDIA_ASSETS_STORAGE_KEY = 'loopstream_crm_media_assets';

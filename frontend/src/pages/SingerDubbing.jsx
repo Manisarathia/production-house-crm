@@ -3,6 +3,7 @@ import {
   Mic,
   Headphones,
   Languages,
+  Clock,
   Search,
   Plus,
   Edit3,
@@ -16,13 +17,21 @@ import {
   PauseCircle,
   CheckCircle2,
   AlertCircle,
+  Radio,
   Volume2,
+  Calendar,
+  Sparkles,
   Music,
-  RefreshCw} from 'lucide-react';
+  Disc3,
+  FileAudio,
+  RefreshCw,
+  Loader2
+} from 'lucide-react';
 import {
   singerApi,
   dubbingApi,
   extractPageItems,
+  normalizeSingerStatusToBackend,
   normalizeSingerStatusToFrontend,
   normalizeDubbingStatusToBackend,
   normalizeDubbingStatusToFrontend
@@ -34,7 +43,8 @@ import {
 import MediaImagePicker from '../components/MediaImagePicker.jsx';
 import {
   getStoredProjects,
-  formatCurrency} from '../utils/productionStorage.js';
+  formatCurrency,
+} from '../utils/productionStorage.js';
 
 const normalizeSessionTime = (value) => {
   const time = value.trim();

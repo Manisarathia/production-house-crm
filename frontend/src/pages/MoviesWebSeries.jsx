@@ -3,12 +3,15 @@ import {
   Film,
   Plus,
   Search,
+  Tv,
   X,
+  PlayCircle,
   LayoutGrid,
   List,
   Table as TableIcon,
   Edit3,
   Trash2,
+  Languages,
   ImageIcon,
   Eye
 } from 'lucide-react';

@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
+  Film,
   HardDrive,
   CheckCircle2,
+  Clock,
   Search,
   Plus,
   Edit3,
@@ -12,11 +14,21 @@ import {
   List,
   Table as TableIcon,
   Sliders,
+  Sparkles,
+  Download,
+  ShieldCheck,
   AlertCircle,
+  FileCheck,
   FolderLock,
+  Layers,
+  PlayCircle,
   Server,
   Cpu,
-  RefreshCw} from 'lucide-react';
+  MonitorPlay,
+  Database,
+  RefreshCw,
+  Loader2
+} from 'lucide-react';
 import {
   postProductionApi,
   mediaAssetApi,
@@ -32,7 +44,8 @@ import {
 } from '../utils/mediaAudioLegalImages.js';
 import MediaImagePicker from '../components/MediaImagePicker.jsx';
 import {
-  getStoredProjects} from '../utils/productionStorage.js';
+  getStoredProjects,
+} from '../utils/productionStorage.js';
 
 export default function PostProductionMedia() {
   const [projects] = useState(() => getStoredProjects());

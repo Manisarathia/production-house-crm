@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   FileText,
   Scale,
+  ShieldCheck,
   Globe,
+  Building,
   Download,
   Plus,
   Search,
@@ -15,8 +17,16 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  Clock,
+  Sparkles,
+  Lock,
   FileCheck,
-  RefreshCw} from 'lucide-react';
+  Calendar,
+  DollarSign,
+  Briefcase,
+  RefreshCw,
+  Loader2
+} from 'lucide-react';
 import {
   contractApi,
   contentRightApi,
@@ -34,7 +44,9 @@ import {
 import MediaImagePicker from '../components/MediaImagePicker.jsx';
 import {
   getStoredProjects,
-  formatCurrency} from '../utils/productionStorage.js';
+  formatCurrency,
+  normalizeLoopPlatform,
+} from '../utils/productionStorage.js';
 
 export default function ContractsRights() {
   const [projects] = useState(() => getStoredProjects());
