@@ -16,14 +16,6 @@ import {
   Eye
 } from 'lucide-react';
 
-import {
-  getStoredTitles,
-  createTitle,
-  updateTitle,
-  deleteTitle,
-  getStoredProjects
-} from '../utils/productionStorage.js';
-
 const MEDIA_API_URL = 'http://localhost:8080/api/production/media-items';
 const PROJECTS_API_URL = 'http://localhost:8080/api/production/projects';
 
@@ -64,33 +56,6 @@ export default function MoviesWebSeries() {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  const loadFromStorage = () => {
-    const mediaData = getStoredTitles();
-    const projectsData = getStoredProjects();
-    setProjects(projectsData);
-    const mappedTitles = mediaData.map(item => ({
-      id: item.id,
-      title: item.title || 'Untitled Feature',
-      category: item.category || (item.episodes ? 'Web Series' : 'Movie'),
-      seasons: item.seasons || (item.episodes ? 'Season 1' : 'Feature Film'),
-      runtime: item.runtime || (item.episodes ? 'Episodic Breakdown' : '128 minutes'),
-      releaseType: item.releaseType || 'OTT Exclusive',
-      platform: item.platform || 'LoopNexus',
-      genre: item.genre || 'Drama/Production',
-      censorRating: item.censorRating || 'U/A 16+',
-      contentStatus: item.contentStatus || 'Ready for Delivery',
-      associatedProject: item.associatedProject || 'The Last Monsoon',
-      masterFormat: item.masterFormat || '4K HDR UHD',
-      audioLanguages: item.audioLanguages || 'Hindi, Tamil, English',
-      subtitles: item.subtitles || 'English',
-      targetReleaseDate: item.targetReleaseDate || 'TBD',
-      director: item.director || 'Production Director',
-      posterUrl: item.posterUrl || '',
-      logline: item.logline || item.synopsis || 'Production ledger release tracking module.'
-    }));
-    setTitles(mappedTitles);
-  };
-
   const fetchDataFromServer = async () => {
     setLoading(true);
     try {
@@ -103,36 +68,32 @@ export default function MoviesWebSeries() {
         const mediaData = await mediaRes.json();
         const projectsData = await projectsRes.json();
 
-        if (Array.isArray(mediaData) && mediaData.length > 0) {
-          setProjects(projectsData);
-          const mappedTitles = mediaData.map(item => ({
-            id: item.id,
-            title: item.title || 'Untitled Feature',
-            category: item.seasonNumber ? 'Web Series' : 'Movie',
-            seasons: item.seasonNumber ? `Season ${item.seasonNumber}` : 'Feature Film',
-            runtime: item.seasonNumber ? 'Episodic Breakdown' : '128 minutes',
-            releaseType: 'OTT Exclusive',
-            platform: 'LoopNexus',
-            genre: 'Drama/Production',
-            censorRating: 'U/A 16+',
-            contentStatus: item.project?.stage ? item.project.stage.replace('_', ' ') : 'Ready for Delivery',
-            associatedProject: item.project?.title || 'Independent Title',
-            masterFormat: '4K HDR UHD',
-            audioLanguages: 'Hindi, Tamil, English',
-            subtitles: 'English',
-            targetReleaseDate: item.project?.startDate || 'TBD',
-            director: 'Production Director',
-            posterUrl: item.posterUrl || item.project?.posterUrl || '',
-            logline: 'Production ledger release tracking module.'
-          }));
-          setTitles(mappedTitles);
-          return;
-        }
+        setProjects(projectsData);
+
+        const mappedTitles = mediaData.map(item => ({
+          id: item.id,
+          title: item.title || 'Untitled Feature',
+          category: item.seasonNumber ? 'Web Series' : 'Movie',
+          seasons: item.seasonNumber ? `Season ${item.seasonNumber}` : 'Feature Film',
+          runtime: item.seasonNumber ? 'Episodic Breakdown' : '128 minutes',
+          releaseType: 'OTT Exclusive',
+          platform: 'LoopNexus',
+          genre: 'Drama/Production',
+          censorRating: 'U/A 16+',
+          contentStatus: item.project?.stage ? item.project.stage.replace('_', ' ') : 'Ready for Delivery',
+          associatedProject: item.project?.title || 'Independent Title',
+          masterFormat: '4K HDR UHD',
+          audioLanguages: 'Hindi, Tamil, English',
+          subtitles: 'English',
+          targetReleaseDate: item.project?.startDate || 'TBD',
+          director: 'Production Director',
+          posterUrl: item.posterUrl || item.project?.posterUrl || '',
+          logline: 'Production ledger release tracking module.'
+        }));
+        setTitles(mappedTitles);
       }
-      loadFromStorage();
     } catch (error) {
-      console.warn("Failure synchronising database libraries cluster, loading from storage:", error);
-      loadFromStorage();
+      console.error("Failure synchronising database libraries cluster:", error);
     } finally {
       setLoading(false);
     }
@@ -190,38 +151,18 @@ export default function MoviesWebSeries() {
         setCategoryFilter('ALL');
         setSearchQuery('');
         setCreateModalOpen(false);
+
         await fetchDataFromServer();
-        return;
+      } else {
+        const errorData = await response.json();
+        setValidationError(errorData.error || "Server validation constraint failure.");
       }
     } catch (error) {
-      console.warn("Backend unavailable, creating title in storage:", error);
+      console.error("Network interface communication failure:", error);
+      setValidationError("Failed to communicate with the server repository.");
     }
-
-    createTitle({
-      title: formData.title,
-      category: formData.category,
-      seasons: formData.seasons,
-      runtime: formData.runtime,
-      releaseType: formData.releaseType,
-      platform: formData.platform,
-      genre: formData.genre,
-      censorRating: formData.censorRating,
-      contentStatus: formData.contentStatus,
-      associatedProject: formData.associatedProject || 'The Last Monsoon',
-      masterFormat: formData.masterFormat,
-      audioLanguages: formData.audioLanguages,
-      subtitles: formData.subtitles,
-      targetReleaseDate: formData.targetReleaseDate,
-      director: formData.director,
-      posterUrl: formData.posterUrl,
-      logline: formData.logline
-    });
-    setFormData(initialFormState);
-    setCategoryFilter('ALL');
-    setSearchQuery('');
-    setCreateModalOpen(false);
-    loadFromStorage();
   };
+
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -249,33 +190,10 @@ export default function MoviesWebSeries() {
       if (response.ok) {
         setEditModalTitle(null);
         await fetchDataFromServer();
-        return;
       }
     } catch (error) {
-      console.warn("Backend unavailable, updating title in storage:", error);
+      console.error("Network failure processing modification block:", error);
     }
-
-    updateTitle(editModalTitle.id, {
-      title: formData.title,
-      category: formData.category,
-      seasons: formData.seasons,
-      runtime: formData.runtime,
-      releaseType: formData.releaseType,
-      platform: formData.platform,
-      genre: formData.genre,
-      censorRating: formData.censorRating,
-      contentStatus: formData.contentStatus,
-      associatedProject: formData.associatedProject || 'The Last Monsoon',
-      masterFormat: formData.masterFormat,
-      audioLanguages: formData.audioLanguages,
-      subtitles: formData.subtitles,
-      targetReleaseDate: formData.targetReleaseDate,
-      director: formData.director,
-      posterUrl: formData.posterUrl,
-      logline: formData.logline
-    });
-    setEditModalTitle(null);
-    loadFromStorage();
   };
 
   const handleOpenEdit = (titleItem) => {
@@ -308,13 +226,10 @@ export default function MoviesWebSeries() {
       const response = await fetch(`${MEDIA_API_URL}/${id}`, { method: 'DELETE' });
       if (response.ok) {
         await fetchDataFromServer();
-        return;
       }
     } catch (error) {
-      console.warn("Backend unavailable, deleting from storage:", error);
+      console.error("Purge instruction communication failed:", error);
     }
-    deleteTitle(id);
-    loadFromStorage();
   };
 
   return (

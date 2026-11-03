@@ -26,14 +26,6 @@ import {
 } from 'lucide-react';
 
 import { list, create, update, remove, formatCurrency } from '../utils/productionApi.js';
-import {
-  getStoredCastCrew,
-  getStoredProjects,
-  getStoredTitles,
-  createCastCrew as createCastCrewStorage,
-  updateCastCrew as updateCastCrewStorage,
-  deleteCastCrew as deleteCastCrewStorage
-} from '../utils/productionStorage.js';
 
 const listCrew = () => list('crew'); const listProjects = () => list('projects');
 const listMedia = () => list('media-items');
