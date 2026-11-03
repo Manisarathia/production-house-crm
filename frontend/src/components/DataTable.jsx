@@ -1,4 +1,5 @@
 import { getId } from '../utils/helpers';
+import { DeleteActionButton, EditActionButton } from './RecordActionButtons';
 import '../css/Datatable.css';
 export default function DataTable({ columns,
      rows, loading, emptyText,
@@ -33,14 +34,10 @@ export default function DataTable({ columns,
                 <td className="table__actions">
                   {extraActions?.(row)}
                   {onEdit && (
-                    <button className="btn btn--link" onClick={() => onEdit(row)}>
-                      Edit
-                    </button>
+                    <EditActionButton onClick={() => onEdit(row)} />
                   )}
                   {onDelete && (
-                    <button className="btn btn--link btn--danger" onClick={() => handleDelete(row)}>
-                      Delete
-                    </button>
+                    <DeleteActionButton onClick={() => handleDelete(row)} />
                   )}
                 </td>
               )}

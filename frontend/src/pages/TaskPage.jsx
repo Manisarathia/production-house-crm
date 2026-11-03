@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { taskApi } from '../api';
-import useResource from '../hooks/useResourse';
+import useResource from '../hooks/useResource';
 import PageHeader from '../components/PageHeader';
 import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import { formatDate, getId, isPastDate, labelize } from '../utils/helpers';
 import { taskDummyData } from '../data/dummyData';
+import { DeleteActionButton, EditActionButton } from '../components/RecordActionButtons';
 import "../css/TaskPage.css"
 const COLUMNS = ['todo', 'in-progress', 'done'];
 
@@ -75,14 +76,8 @@ export default function TasksPage() {
                           Move to {labelize(COLUMNS[COLUMNS.indexOf(task.status) + 1])}
                         </button>
                       )}
-                      <button className="btn btn--link" 
-                      onClick={() => setEditing(task)}>
-                        Edit
-                      </button>
-                      <button className="btn btn--link btn--danger"
-                       onClick={() => handleDelete(task)}>
-                        Delete
-                      </button>
+                      <EditActionButton onClick={() => setEditing(task)} label="Edit task" />
+                      <DeleteActionButton onClick={() => handleDelete(task)} label="Delete task" />
                     </div>
                   </article>
                 );

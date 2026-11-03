@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { locationApi } from '../api';
-import useResource from '../hooks/useResourse';
+import useResource from '../hooks/useResource';
 import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';

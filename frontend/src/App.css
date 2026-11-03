@@ -2595,6 +2595,91 @@ body {
     font-size: 10px
 }
 
+.login-switch {
+    margin: 14px 0 0;
+    text-align: center;
+    color: #a9a19a;
+    font-size: 11px
+}
+
+.login-switch a {
+    color: #f07842;
+    font-weight: 750
+}
+
+.login-switch a:hover {
+    color: #ffad82
+}
+
+/* Registration keeps the same compact desktop footprint as sign in. */
+.register-form-wrap {
+    max-width: 430px
+}
+
+.register-form-wrap .login-welcome {
+    margin-bottom: 20px
+}
+
+.register-form-wrap .login-welcome h2 {
+    font-size: clamp(29px, 2.7vw, 36px);
+    margin: 10px 0 7px
+}
+
+.register-form {
+    gap: 7px
+}
+
+.register-form > input,
+.register-form .password-field,
+.register-form .login-submit {
+    height: 42px
+}
+
+.register-form > input {
+    margin-bottom: 3px
+}
+
+.register-password-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin: 1px 0 3px
+}
+
+.register-password-control {
+    min-width: 0
+}
+
+.register-password-control > label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 750;
+    color: #e3ddd7
+}
+
+.register-password-control .password-field {
+    margin: 0;
+    padding: 0 9px
+}
+
+.register-password-control .password-field input {
+    font-size: 11px
+}
+
+.register-form-wrap .login-switch {
+    margin-top: 10px
+}
+
+.register-form-wrap .login-secure-note {
+    margin-top: 16px;
+    padding-top: 14px
+}
+
+.register-form-wrap .login-copyright {
+    margin-top: 16px
+}
+
 .login-secure-note {
     display: flex;
     align-items: flex-start;
@@ -2745,6 +2830,11 @@ body {
 
     .login-copyright {
         line-height: 1.6
+    }
+
+    .register-password-row {
+        grid-template-columns: 1fr;
+        gap: 7px
     }
 }
 

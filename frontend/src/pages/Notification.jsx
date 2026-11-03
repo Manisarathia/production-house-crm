@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { notificationApi } from '../api';
-import useResource from '../hooks/useResourse';
+import useResource from '../hooks/useResource';
 import PageHeader from '../components/PageHeader';
 import SummaryStrip from '../components/SummaryStrip';
 import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import { formatDateTime, getId, labelize } from '../utils/helpers';
 import { notificationDummyData } from '../data/dummyData';
+import { DeleteActionButton } from '../components/RecordActionButtons';
 import '../css/NotificationPage.css';
 
 const TYPES = ['delivery', 'approval', 'ott', 'schedule', 'general'];
@@ -112,9 +113,7 @@ export default function NotificationsPage() {
                   Mark read
                 </button>
               )}
-              <button className="btn btn--link btn--danger" onClick={() => handleDelete(item)}>
-                Delete
-              </button>
+              <DeleteActionButton onClick={() => handleDelete(item)} label="Delete notification" />
             </div>
           </li>
         ))}

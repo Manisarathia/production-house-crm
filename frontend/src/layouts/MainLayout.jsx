@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import './MainLayout.css';
 import { notificationApi } from '../api';
-import useResource from '../hooks/useResourse';
+import useResource from '../hooks/useResource';
 import { notificationDummyData } from '../data/dummyData';
 import { authApi } from '../api/systemAdministrationApi.js';
 

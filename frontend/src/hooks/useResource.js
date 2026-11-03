@@ -47,7 +47,7 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
         throw new Error('Backend returned invalid response');
       }
     } catch {
-      // Backend is offline or not reachable -> Show dummy data
+
       setIsBackendConnected(false);
 
       let initialData = null;

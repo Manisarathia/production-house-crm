@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search, MoreHorizontal, Building2, X, Users } from 'lucide-react';
+import { Plus, Search, Pencil, Building2, X, Users } from 'lucide-react';
+import { DeleteActionButton } from '../components/RecordActionButtons';
 import { departmentsApi, teamMembersApi } from '../api/systemAdministrationApi.js';
 
 const DEPARTMENT_COLORS = ['blue', 'purple', 'green', 'orange', 'pink', 'cyan'];
@@ -163,7 +164,7 @@ export default function Departments() {
                     aria-label={`Edit ${department.name}`}
                     title="Edit department"
                   >
-                    <MoreHorizontal size={19} />
+                    <Pencil size={16} />
                   </button>}
                 </div>
                 <h3>{department.name}</h3>
@@ -185,7 +186,7 @@ export default function Departments() {
                   >
                     <Users size={15} /> {department.members} members
                   </button>
-                  {canWrite && <button onClick={() => handleDelete(department)}>Delete</button>}
+                  {canWrite && <DeleteActionButton onClick={() => handleDelete(department)} label={`Delete ${department.name}`} />}
                 </div>
               </article>
             ))}

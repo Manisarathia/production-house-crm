@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 import Dashboard from './pages/Dashboard';
 import TeamUsers from './pages/TeamUsers';
@@ -55,6 +56,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       <Route element={<ProtectedLayout />}>
         <Route path="/" element={<Dashboard />} />

@@ -15,7 +15,7 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const publicAuthEndpoint = ['/auth/login', '/auth/invitations/accept'].includes(config.url);
+    const publicAuthEndpoint = ['/auth/login', '/auth/register', '/auth/invitations/accept'].includes(config.url);
     if (token && !publicAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }

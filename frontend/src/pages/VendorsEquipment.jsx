@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Truck, Package, X, Calendar } from 'lucide-react';
+import { DeleteActionButton } from '../components/RecordActionButtons';
 import { getStoredProjects } from '../utils/productionStorage.js';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/vendors';
@@ -358,14 +359,7 @@ export default function VendorsEquipment() {
                                             </span>
                                         </td>
                                         <td>
-                                            <button
-                                                type="button"
-                                                className="reject-btn"
-                                                onClick={(e) => handleDeleteVendor(v.id, e)}
-                                                style={{ padding: '4px 8px', fontSize: '10px' }}
-                                            >
-                                                Remove
-                                            </button>
+                                            <DeleteActionButton onClick={(e) => handleDeleteVendor(v.id, e)} label={`Delete ${v.name}`} />
                                         </td>
 
                                     </tr>
@@ -415,12 +409,7 @@ export default function VendorsEquipment() {
                                 </div>
 
                                 <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #303030', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button
-                                        type="button"
-                                        style={{ border: '0', background: 'transparent', color: '#ff8989', fontSize: '11px', cursor: 'pointer', padding: '0' }}
-                                        onClick={(e) => handleDeleteEquipment(x.id, e)}
-                                    > Delete Set
-                                    </button>
+                                    <DeleteActionButton onClick={(e) => handleDeleteEquipment(x.id, e)} label={`Delete ${x.name}`} />
                                     <button
                                         type="button"
                                         className={x.status === 'MAINTENANCE' ? 'approve-btn' : 'reject-btn'}

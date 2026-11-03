@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { approvalApi, attendanceApi, deliveryApi, ottApi, scheduleApi, taskApi } from '../api';
-import useResource from '../hooks/useResourse';
+import useResource from '../hooks/useResource';
 import PageHeader from '../components/PageHeader';
 import SummaryStrip from '../components/SummaryStrip';
 import DataTable from '../components/DataTable';
