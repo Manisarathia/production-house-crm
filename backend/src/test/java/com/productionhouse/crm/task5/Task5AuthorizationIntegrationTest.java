@@ -136,6 +136,36 @@ class Task5AuthorizationIntegrationTest {
         assertThat(userRepository.existsByEmailIgnoreCase("existing@studio.test")).isTrue();
     }
 
+    @Test
+    void persistsUploadedImageWithPostProductionRecord() throws Exception {
+        Role adminRole = roleRepository.findByNameIgnoreCase("ADMIN").orElseThrow();
+        CrmUser admin = new CrmUser("Studio Administrator", ADMIN_EMAIL,
+                passwordEncoder.encode(PASSWORD), UserStatus.ACTIVE);
+        admin.setRoles(Set.of(adminRole));
+        userRepository.saveAndFlush(admin);
+
+        String imageData = "data:image/png;base64,"
+                + java.util.Base64.getEncoder().encodeToString(new byte[256 * 1024]);
+        String token = login(ADMIN_EMAIL, PASSWORD);
+        MvcResult created = mockMvc.perform(post("/api/mediahouse/postproduction")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(java.util.Map.of(
+                                "name", "Image persistence check",
+                                "status", "NOT_STARTED",
+                                "image", imageData))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.image").value(imageData))
+                .andReturn();
+
+        long id = objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asLong();
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                "/api/mediahouse/postproduction/" + id)
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.image").value(imageData));
+    }
+
     private String login(String email, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

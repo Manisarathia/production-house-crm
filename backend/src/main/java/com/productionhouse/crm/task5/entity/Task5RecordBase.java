@@ -35,6 +35,9 @@ public abstract class Task5RecordBase {
     @Column(length = 2000)
     private String notes;
 
+    @Column(name = "image_data", columnDefinition = "LONGTEXT")
+    private String image;
+
     @Column(nullable = false)
     private boolean active = true;
 

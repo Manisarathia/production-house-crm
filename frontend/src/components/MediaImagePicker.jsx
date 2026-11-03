@@ -1,6 +1,9 @@
 import React, { useRef } from 'react';
 import { Image as ImageIcon, Upload, X, Sparkles, Check } from 'lucide-react';
 
+const MAX_IMAGE_FILE_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_DATA_CHARS = 11_200_000;
+
 export default function MediaImagePicker({
   value,
   onChange,
@@ -13,13 +16,21 @@ export default function MediaImagePicker({
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 8 * 1024 * 1024) {
+      if (file.size > MAX_IMAGE_FILE_BYTES) {
         alert('Please choose an image under 8MB.');
         return;
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        onChange(event.target.result);
+        const imageData = event.target.result;
+        if (typeof imageData !== 'string' || imageData.length > MAX_IMAGE_DATA_CHARS) {
+          alert('The selected image exceeds the supported upload size.');
+          return;
+        }
+        onChange(imageData);
+      };
+      reader.onerror = () => {
+        alert('Could not read the selected image. Please try another file.');
       };
       reader.readAsDataURL(file);
     }
@@ -92,7 +103,8 @@ export default function MediaImagePicker({
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center' }}>
         <input
-          type="url"
+          type="text"
+          maxLength={MAX_IMAGE_DATA_CHARS}
           placeholder={placeholder}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
