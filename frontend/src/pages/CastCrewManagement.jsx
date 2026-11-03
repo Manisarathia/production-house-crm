@@ -188,7 +188,6 @@ export default function CastCrewManagement() {
     event.target.value = '';
   };
 
-  // Match the simple poster-upload layout used by Movies & Web Series.
   const renderMemberImageField = (isEdit = false) => (
     <div style={{ marginTop: '15px', marginBottom: '15px' }}>
       <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -347,6 +346,29 @@ export default function CastCrewManagement() {
         .cast-crew-poster-img { display: block; width: 100%; height: 100%; object-fit: cover; }
         .cast-crew-poster-placeholder { color: #777; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .cast-crew-poster-card .prod-card-foot { margin-top: auto; }
+
+        .cast-crew-poster-card { gap: 14px; min-width: 0; }
+        .cast-crew-poster-card .cast-crew-poster-wrap { flex-shrink: 0; margin-bottom: 0; }
+        .cast-crew-poster-card .prod-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; margin: 0; }
+        .cast-crew-poster-card .prod-card-title-group { flex: 1 1 auto; min-width: 0; }
+        .cast-crew-poster-card .prod-card-title-group > div { min-width: 0; }
+        .cast-crew-poster-card .prod-card-title-group h3 { margin: 0 0 5px; overflow-wrap: anywhere; line-height: 1.35; }
+        .cast-crew-poster-card .prod-card-title-group span { display: block; line-height: 1.4; overflow-wrap: anywhere; }
+        .cast-crew-poster-card .prod-card-top > .status-pill { flex-shrink: 0; white-space: nowrap; }
+        .cast-crew-poster-card .member-role-box { min-height: 64px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+        .cast-crew-poster-card .member-role-box strong { font-size: 12px !important; line-height: 1.4; overflow-wrap: anywhere; }
+        .cast-crew-poster-card .prod-meta-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; min-height: 32px; }
+        .cast-crew-poster-card .prod-meta-tags > * { max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; }
+        .cast-crew-poster-card .prod-finance-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin: 0; padding: 12px; box-sizing: border-box; }
+        .cast-crew-poster-card .prod-finance-item { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+        .cast-crew-poster-card .prod-finance-item span { line-height: 1.4; overflow-wrap: anywhere; }
+        .cast-crew-poster-card .prod-finance-item strong { line-height: 1.3; overflow-wrap: anywhere; }
+        .cast-crew-poster-card .prod-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; min-width: 0; }
+        .cast-crew-poster-card .prod-foot-crew { flex: 1 1 auto; min-width: 0; }
+        .cast-crew-poster-card .prod-foot-crew strong { font-size: 12px !important; overflow-wrap: anywhere; line-height: 1.35; }
+        .cast-crew-poster-card .prod-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .cast-crew-poster-card .prod-card-actions .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; }
+
 
         .prod-card, .prod-list-card {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -698,7 +720,7 @@ export default function CastCrewManagement() {
                     <span className={`status-pill ${tone}`}>{member.status}</span>
                   </div>
 
-                  <div style={{ background: '#202020', padding: '10px 12px', borderRadius: '8px', border: '1px solid #2d2d2d' }}>
+                  <div className="member-role-box" style={{ background: '#202020', padding: '10px 12px', borderRadius: '8px', border: '1px solid #2d2d2d' }}>
                     <span style={{ fontSize: '8.5px', color: '#a7a09a', display: 'block', marginBottom: '2px' }}>
                       ASSIGNED DESIGNATION / ROLE
                     </span>
