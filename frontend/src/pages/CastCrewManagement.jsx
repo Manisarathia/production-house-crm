@@ -1010,6 +1010,23 @@ export default function CastCrewManagement() {
               </label>
             </div>
 
+            <div className="form-grid-2">
+              <label>
+                Media Item
+                <select
+                  value={formData.mediaItemId || ''}
+                  onChange={e => setFormData({ ...formData, mediaItemId: e.target.value })}
+                >
+                  <option value="">Select Movie/Series</option>
+                  {mediaItems.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.title || item.name || item.id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
             <div className="form-grid-3">
               <label>
                 Agreed Rate (₹ INR)
@@ -1042,6 +1059,23 @@ export default function CastCrewManagement() {
                   value={formData.daysBooked}
                   onChange={e => setFormData({ ...formData, daysBooked: e.target.value })}
                 />
+              </label>
+            </div>
+
+            <div className="form-grid-2">
+              <label>
+                Media Item
+                <select
+                  value={formData.mediaItemId || ''}
+                  onChange={e => setFormData({ ...formData, mediaItemId: e.target.value })}
+                >
+                  <option value="">Select Media Item (optional)</option>
+                  {mediaItems.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.title || item.name || item.id}
+                    </option>
+                  ))}
+                </select>
               </label>
             </div>
 
