@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, ReceiptText, X, Download } from 'lucide-react';
-import { getStoredProjects } from '../utils/productionStorage.js';
 
 const PROJECTS_API = 'http://localhost:8080/api/production/projects';
 const VENDORS_API = 'http://localhost:8080/api/finance/vendors';
@@ -30,21 +29,30 @@ export default function InvoicesPayments() {
   }, []);
   const [projectLoadError, setProjectLoadError] = useState('');
   useEffect(() => {
-    fetch(PROJECTS_API).then(async r => {
-      if (!r.ok) throw new Error('Projects API returned ' + r.status);
-      return r.json();
-    })
-      .then(data => {
-        const list = Array.isArray(data) && data.length > 0 ? data : getStoredProjects();
-        setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
-        setProjectLoadError('');
-      })
-      .catch(err => {
-        console.warn('Backend projects API offline, using local storage:', err);
-        const list = getStoredProjects();
-        setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
-        setProjectLoadError('');
-      });
+    let cancelled = false;
+    async function loadProjects() {
+      setProjects([]);
+      setProjectId('');
+      setProjectLoadError('');
+      try {
+        const response = await fetch(PROJECTS_API, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Projects API returned ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('Invalid projects response');
+        if (!cancelled) {
+          setProjects(data.filter(p => p && p.id).map(p => ({ ...p, title: p.title || p.name || '' })));
+        }
+      } catch (error) {
+        console.error('Unable to load projects from backend:', error);
+        if (!cancelled) {
+          setProjects([]);
+          setProjectId('');
+          setProjectLoadError('Unable to load projects from the server. Check backend connection or login.');
+        }
+      }
+    }
+    void loadProjects();
+    return () => { cancelled = true; };
   }, []);
   const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
@@ -394,8 +402,9 @@ export default function InvoicesPayments() {
                 required
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
+                disabled={projects.length === 0}
               >
-                <option value="">-- Select production project --</option>
+                <option value="">{projects.length === 0 ? 'No projects available' : '-- Select production project --'}</option>
                 {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
               </select>
             </label>
@@ -414,7 +423,7 @@ export default function InvoicesPayments() {
 
             <div className="modal-actions">
               <button type="button" className="btn btn-light" onClick={() => setShow(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary"><ReceiptText size={16} /> Create invoice</button>
+              <button type="submit" className="btn btn-primary" disabled={!projectId}><ReceiptText size={16} /> Create invoice</button>
             </div>
           </form>
         </div>

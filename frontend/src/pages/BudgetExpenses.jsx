@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Wallet, X } from 'lucide-react';
-import { getStoredProjects } from '../utils/productionStorage.js';
+import { departmentsApi } from '../api/systemAdministrationApi.js';
 
 const PROJECTS_API = 'http://localhost:8080/api/production/projects';
 
@@ -11,23 +11,32 @@ const money = n => '₹' + Number(n).toLocaleString('en-IN');
 export default function BudgetExpenses() {
     const [projects, setProjects] = useState([]);
     const [projectLoadError, setProjectLoadError] = useState('');
-    useEffect(() => {
-        fetch(PROJECTS_API).then(async r => {
-            if (!r.ok) throw new Error('Projects API returned ' + r.status);
-            return r.json();
-        })
-            .then(data => {
-                const list = Array.isArray(data) && data.length > 0 ? data : getStoredProjects();
-                setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
-                setProjectLoadError('');
-            })
-            .catch(err => {
-                console.warn('Backend projects API offline, using local storage:', err);
-                const list = getStoredProjects();
-                setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
-                setProjectLoadError('');
-            });
-    }, []);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadProjects() {
+      setProjects([]);
+      setProjectId('');
+      setProjectLoadError('');
+      try {
+        const response = await fetch(PROJECTS_API, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Projects API returned ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('Invalid projects response');
+        if (!cancelled) {
+          setProjects(data.filter(p => p && p.id).map(p => ({ ...p, title: p.title || p.name || '' })));
+        }
+      } catch (error) {
+        console.error('Unable to load projects from backend:', error);
+        if (!cancelled) {
+          setProjects([]);
+          setProjectId('');
+          setProjectLoadError('Unable to load projects from the server. Check backend connection or login.');
+        }
+      }
+    }
+    void loadProjects();
+    return () => { cancelled = true; };
+  }, []);
     const [expenses, setExpenses] = useState([]);
     const [q, setQ] = useState('');
     const [show, setShow] = useState(false);
@@ -39,7 +48,29 @@ export default function BudgetExpenses() {
     const [title, setTitle] = useState('');
     const [projectId, setProjectId] = useState('');
     const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState('Production');
+    const [category, setCategory] = useState('');
+    const [departments, setDepartments] = useState([]);
+    const [departmentsLoading, setDepartmentsLoading] = useState(false);
+    const [departmentError, setDepartmentError] = useState('');
+
+    const loadDepartments = async () => {
+        setDepartmentsLoading(true);
+        setDepartmentError('');
+        try {
+            const data = await departmentsApi.list();
+            if (!Array.isArray(data)) throw new Error('Invalid departments response');
+            const active = data.filter(d => d && d.active !== false && d.name);
+            setDepartments(active);
+            setCategory(current => active.some(d => d.name === current) ? current : '');
+        } catch (error) {
+            console.error('Unable to load expense categories from departments:', error);
+            setDepartments([]);
+            setCategory('');
+            setDepartmentError(error.message || 'Unable to load departments. Check your access.');
+        } finally {
+            setDepartmentsLoading(false);
+        }
+    };
     const [loggedBy, setLoggedBy] = useState('Production Manager');
 
     const fetchExpenses = async () => {
@@ -158,7 +189,7 @@ export default function BudgetExpenses() {
                     <h1>Budget & Expenses</h1>
                     <p>Monitor production budgets, track spend and review expense requests.</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={18} /> Add expense</button>
+                <button className="btn btn-primary" onClick={() => { setCategory(''); setShow(true); void loadDepartments(); }}><Plus size={18} /> Add expense</button>
             </div>
 
             <section className="stats-grid finance-stats">
@@ -282,21 +313,19 @@ export default function BudgetExpenses() {
 
                         <label>
                             Project Context Selection Key
-                            <select required value={projectId} onChange={e => setProjectId(e.target.value)}>
-                                <option value="">-- Select production project --</option>
+                            <select required value={projectId} onChange={e => setProjectId(e.target.value)} disabled={projects.length === 0}>
+                                <option value="">{projects.length === 0 ? 'No projects available' : '-- Select production project --'}</option>
                                 {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                             </select>
                         </label>
 
                         <label>
                             Category
-                            <select value={category} onChange={e => setCategory(e.target.value)}>
-                                <option value="Production">Production</option>
-                                <option value="Equipment">Equipment</option>
-                                <option value="Travel">Travel</option>
-                                <option value="Operations">Operations</option>
-                                <option value="Post-production">Post-production</option>
+                            <select required value={category} onChange={e => setCategory(e.target.value)} disabled={departmentsLoading || departments.length === 0}>
+                                <option value="">{departmentsLoading ? 'Loading departments...' : departments.length === 0 ? 'No departments available' : '-- Select Department --'}</option>
+                                {departments.map(dept => <option key={dept.id} value={dept.name}>{dept.name}</option>)}
                             </select>
+                            {departmentError && <p role="alert" style={{ color: '#ff8989', fontSize: '12px' }}>{departmentError}</p>}
                         </label>
 
                         <label>
@@ -306,7 +335,7 @@ export default function BudgetExpenses() {
 
                         <div className="modal-actions">
                             <button type="button" className="btn btn-light" onClick={() => setShow(false)}>Cancel</button>
-                            <button type="submit" className="btn btn-primary"><Plus size={16} /> Submit expense</button>
+                            <button type="submit" className="btn btn-primary" disabled={!projectId || !category || departmentsLoading}><Plus size={16} /> Submit expense</button>
                         </div>
                     </form>
                 </div>
