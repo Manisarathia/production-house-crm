@@ -1,7 +1,6 @@
 package com.productionhouse.crm.systemadministration.settings.api;
 
 import com.productionhouse.crm.auth.security.CurrentUser;
-import com.productionhouse.crm.systemadministration.roles.entity.Permission;
 import com.productionhouse.crm.systemadministration.settings.api.dto.SettingRequest;
 import com.productionhouse.crm.systemadministration.settings.api.dto.SettingResponse;
 import com.productionhouse.crm.systemadministration.settings.api.dto.SettingValueRequest;

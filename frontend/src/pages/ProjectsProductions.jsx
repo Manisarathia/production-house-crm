@@ -3,7 +3,6 @@ import {
   Film,
   Plus,
   Search,
-  Calendar,
   Eye,
   X,
   PlayCircle,

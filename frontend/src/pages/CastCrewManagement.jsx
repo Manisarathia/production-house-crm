@@ -3,27 +3,14 @@ import {
   Users,
   UserPlus,
   Search,
-  Clapperboard,
-  ShieldCheck,
   Phone,
-  Mail,
-  Calendar,
-  IndianRupee,
-  Briefcase,
   Trash2,
   Edit3,
   Eye,
   X,
   LayoutGrid,
   List,
-  Table as TableIcon,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  Award,
-  AlertCircle,
-  Film
-} from 'lucide-react';
+  Table as TableIcon} from 'lucide-react';
 
 import { list, create, update, remove, formatCurrency } from '../utils/productionApi.js';
 import {
