@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Truck, Package, X, Calendar } from 'lucide-react';
 import { DeleteActionButton } from '../components/RecordActionButtons';
+import { departmentsApi } from '../api/systemAdministrationApi.js';
 
 const API_BASE_URL = 'http://localhost:8080/api/finance/vendors';
 const PROJECTS_API_URL = 'http://localhost:8080/api/production/projects';
@@ -15,7 +16,7 @@ export default function VendorsEquipment() {
     const [mode, setMode] = useState('Vendors');
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('CAMERA_AND_LENSES');
+    const [category, setCategory] = useState('');
     const [contactEmail, setContactEmail] = useState('');
     const [eqName, setEqName] = useState('');
     const [dailyRate, setDailyRate] = useState('');
@@ -29,7 +30,9 @@ export default function VendorsEquipment() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [rentError, setRentError] = useState('');
-    const [categories, setCategories] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [departmentError, setDepartmentError] = useState('');
+    const [departmentsLoading, setDepartmentsLoading] = useState(false);
 
 
     const fetchVendors = async () => {
@@ -52,18 +55,22 @@ export default function VendorsEquipment() {
         }
     };
 
-    const fetchCategories = async () => {
+    const fetchDepartments = async () => {
+        setDepartmentsLoading(true);
+        setDepartmentError('');
         try {
-            const response = await fetch(`${API_BASE_URL}/categories`);
-            if (response.ok) {
-                const data = await response.json();
-                setCategories(data);
-                if (data.length > 0 && !category) {
-                    setCategory(data[0]);
-                }
-            }
+            const data = await departmentsApi.list();
+            if (!Array.isArray(data)) throw new Error('Invalid departments response');
+            const active = data.filter(d => d.active !== false && d.name);
+            setDepartments(active);
+            setCategory(current => active.some(d => d.name === current) ? current : '');
         } catch (error) {
-            console.error("Error loading vendor categories:", error);
+            console.error('Unable to load departments:', error);
+            setDepartments([]);
+            setCategory('');
+            setDepartmentError('Unable to load departments. Check DEPARTMENT_READ permission and backend connection.');
+        } finally {
+            setDepartmentsLoading(false);
         }
     };
 
@@ -81,7 +88,7 @@ export default function VendorsEquipment() {
 
     const refreshAllData = async () => {
         setLoading(true);
-        await Promise.all([fetchVendors(), fetchEquipment(), fetchCategories()]);
+        await Promise.all([fetchVendors(), fetchEquipment(), fetchDepartments()]);
         setLoading(false);
     };
 
@@ -286,7 +293,7 @@ export default function VendorsEquipment() {
                 </div>
                 <div className="heading-actions" style={{ display: 'flex', gap: '10px' }}>
                     <button style={{ background: "#e3652e" }} className="btn btn-light" onClick={() => { setSelectedVendorId(''); setShowEq(true); fetchVendors(); }}><Plus size={18} /> Add equipment</button>
-                    <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={18} /> Add vendor</button>
+                    <button className="btn btn-primary" onClick={() => { setCategory(''); setShow(true); fetchDepartments(); }}><Plus size={18} /> Add vendor</button>
                 </div>
             </div>
 
@@ -347,7 +354,7 @@ export default function VendorsEquipment() {
                                         <td><div className="project-name"><div className="department-icon blue"><Truck size={18} /></div><div><strong>{v.name}</strong></div></div></td>
                                         <td>
                                             <span style={{ fontWeight: '500' }}>
-                                                {mapCategoryLabel(v.category)}
+                                                {v.category || 'Unassigned'}
                                             </span>
                                         </td>
                                         <td><code>{v.contactEmail}</code></td>
@@ -449,13 +456,13 @@ export default function VendorsEquipment() {
                         </label>
 
                         <label> Service type
-                            <select value={category} onChange={e => setCategory(e.target.value)}>
-                                {categories.map((cat) => (
-                                    <option key={cat} value={cat}>
-                                        {mapCategoryLabel(cat)}
-                                    </option>
+                            <select required value={category} onChange={e => setCategory(e.target.value)} disabled={departmentsLoading || departments.length === 0}>
+                                <option value="">{departmentsLoading ? 'Loading departments...' : '-- Select Department --'}</option>
+                                {departments.map(dept => (
+                                    <option key={dept.id} value={dept.name}>{dept.name}</option>
                                 ))}
                             </select>
+                            {departmentError && <p role="alert" style={{ color: '#ff8989', fontSize: '12px' }}>{departmentError}</p>}
                         </label>
 
 
@@ -472,7 +479,7 @@ export default function VendorsEquipment() {
 
                         <div className="modal-actions">
                             <button type="button" className="btn btn-light" onClick={() => setShow(false)}>Cancel</button>
-                            <button type="submit" className="btn btn-primary">Save vendor</button>
+                            <button type="submit" className="btn btn-primary" disabled={departmentsLoading || !category}>Save vendor</button>
                         </div>
                     </form>
                 </div>

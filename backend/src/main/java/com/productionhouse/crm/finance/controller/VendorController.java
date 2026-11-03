@@ -22,7 +22,6 @@ import com.productionhouse.crm.finance.model.Equipment;
 import com.productionhouse.crm.finance.model.EquipmentBooking;
 import com.productionhouse.crm.finance.model.EquipmentStatus;
 import com.productionhouse.crm.finance.model.Vendor;
-import com.productionhouse.crm.finance.model.VendorCategory;
 import com.productionhouse.crm.finance.repository.EquipmentRepository;
 import com.productionhouse.crm.finance.repository.VendorRepository;
 import com.productionhouse.crm.finance.service.EquipmentService;
@@ -56,12 +55,6 @@ public class VendorController {
     public ResponseEntity<List<Vendor>> getAllVendors() {
         return ResponseEntity.ok(vendorService.getAllVendors());
     }
-
-    @GetMapping("/categories")
-    public ResponseEntity<VendorCategory[]> getVendorCategories() {
-        return ResponseEntity.ok(VendorCategory.values());
-    }
-
     
     @GetMapping("/equipment")
     public ResponseEntity<List<Equipment>> getAllEquipment() {
