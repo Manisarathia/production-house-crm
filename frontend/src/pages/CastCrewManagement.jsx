@@ -24,9 +24,7 @@ import {
   AlertCircle,
   Film
 } from 'lucide-react';
-
 import { list, create, update, remove, formatCurrency } from '../utils/productionApi.js';
-
 const listCrew = () => list('crew'); const listProjects = () => list('projects');
 const listMedia = () => list('media-items');
 const createCrew = (data) => create('crew', data);
@@ -43,29 +41,11 @@ export default function CastCrewManagement() {
   const reload = async () => {
     try {
       setApiError('');
-      let [crew, projectRows, mediaRows] = await Promise.all([listCrew(), listProjects(), listMedia()]);
-      if (!Array.isArray(crew) || crew.length === 0) crew = getStoredCastCrew();
-      if (!Array.isArray(projectRows) || projectRows.length === 0) projectRows = getStoredProjects();
-      if (!Array.isArray(mediaRows) || mediaRows.length === 0) {
-        mediaRows = getStoredTitles().map(t => ({
-          ...t,
-          project: { title: t.associatedProject || t.title }
-        }));
-      }
+      const [crew, projectRows, mediaRows] = await Promise.all([listCrew(), listProjects(), listMedia()]);
       setCastCrew(crew);
-      setProjects(projectRows.map(p => ({ ...p, title: p.title || p.name, name: p.name || p.title })));
+      setProjects(projectRows);
       setMediaItems(mediaRows);
-      setApiError('');
-    } catch (e) {
-      console.warn('Cast & Crew reload fallback to storage:', e);
-      setCastCrew(getStoredCastCrew());
-      setProjects(getStoredProjects().map(p => ({ ...p, title: p.title || p.name, name: p.name || p.title })));
-      setMediaItems(getStoredTitles().map(t => ({
-        ...t,
-        project: { title: t.associatedProject || t.title }
-      })));
-      setApiError('');
-    }
+    } catch (e) { setApiError(e.message); }
   };
   useEffect(() => { reload(); }, []);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,7 +76,8 @@ export default function CastCrewManagement() {
     daysBooked: 25,
     dietaryNotes: 'Standard',
     tone: 'blue',
-    mediaItemId: ''
+    mediaItemId: '',
+    memberImage: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -140,12 +121,11 @@ export default function CastCrewManagement() {
 
   const handleOpenCreate = () => {
     setFormError('');
-    const currentProjects = projects.length > 0 ? projects : getStoredProjects();
-    const defaultProj = currentProjects[0]?.title || currentProjects[0]?.name || 'The Last Monsoon';
     setFormData({
       ...initialFormState,
-      project: defaultProj,
-      mediaItemId: ''
+      project: projects[0]?.title || '',
+      mediaItemId: '',
+      memberImage: ''
     });
     setCreateModalOpen(true);
   };
@@ -169,10 +149,69 @@ export default function CastCrewManagement() {
       daysBooked: member.daysBooked || 0,
       dietaryNotes: member.dietaryNotes || 'Standard',
       tone: member.tone || 'blue',
-      mediaItemId: member.mediaItemId || ''
+      mediaItemId: member.mediaItemId || '',
+      memberImage: member.memberImage || ''
     });
     setEditModalMember(member);
   };
+
+  const handleMemberImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setFormError('Please select a JPG, PNG or WebP image.');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError('Image must be smaller than 5 MB.');
+      event.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 512 / Math.max(img.width, img.height));
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        setFormData(prev => ({ ...prev, memberImage: canvas.toDataURL('image/jpeg', 0.8) }));
+        setFormError('');
+      };
+      img.onerror = () => setFormError('Unable to read image.');
+      img.src = reader.result;
+    };
+    reader.onerror = () => setFormError('Unable to read image.');
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
+
+  // Match the simple poster-upload layout used by Movies & Web Series.
+  const renderMemberImageField = (isEdit = false) => (
+    <div style={{ marginTop: '15px', marginBottom: '15px' }}>
+      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+        {isEdit ? 'Change Member Image *' : 'Attach Member Image *'}
+      </label>
+      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleMemberImageChange} aria-required="true" />
+      {formData.memberImage && (
+        <img
+          src={formData.memberImage}
+          alt="Member preview"
+          style={{ marginTop: '10px', maxHeight: '90px', borderRadius: '4px', display: 'block' }}
+        />
+      )}
+      <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '5px' }}>Required · JPG, PNG or WebP, max 5 MB</div>
+      {formError && <div role="alert" style={{ color: '#ff8585', fontSize: '12px', marginTop: '6px' }}>{formError}</div>}
+      {formData.memberImage && (
+        <button type="button" className="btn btn-sm" style={{ marginTop: '8px' }}
+          onClick={() => setFormData(prev => ({ ...prev, memberImage: '' }))}>
+          Remove Image
+        </button>
+      )}
+    </div>
+  );
 
   const normalizedPhone = () => {
     const digits = String(formData.phone ?? '').replace(/\D/g, '');
@@ -187,6 +226,14 @@ export default function CastCrewManagement() {
     return true;
   };
 
+  const validateMemberImage = () => {
+    if (!formData.memberImage || !formData.memberImage.trim()) {
+      setFormError('Member Image is required. Please upload a photo before saving.');
+      return false;
+    }
+    return true;
+  };
+
   const payloadFromForm = () => ({
     ...formData,
     phone: normalizedPhone(),
@@ -197,57 +244,50 @@ export default function CastCrewManagement() {
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !validatePhone()) return;
+    if (!formData.name.trim() || !validatePhone() || !validateMemberImage()) return;
     setBusy(true);
     setFormError('');
     try {
       await createCrew(payloadFromForm());
+      await reload(); setCreateModalOpen(false);
     }
     catch (err) {
-      console.warn('API createCrew failed, writing to local storage:', err);
-      createCastCrewStorage(payloadFromForm());
+      setFormError(err.message || 'Unable to save member.');
     }
     finally {
-      await reload();
-      setCreateModalOpen(false);
       setBusy(false);
+
     }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!editModalMember || !formData.name.trim() || !validatePhone()) return;
-    setBusy(true);
-    setFormError('');
+    if (!editModalMember || !formData.name.trim() || !validatePhone() || !validateMemberImage()) return;
+    setBusy(true); setFormError('');
     try {
       await updateCrew(editModalMember.id, payloadFromForm());
+      await reload(); setEditModalMember(null); setDetailModalMember(null);
     } catch (err) {
-      console.warn('API updateCrew failed, updating in local storage:', err);
-      updateCastCrewStorage(editModalMember.id, payloadFromForm());
+      setFormError(err.message || 'Unable to update member.');
     }
     finally {
-      await reload();
-      setEditModalMember(null);
-      setDetailModalMember(null);
       setBusy(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTargetMember) return;
-    setBusy(true);
-    setApiError('');
+    setBusy(true); setApiError('');
     try {
       await removeCrew(deleteTargetMember.id);
-    }
-    catch (err) {
-      console.warn('API removeCrew failed, deleting from local storage:', err);
-      deleteCastCrewStorage(deleteTargetMember.id);
-    }
-    finally {
       await reload();
       setDeleteTargetMember(null);
       setDetailModalMember(null);
+    }
+    catch (err) {
+      setApiError(err.message);
+    }
+    finally {
       setBusy(false);
     }
   };
@@ -297,6 +337,18 @@ export default function CastCrewManagement() {
         ::-webkit-scrollbar-thumb:hover {
           background: #e3652e;
         }
+
+        /* Movie-poster-style member cards: large photo with details underneath */
+        .cast-crew-poster-card { overflow: hidden; padding: 18px !important; display: flex; flex-direction: column; }
+        .cast-crew-poster-wrap {
+          width: calc(100% + 36px); margin: -18px -18px 14px -18px;
+          aspect-ratio: 16 / 11; overflow: hidden; background: #222;
+          border-radius: 11px 11px 0 0; display: flex;
+          align-items: center; justify-content: center;
+        }
+        .cast-crew-poster-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .cast-crew-poster-placeholder { color: #777; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .cast-crew-poster-card .prod-card-foot { margin-top: auto; }
 
         .prod-card, .prod-list-card {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -625,20 +677,21 @@ export default function CastCrewManagement() {
           <div className="production-grid">
             {filteredList.map(member => {
               const tone = getStatusTone(member.status);
-              const initials = member.name
-                .split(' ')
-                .map(s => s[0])
-                .join('')
-                .slice(0, 2)
-                .toUpperCase();
 
               return (
-                <div className="prod-card" key={member.id}>
+                <div className="prod-card cast-crew-poster-card" key={member.id}>
+                  <div className="cast-crew-poster-wrap">
+                    {member.memberImage ? (
+                      <img className="cast-crew-poster-img" src={member.memberImage} alt={member.name} />
+                    ) : (
+                      <div className="cast-crew-poster-placeholder">
+                        <Users size={42} />
+                        <span style={{ fontSize: '12px' }}>No member image</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="prod-card-top">
                     <div className="prod-card-title-group">
-                      <div className={`avatar avatar-${member.category === 'Cast' ? 'blue' : 'orange'}`} style={{ width: '38px', height: '38px', fontSize: '12px' }}>
-                        {initials}
-                      </div>
                       <div>
                         <h3>{member.name}</h3>
                         <span>{member.department} · {member.category}</span>
@@ -742,9 +795,13 @@ export default function CastCrewManagement() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '13px', minWidth: '220px', flex: '1.2' }}>
-                    <div className={`avatar avatar-${member.category === 'Cast' ? 'blue' : 'orange'}`} style={{ width: '36px', height: '36px', fontSize: '11px', flexShrink: 0 }}>
-                      {initials}
-                    </div>
+                    {member.memberImage ? (
+                      <img src={member.memberImage} alt={member.name} style={{ width: '64px', height: '76px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, display: 'block' }} />
+                    ) : (
+                      <div style={{ width: '64px', height: '76px', background: '#222', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#8a96a8', fontWeight: 700, fontSize: '16px' }}>
+                        {initials || <Users size={24} />}
+                      </div>
+                    )}
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <h3 style={{ margin: 0, fontSize: '15px', color: '#f4f0eb', fontWeight: 750 }}>
@@ -842,7 +899,7 @@ export default function CastCrewManagement() {
                       <td>
                         <div className="project-name">
                           <div className={`avatar avatar-${member.category === 'Cast' ? 'blue' : 'orange'}`} style={{ width: '30px', height: '30px', fontSize: '10px' }}>
-                            {initials}
+                            {member.memberImage ? <img src={member.memberImage} alt={member.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : initials}
                           </div>
                           <div>
                             <strong>{member.name}</strong>
@@ -948,6 +1005,8 @@ export default function CastCrewManagement() {
               </button>
             </div>
 
+            {renderMemberImageField(false)}
+
             <div className="form-grid-2">
               <label>
                 Full Name *
@@ -1016,8 +1075,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.title || p.name}>
-                      {p.title || p.name}
+                    <option key={p.id} value={p.title}>
+                      {p.title}
                     </option>
                   ))}
                   <option value="General Roster">General Roster (Unassigned)</option>
@@ -1046,7 +1105,7 @@ export default function CastCrewManagement() {
                   value={formData.mediaItemId || ''}
                   onChange={e => setFormData({ ...formData, mediaItemId: e.target.value })}
                 >
-                  <option value="">Select Movie/Series</option>
+                  <option value="">Select Media Item (optional)</option>
                   {mediaItems.map(item => (
                     <option key={item.id} value={item.id}>
                       {item.title || item.name || item.id}
@@ -1211,6 +1270,8 @@ export default function CastCrewManagement() {
               </button>
             </div>
 
+            {renderMemberImageField(true)}
+
             <div className="form-grid-2">
               <label>
                 Full Name *
@@ -1270,8 +1331,8 @@ export default function CastCrewManagement() {
                   onChange={e => setFormData({ ...formData, project: e.target.value })}
                 >
                   {projects.map(p => (
-                    <option key={p.id} value={p.title || p.name}>
-                      {p.title || p.name}
+                    <option key={p.id} value={p.title}>
+                      {p.title}
                     </option>
                   ))}
                   <option value="General Roster">General Roster</option>
@@ -1417,12 +1478,7 @@ export default function CastCrewManagement() {
                   className={`avatar avatar-${detailModalMember.category === 'Cast' ? 'blue' : 'orange'}`}
                   style={{ width: '46px', height: '46px', fontSize: '15px' }}
                 >
-                  {detailModalMember.name
-                    .split(' ')
-                    .map(s => s[0])
-                    .join('')
-                    .slice(0, 2)
-                    .toUpperCase()}
+                  {detailModalMember.memberImage ? <img src={detailModalMember.memberImage} alt={detailModalMember.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : detailModalMember.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <h2>{detailModalMember.name}</h2>

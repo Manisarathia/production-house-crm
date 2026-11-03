@@ -10,6 +10,7 @@ import com.productionhouse.crm.auth.security.CurrentUser;
 import com.productionhouse.crm.auth.security.JwtTokenService;
 import com.productionhouse.crm.systemadministration.roles.entity.Permission;
 import com.productionhouse.crm.systemadministration.roles.entity.Role;
+import com.productionhouse.crm.systemadministration.roles.repository.RoleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,15 +33,18 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService tokenService;
+    private final RoleRepository roleRepository;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            JwtTokenService tokenService
+            JwtTokenService tokenService,
+            RoleRepository roleRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +62,27 @@ public class AuthService {
                 "Bearer",
                 tokenService.expirationSeconds(),
                 toResponse(user)
+        );
+    }
+
+    /** Registers a self-service account with the least-privileged built-in role. */
+    @Transactional
+    public AuthenticationResponse register(String username, String email, String password) {
+        validateBcryptPasswordLength(password);
+        String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw ApiException.conflict("An account already exists for this email address.");
+        }
+        Role viewerRole = roleRepository.findByNameIgnoreCase("VIEWER")
+                .orElseThrow(() -> new IllegalStateException("Default VIEWER role was not initialized."));
+        CrmUser user = new CrmUser(username.trim(), normalizedEmail, passwordEncoder.encode(password), UserStatus.ACTIVE);
+        user.setRoles(java.util.Set.of(viewerRole));
+        CrmUser savedUser = userRepository.save(user);
+        return new AuthenticationResponse(
+                tokenService.issue(savedUser.getId(), savedUser.getTokenVersion()),
+                "Bearer",
+                tokenService.expirationSeconds(),
+                toResponse(savedUser)
         );
     }
 
