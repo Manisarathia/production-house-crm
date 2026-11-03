@@ -2514,8 +2514,13 @@ body {
 
 .login-form>input:focus,
 .password-field:focus-within {
-    border-color: #e3652e;
-    box-shadow: 0 0 0 3px #e3652e20
+    border-color: #4a4540;
+    box-shadow: none
+}
+
+.login-form > input:focus-visible,
+.password-field:focus-within {
+    outline: none
 }
 
 .password-label {
@@ -2547,6 +2552,13 @@ body {
     background: transparent;
     color: #f4f0eb;
     font-size: 12px
+}
+
+/* The password input lives inside a styled wrapper, so it must not draw a second focus box. */
+.password-field input:focus,
+.password-field input:focus-visible {
+    outline: none;
+    box-shadow: none
 }
 
 .password-field button {

@@ -5,6 +5,7 @@ import com.productionhouse.crm.auth.api.dto.AuthenticationResponse;
 import com.productionhouse.crm.auth.api.dto.ChangePasswordRequest;
 import com.productionhouse.crm.auth.api.dto.CurrentUserResponse;
 import com.productionhouse.crm.auth.api.dto.LoginRequest;
+import com.productionhouse.crm.auth.api.dto.RegisterRequest;
 import com.productionhouse.crm.auth.security.CurrentUser;
 import com.productionhouse.crm.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -31,6 +32,12 @@ public class AuthController {
     @PostMapping("/login")
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request.email(), request.password());
+    }
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AuthenticationResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request.username(), request.email(), request.password());
     }
 
     @PostMapping("/invitations/accept")
