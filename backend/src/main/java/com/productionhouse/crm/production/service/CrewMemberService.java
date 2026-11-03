@@ -50,6 +50,14 @@ public class CrewMemberService {
 		crewMember.setDaysBooked(crewMemberRequest.daysBooked);
 		crewMember.setDietaryNotes(crewMemberRequest.dietaryNotes);
 		crewMember.setTone(crewMemberRequest.tone);
+        if (crewMemberRequest.memberImage == null || crewMemberRequest.memberImage.isBlank())
+            throw new IllegalArgumentException("Member Image is required");
+        String image = crewMemberRequest.memberImage.trim();
+        if (!image.matches("(?s)^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$"))
+            throw new IllegalArgumentException("Member Image must be a JPG, PNG or WebP image");
+        if (image.length() > 8_000_000)
+            throw new IllegalArgumentException("Member Image is too large");
+        crewMember.setMemberImage(image);
 		if (crewMemberRequest.mediaItemId == null || crewMemberRequest.mediaItemId.isBlank())
 			crewMember.setMediaItem(null);
 		else
