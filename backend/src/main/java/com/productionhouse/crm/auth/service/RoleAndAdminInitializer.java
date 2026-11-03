@@ -61,7 +61,7 @@ public class RoleAndAdminInitializer implements ApplicationRunner {
                 || adminPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw new IllegalStateException("Bootstrap admin email or password does not meet the required format.");
         }
-        if (userRepository.count() != 0) {
+        if (userRepository.existsByEmailIgnoreCase(adminEmail.trim())) {
             return;
         }
         Role adminRole = roleRepository.findByNameIgnoreCase("ADMIN")

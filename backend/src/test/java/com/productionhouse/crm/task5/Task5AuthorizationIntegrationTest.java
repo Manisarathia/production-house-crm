@@ -113,6 +113,29 @@ class Task5AuthorizationIntegrationTest {
                 .andExpect(jsonPath("$.message").value("You do not have permission to perform this action."));
     }
 
+    @Test
+    void createsConfiguredBootstrapAdminEvenWhenDatabaseAlreadyHasUsers() throws Exception {
+        CrmUser existingUser = new CrmUser("Existing User", "existing@studio.test",
+                passwordEncoder.encode(PASSWORD), UserStatus.ACTIVE);
+        userRepository.saveAndFlush(existingUser);
+
+        RoleAndAdminInitializer configuredInitializer = new RoleAndAdminInitializer(
+                roleRepository,
+                userRepository,
+                passwordEncoder,
+                "admin@frameflow.com",
+                PASSWORD
+        );
+        configuredInitializer.run(new DefaultApplicationArguments());
+
+        CrmUser bootstrapAdmin = userRepository.findByEmailIgnoreCase("admin@frameflow.com").orElseThrow();
+        assertThat(bootstrapAdmin.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(passwordEncoder.matches(PASSWORD, bootstrapAdmin.getPasswordHash())).isTrue();
+        assertThat(bootstrapAdmin.getRoles()).extracting(Role::getName).contains("ADMIN");
+        assertThat(login("admin@frameflow.com", PASSWORD)).isNotBlank();
+        assertThat(userRepository.existsByEmailIgnoreCase("existing@studio.test")).isTrue();
+    }
+
     private String login(String email, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
