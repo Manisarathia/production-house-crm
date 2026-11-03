@@ -36,6 +36,14 @@ export default function CastCrewManagement() {
   const [mediaItems, setMediaItems] = useState([]);
   const [apiError, setApiError] = useState('');
   const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ phone: '', image: '' });
+  const [phoneCountry, setPhoneCountry] = useState('91');
+  const countryCodes = [{ code: '91', label: 'India (+91)' }, { code: '1', label: 'USA/Canada (+1)' }, { code: '44', label: 'UK (+44)' }, { code: '971', label: 'UAE (+971)' }, { code: '61', label: 'Australia (+61)' }, { code: '65', label: 'Singapore (+65)' }];
+  const splitPhone = (raw) => {
+    const digits = String(raw ?? '').replace(/\D/g, '');
+    const found = [...countryCodes].sort((a, b) => b.code.length - a.code.length).find(c => digits.startsWith(c.code) && digits.length === c.code.length + 10);
+    return { code: found?.code || '91', number: found ? digits.slice(found.code.length) : digits.slice(-10) };
+  };
   const [busy, setBusy] = useState(false);
   const [projects, setProjects] = useState([]);
   const reload = async () => {
@@ -121,6 +129,8 @@ export default function CastCrewManagement() {
 
   const handleOpenCreate = () => {
     setFormError('');
+    setFieldErrors({ phone: '', image: '' });
+    setPhoneCountry('91');
     setFormData({
       ...initialFormState,
       project: projects[0]?.title || '',
@@ -132,6 +142,9 @@ export default function CastCrewManagement() {
 
   const handleOpenEdit = (member) => {
     setFormError('');
+    setFieldErrors({ phone: '', image: '' });
+    const existingPhone = splitPhone(member.phone);
+    setPhoneCountry(existingPhone.code);
     setFormData({
       name: member.name,
       category: member.category,
@@ -139,7 +152,7 @@ export default function CastCrewManagement() {
       role: member.role,
       project: member.project,
       email: member.email,
-      phone: member.phone,
+      phone: existingPhone.number,
       rate: member.rate,
       rateType: member.rateType,
       status: member.status,
@@ -159,12 +172,12 @@ export default function CastCrewManagement() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setFormError('Please select a JPG, PNG or WebP image.');
+      setFieldErrors(prev => ({ ...prev, image: 'Please select a JPG, PNG or WebP image.' }));
       event.target.value = '';
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setFormError('Image must be smaller than 5 MB.');
+      setFieldErrors(prev => ({ ...prev, image: 'Image must be smaller than 5 MB.' }));
       event.target.value = '';
       return;
     }
@@ -178,12 +191,12 @@ export default function CastCrewManagement() {
         canvas.height = Math.max(1, Math.round(img.height * scale));
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         setFormData(prev => ({ ...prev, memberImage: canvas.toDataURL('image/jpeg', 0.8) }));
-        setFormError('');
+        setFieldErrors(prev => ({ ...prev, image: '' }));
       };
-      img.onerror = () => setFormError('Unable to read image.');
+      img.onerror = () => setFieldErrors(prev => ({ ...prev, image: 'Unable to read image.' }));
       img.src = reader.result;
     };
-    reader.onerror = () => setFormError('Unable to read image.');
+    reader.onerror = () => setFieldErrors(prev => ({ ...prev, image: 'Unable to read image.' }));
     reader.readAsDataURL(file);
     event.target.value = '';
   };
@@ -202,10 +215,10 @@ export default function CastCrewManagement() {
         />
       )}
       <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '5px' }}>Required · JPG, PNG or WebP, max 5 MB</div>
-      {formError && <div role="alert" style={{ color: '#ff8585', fontSize: '12px', marginTop: '6px' }}>{formError}</div>}
+      {fieldErrors.image && <div role="alert" style={{ color: '#ff8585', fontSize: '12px', marginTop: '6px' }}>{fieldErrors.image}</div>}
       {formData.memberImage && (
         <button type="button" className="btn btn-sm" style={{ marginTop: '8px' }}
-          onClick={() => setFormData(prev => ({ ...prev, memberImage: '' }))}>
+          onClick={() => { setFormData(prev => ({ ...prev, memberImage: '' })); setFieldErrors(prev => ({ ...prev, image: 'Member Image is required. Please upload a photo before saving.' })); }}>
           Remove Image
         </button>
       )}
@@ -215,25 +228,22 @@ export default function CastCrewManagement() {
   const normalizedPhone = () => String(formData.phone ?? '').replace(/\D/g, '');
 
   const validatePhone = () => {
-    if (!/^91[6-9][0-9]{9}$/.test(normalizedPhone())) {
-      setFormError('Phone must start with 91 followed by a valid 10-digit Indian mobile number (e.g. 919876543210).');
-      return false;
-    }
-    setFormError('');
-    return true;
+    const digits = normalizedPhone();
+    const error = digits.length !== 10 || (phoneCountry === '91' && !/^[6-9]\d{9}$/.test(digits))
+      ? 'Enter a valid 10-digit mobile number after the selected country code.' : '';
+    setFieldErrors(prev => ({ ...prev, phone: error }));
+    return !error;
   };
 
   const validateMemberImage = () => {
-    if (!formData.memberImage || !formData.memberImage.trim()) {
-      setFormError('Member Image is required. Please upload a photo before saving.');
-      return false;
-    }
-    return true;
+    const error = !formData.memberImage?.trim() ? 'Member Image is required. Please upload a photo before saving.' : '';
+    setFieldErrors(prev => ({ ...prev, image: error }));
+    return !error;
   };
 
   const payloadFromForm = () => ({
     ...formData,
-    phone: normalizedPhone(),
+    phone: phoneCountry + normalizedPhone(),
     rate: Number(formData.rate || 0),
     daysBooked: Number(formData.daysBooked || 0),
     mediaItemId: formData.mediaItemId || null
@@ -241,7 +251,10 @@ export default function CastCrewManagement() {
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !validatePhone() || !validateMemberImage()) return;
+    if (!formData.name.trim()) return;
+    const phoneValid = validatePhone();
+    const imageValid = validateMemberImage();
+    if (!phoneValid || !imageValid) return;
     setBusy(true);
     setFormError('');
     try {
@@ -259,7 +272,10 @@ export default function CastCrewManagement() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!editModalMember || !formData.name.trim() || !validatePhone() || !validateMemberImage()) return;
+    if (!editModalMember || !formData.name.trim()) return;
+    const phoneValid = validatePhone();
+    const imageValid = validateMemberImage();
+    if (!phoneValid || !imageValid) return;
     setBusy(true); setFormError('');
     try {
       await updateCrew(editModalMember.id, payloadFromForm());
@@ -1233,14 +1249,20 @@ export default function CastCrewManagement() {
 
               <label>
                 Emergency / Direct Phone
-                <input
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select aria-label="Country calling code" value={phoneCountry} onChange={e => { setPhoneCountry(e.target.value); setFieldErrors(prev => ({ ...prev, phone: '' })); }} style={{ maxWidth: '155px' }}>
+                    {countryCodes.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                  </select>
+                  <input
                   value={formData.phone}
-                  onChange={e => { setFormData({ ...formData, phone: e.target.value }); setFormError(''); }}
-                  placeholder="919876543210"
-                  inputMode="tel"
+                  onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
                   required
                 />
-                {formError && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{formError}</span>}
+                </div>
+                {fieldErrors.phone && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{fieldErrors.phone}</span>}
               </label>
             </div>
 
@@ -1451,13 +1473,20 @@ export default function CastCrewManagement() {
 
               <label>
                 Direct Phone
-                <input
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select aria-label="Country calling code" value={phoneCountry} onChange={e => { setPhoneCountry(e.target.value); setFieldErrors(prev => ({ ...prev, phone: '' })); }} style={{ maxWidth: '155px' }}>
+                    {countryCodes.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                  </select>
+                  <input
                   value={formData.phone}
-                  onChange={e => { setFormData({ ...formData, phone: e.target.value }); setFormError(''); }}
-                  inputMode="tel"
+                  onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
                   required
                 />
-                {formError && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{formError}</span>}
+                </div>
+                {fieldErrors.phone && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{fieldErrors.phone}</span>}
               </label>
             </div>
 

@@ -22,17 +22,8 @@ public class CrewMember {
     private String project;
     private String email;
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone contact must be a valid 10-digit number")
+    @Pattern(regexp = "^(91|1|44|971|61|65)[0-9]{10}$", message = "Select a supported country code and enter a 10-digit mobile number")
     private String phone;
-
-    @PrePersist
-    @PreUpdate
-    private void normalizePhone() {
-        if (phone == null) return;
-        String digits = phone.replaceAll("[^0-9]", "");
-        if (digits.length() == 12 && digits.startsWith("91")) digits = digits.substring(2);
-        phone = digits;
-    }
 
     private Double rate;
     private String rateType;
