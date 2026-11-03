@@ -216,6 +216,63 @@
     margin-top: 6px
 }
 
+.dashboard-metric-card .stat-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 14px 0 7px
+}
+
+.dashboard-metric-card .stat-title {
+    min-width: 0;
+    margin: 0
+}
+
+.stat-trend {
+    flex: 0 0 92px;
+    height: 34px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px
+}
+
+.stat-trend-item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px
+}
+
+.stat-trend-bar-track {
+    height: 22px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    border-bottom: 1px solid #edf0f5
+}
+
+.stat-trend-bar {
+    display: block;
+    width: 4px;
+    min-height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: #4b83f4
+}
+
+.stat-trend-bar.unavailable {
+    background: #cbd2dc
+}
+
+.stat-trend-month {
+    font-size: 7px;
+    line-height: 1;
+    color: #8a96a8
+}
+
 .sparkline {
     height: 35px;
     display: flex;
@@ -249,6 +306,17 @@
     grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
     gap: 17px;
     margin-bottom: 18px
+}
+
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    min-width: 0
+}
+
+.dashboard-column>.panel {
+    margin: 0
 }
 
 .panel {
@@ -536,6 +604,54 @@
 
 .projects-panel {
     padding-bottom: 10px
+}
+
+.active-project-list {
+    display: flex;
+    flex-direction: column
+}
+
+.active-project-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f6
+}
+
+.active-project-item:last-child {
+    border-bottom: 0
+}
+
+.active-project-copy {
+    flex: 1;
+    min-width: 0
+}
+
+.active-project-copy strong,
+.active-project-copy span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.active-project-copy strong {
+    font-size: 10px;
+    color: #26344b
+}
+
+.active-project-copy span,
+.active-project-date {
+    margin-top: 4px;
+    font-size: 9px;
+    color: #9aa5b5
+}
+
+.active-project-date {
+    flex-shrink: 0;
+    margin-top: 0
 }
 
 .filter-button {
@@ -1036,6 +1152,77 @@ tbody tr:hover {
     font-size: 9px;
     font-weight: 750;
     white-space: nowrap
+}
+
+.department-foot .department-members-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    cursor: pointer
+}
+
+.department-members-modal {
+    width: min(100%, 560px);
+    max-height: min(80vh, 680px);
+    overflow: auto
+}
+
+.department-members-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 55vh;
+    overflow-y: auto
+}
+
+.department-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eff2f6
+}
+
+.department-member-copy {
+    flex: 1;
+    min-width: 0
+}
+
+.department-member-copy strong,
+.department-member-copy span,
+.department-member-meta span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.department-member-copy strong {
+    font-size: 11px;
+    color: #26344b
+}
+
+.department-member-copy span,
+.department-member-meta span {
+    margin-top: 4px;
+    font-size: 9px;
+    color: #8a96a8
+}
+
+.department-member-meta {
+    max-width: 130px;
+    text-align: right
+}
+
+.department-member-meta span:first-child {
+    color: #536179
+}
+
+.department-members-limit {
+    margin: 10px 0 0;
+    font-size: 9px;
+    text-align: center;
+    color: #8a96a8
 }
 
 .count-badge {
@@ -1584,6 +1771,8 @@ body {
 .panel-head p,
 .settings-title p,
 .deadline-copy span,
+.active-project-copy span,
+.active-project-date,
 .muted,
 .mini-stat span {
     color: #a7a09a
@@ -1599,6 +1788,33 @@ body {
     background: #191919;
     border-color: #303030;
     box-shadow: 0 8px 26px #00000025
+}
+
+.active-project-item {
+    border-color: #303030
+}
+
+.active-project-copy strong {
+    color: #f4f0eb
+}
+
+.department-member {
+    border-color: #303030
+}
+
+.department-member-copy strong,
+.department-member-meta span:first-child {
+    color: #f4f0eb
+}
+
+.department-member-copy span,
+.department-member-meta span,
+.department-members-limit {
+    color: #aaa39d
+}
+
+.department-foot .department-members-button {
+    color: #f07842
 }
 
 
@@ -1688,6 +1904,22 @@ body {
 .stat-change.down {
     color: #ffad76;
     background: #382419
+}
+
+.stat-trend-month {
+    color: #aaa39d
+}
+
+.stat-trend-bar-track {
+    border-color: #303030
+}
+
+.stat-trend-bar {
+    background: #e3652e
+}
+
+.stat-trend-bar.unavailable {
+    background: #666
 }
 
 .chart-legend,

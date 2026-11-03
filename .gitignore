@@ -22,7 +22,6 @@ target/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
 build/
@@ -31,3 +30,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node & Frontend ###
+node_modules/
+**/node_modules/
+.vite/
+**/dist/assets/
+*.log
+
+frontend/node_modules

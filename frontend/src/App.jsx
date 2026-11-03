@@ -36,7 +36,9 @@ import NotificationsPage from './pages/Notification';
 import './App.css';
 
 function ProtectedLayout() {
-  const isAuthenticated = localStorage.getItem('frameflow-auth') === 'true';
+  const isAuthenticated = Boolean(
+    localStorage.getItem('token') || sessionStorage.getItem('token')
+  );
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

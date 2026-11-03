@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, ReceiptText, X, Download } from 'lucide-react';
+import { getStoredProjects } from '../utils/productionStorage.js';
 
 const PROJECTS_API = 'http://localhost:8080/api/production/projects';
 const VENDORS_API = 'http://localhost:8080/api/finance/vendors';
@@ -33,10 +34,16 @@ export default function InvoicesPayments() {
       if (!r.ok) throw new Error('Projects API returned ' + r.status);
       return r.json();
     })
-      .then(data => setProjects(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) && data.length > 0 ? data : getStoredProjects();
+        setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
+        setProjectLoadError('');
+      })
       .catch(err => {
-        console.error(err);
-        setProjectLoadError('Unable to load production projects');
+        console.warn('Backend projects API offline, using local storage:', err);
+        const list = getStoredProjects();
+        setProjects(list.map(p => ({ ...p, title: p.title || p.name })));
+        setProjectLoadError('');
       });
   }, []);
   const [items, setItems] = useState([]);

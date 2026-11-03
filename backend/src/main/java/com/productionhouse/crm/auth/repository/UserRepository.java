@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.Optional;
 import com.productionhouse.crm.auth.entity.UserStatus;
 
@@ -21,6 +22,8 @@ public interface UserRepository extends JpaRepository<CrmUser, Long> {
     Optional<CrmUser> findByInvitationTokenHash(String invitationTokenHash);
 
     long countByStatus(UserStatus status);
+
+    long countByCreatedAtBefore(Instant createdAt);
 
     @Query("""
             select count(distinct u) from CrmUser u join u.roles r

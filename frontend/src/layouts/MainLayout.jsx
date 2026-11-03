@@ -35,6 +35,7 @@ import './MainLayout.css';
 import { notificationApi } from '../api';
 import useResource from '../hooks/useResourse';
 import { notificationDummyData } from '../data/dummyData';
+import { authApi } from '../api/systemAdministrationApi.js';
 
 const NAVIGATION_GROUPS = [
   {
@@ -129,7 +130,9 @@ export default function MainLayout({ children }) {
     notificationDummyData
   );
 
-  const userEmail = localStorage.getItem('frameflow-user') || 'admin@frameflow.com';
+  const userEmail = sessionStorage.getItem('frameflow-user')
+    || localStorage.getItem('frameflow-user')
+    || 'User';
   const userName = userEmail.includes('@') ? userEmail.split('@')[0] : 'User';
   const userInitials = userName.slice(0, 2).toUpperCase();
   const currentTitle = ROUTE_TITLES[location.pathname] || 'Workspace';
@@ -142,10 +145,22 @@ export default function MainLayout({ children }) {
     return () => window.removeEventListener('notifications:changed', refreshNotificationCount);
   }, [reloadNotifications]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Unable to invalidate the server session during logout:', error);
+    }
     localStorage.removeItem('frameflow-auth');
     localStorage.removeItem('frameflow-user');
+    localStorage.removeItem('frameflow-permissions');
+    localStorage.removeItem('frameflow-roles');
     localStorage.removeItem('token');
+    sessionStorage.removeItem('frameflow-auth');
+    sessionStorage.removeItem('frameflow-user');
+    sessionStorage.removeItem('frameflow-permissions');
+    sessionStorage.removeItem('frameflow-roles');
+    sessionStorage.removeItem('token');
     navigate('/login', { replace: true });
   };
 

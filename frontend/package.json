@@ -12,6 +12,7 @@
     "@vitejs/plugin-react": "latest",
     "aos": "^2.3.4",
     "axios": "^1.21.0",
+    "cors": "^2.8.6",
     "lines-and-columns": "^2.0.4",
     "lucide-react": "^0.468.0",
     "react": "latest",

@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +35,27 @@ public class SecurityConfiguration {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, BearerTokenFilter bearerTokenFilter,
-			ObjectMapper objectMapper) throws Exception {
-		http.csrf(csrf -> csrf.disable()).cors(cors -> {
-		}).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/api/auth/login", "/api/auth/invitations/accept", "/api/production/**",
-								"/api/finance/**")
-						.permitAll().anyRequest().authenticated())
+			ObjectMapper objectMapper, CorsConfigurationSource corsConfigurationSource) throws Exception {
+		http.csrf(csrf -> csrf.disable())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/api/auth/login", "/api/auth/invitations/accept").permitAll()
+						.requestMatchers(
+								"/api/auth/**",
+								"/api/dashboard",
+								"/api/dashboard/**",
+								"/api/users/**",
+								"/api/roles/**",
+								"/api/departments/**",
+								"/api/settings/**",
+								"/api/mediahouse/**",
+								"/api/audio/**",
+								"/api/legal/**"
+						).authenticated()
+						.requestMatchers("/api/**").permitAll()
+						.anyRequest().permitAll())
 				.exceptionHandling(errors -> errors
 						.authenticationEntryPoint((request, response, exception) -> writeError(response, objectMapper,
 								HttpStatus.UNAUTHORIZED, "Authentication is required.", request.getRequestURI()))
@@ -56,15 +69,16 @@ public class SecurityConfiguration {
 
 	@Bean
 	CorsConfigurationSource corsConfigurationSource(
-			@Value("${crm.web.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}") String allowedOrigins) {
+			@Value("${crm.web.allowed-origins:*}") String allowedOrigins) {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim)
-				.filter(origin -> !origin.isEmpty()).toList());
-		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setAllowedOriginPatterns(List.of("*"));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+		configuration.setAllowedHeaders(List.of("*"));
+		configuration.setExposedHeaders(List.of("*"));
+		configuration.setAllowCredentials(false);
 		configuration.setMaxAge(3600L);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/api/**", configuration);
+		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
 
