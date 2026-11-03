@@ -40,7 +40,10 @@ public class CrewMemberService {
 		crewMember.setRole(crewMemberRequest.role);
 		crewMember.setProject(crewMemberRequest.project);
 		crewMember.setEmail(crewMemberRequest.email);
-		crewMember.setPhone(crewMemberRequest.phone);
+        String phone = crewMemberRequest.phone == null ? "" : crewMemberRequest.phone.replaceAll("\\s", "");
+        if (!phone.matches("^91[6-9][0-9]{9}$"))
+            throw new IllegalArgumentException("Phone must start with 91 followed by a valid 10-digit mobile number (e.g. 919876543210)");
+        crewMember.setPhone(phone);
 		crewMember.setRate(crewMemberRequest.rate);
 		crewMember.setRateType(crewMemberRequest.rateType);
 		crewMember.setStatus(crewMemberRequest.status);

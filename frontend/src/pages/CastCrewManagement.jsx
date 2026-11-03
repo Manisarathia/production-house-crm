@@ -213,13 +213,11 @@ export default function CastCrewManagement() {
     </div>
   );
 
-  const normalizedPhone = () => {
-    const digits = String(formData.phone ?? '').replace(/\D/g, '');
-    return digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
-  };
+  const normalizedPhone = () => String(formData.phone ?? '').replace(/\D/g, '');
+
   const validatePhone = () => {
-    if (!/^[0-9]{10}$/.test(normalizedPhone())) {
-      setFormError('Phone number is required. Enter a valid 10-digit Indian mobile number.');
+    if (!/^91[6-9][0-9]{9}$/.test(normalizedPhone())) {
+      setFormError('Phone must start with 91 followed by a valid 10-digit Indian mobile number (e.g. 919876543210).');
       return false;
     }
     setFormError('');
@@ -1216,7 +1214,7 @@ export default function CastCrewManagement() {
                 <input
                   value={formData.phone}
                   onChange={e => { setFormData({ ...formData, phone: e.target.value }); setFormError(''); }}
-                  placeholder="9876543210"
+                  placeholder="919876543210"
                   inputMode="tel"
                   required
                 />
