@@ -331,7 +331,7 @@ export default function EpisodesScenes() {
       case 'NIGHT':
         return <Moon size={13} style={{ color: '#8064e8' }} />;
       case 'DUSK':
-        return <Sunset size={13} style={{ color: '#e3652e' }} />;
+        return <Sunset size={13} style={{ color: '#EFC348' }} />;
       case 'DAWN':
         return <Sunrise size={13} style={{ color: '#70d5e2' }} />;
       default:
@@ -366,7 +366,7 @@ export default function EpisodesScenes() {
           border-radius: 6px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #e3652e;
+          background: #EFC348;
         }
 
         .table-wrap .icon-button {
@@ -383,9 +383,10 @@ export default function EpisodesScenes() {
           box-shadow: 0 0 12px rgba(112, 213, 226, 0.25);
         }
         .table-wrap .icon-button[title*="Edit"]:hover {
-          color: #f07842 !important;
-          background: rgba(227, 101, 46, 0.18) !important;
-          box-shadow: 0 0 12px rgba(227, 101, 46, 0.28);
+          color: #EFC348 !important;
+          border-color: #DEA737 !important;
+          background: rgba(239, 195, 72, 0.15) !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.28);
         }
         .table-wrap .icon-button[title*="Delete"]:hover {
           color: #ff6b6b !important;
@@ -399,24 +400,31 @@ export default function EpisodesScenes() {
         }
         .mini-stat:hover {
           transform: translateY(-3px);
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
           box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 
-                      0 0 16px rgba(227, 101, 46, 0.12) !important;
+                      0 0 16px rgba(239, 195, 72, 0.12) !important;
         }
         .filter-tab-pill {
           transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
         }
         .filter-tab-pill:hover {
           transform: translateY(-2px);
-          border-color: #e3652e !important;
+          border-color: #EFC348 !important;
           color: #ffffff !important;
-          background: rgba(227, 101, 46, 0.12) !important;
+          background: rgba(239, 195, 72, 0.12) !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
+        .filter-tab-pill.active {
+          background: rgba(239, 195, 72, 0.16) !important;
+          color: #EFC348 !important;
+          border-color: #EFC348 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.18) !important;
+        }
         .filter-tab-pill.active:hover {
-          background: #3a2117 !important;
-          color: #f07842 !important;
-          box-shadow: 0 4px 14px rgba(227, 101, 46, 0.4);
+          background: rgba(239, 195, 72, 0.25) !important;
+          color: #EFC348 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.4);
         }
         .table-wrap tbody tr {
           transition: background-color 0.2s ease, box-shadow 0.2s ease;
@@ -425,7 +433,7 @@ export default function EpisodesScenes() {
           background: #231c18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
-          box-shadow: inset 3px 0 0 #e3652e;
+          box-shadow: inset 3px 0 0 #EFC348;
         }
         .table-wrap tbody tr:hover strong {
           color: #ffffff;
@@ -438,17 +446,49 @@ export default function EpisodesScenes() {
           filter: brightness(1.2);
           cursor: default;
         }
-        .heading-actions .btn-primary, .heading-actions .btn-light {
-          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        .btn-primary,
+        .heading-actions .btn-primary,
+        .empty-state .btn-primary,
+        form.modal-card .btn-primary,
+        .modal-actions .btn-primary {
+          background: #EFC348 !important;
+          border-color: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
         }
-        .heading-actions .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 22px rgba(227, 101, 46, 0.45);
+        .btn-primary:hover,
+        .heading-actions .btn-primary:hover,
+        .empty-state .btn-primary:hover,
+        form.modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover {
+          background: #F9D558 !important;
+          border-color: #F9D558 !important;
+          color: #000000 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 22px rgba(239, 195, 72, 0.5) !important;
+        }
+        .heading-actions .btn-light {
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
         }
         .heading-actions .btn-light:hover {
           transform: translateY(-2px);
-          border-color: #e3652e;
+          border-color: #EFC348;
           color: #f4f0eb;
+        }
+
+        .segmented button.chosen {
+          background: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+        }
+
+        .badge-tag.platform {
+          background: rgba(38, 30, 15, 0.9) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+          font-weight: 700 !important;
         }
         .segmented button {
           transition: transform 0.15s ease, color 0.15s ease, background-color 0.15s ease;
@@ -465,11 +505,11 @@ export default function EpisodesScenes() {
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .table-search:hover {
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
         }
         .table-search:focus-within {
-          border-color: #e3652e !important;
-          box-shadow: 0 0 0 2px rgba(227, 101, 46, 0.25) !important;
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 2px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
         }
         .table-search input,
@@ -517,7 +557,40 @@ export default function EpisodesScenes() {
         .detail-section h4 { font-size: 12.5px !important; }
         .detail-item span { font-size: 10.5px !important; }
         .detail-item strong { font-size: 13px !important; }
-      `}</style>
+      /* Modal Form Control Focus & Hover - Cinema Gold */
+        .modal-card input:hover,
+        .modal-card select:hover,
+        .modal-card textarea:hover,
+        .form-grid input:hover,
+        .form-grid select:hover,
+        .form-grid textarea:hover,
+        .form-grid-2 input:hover,
+        .form-grid-2 select:hover,
+        .form-grid-2 textarea:hover,
+        .form-grid-3 input:hover,
+        .form-grid-3 select:hover,
+        .form-grid-3 textarea:hover {
+          border-color: rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .modal-card input:focus,
+        .modal-card select:focus,
+        .modal-card textarea:focus,
+        .form-grid input:focus,
+        .form-grid select:focus,
+        .form-grid textarea:focus,
+        .form-grid-2 input:focus,
+        .form-grid-2 select:focus,
+        .form-grid-2 textarea:focus,
+        .form-grid-3 input:focus,
+        .form-grid-3 select:focus,
+        .form-grid-3 textarea:focus {
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
+          outline: none !important;
+        }
+
+            `}</style>
 
       {/* Top Heading */}
       <div className="page-heading">
@@ -553,7 +626,7 @@ export default function EpisodesScenes() {
         </div>
         <div className="mini-stat">
           <span>Currently In Production</span>
-          <strong style={{ color: '#f07842' }}>{inProgressScenesCount}</strong>
+          <strong style={{ color: '#EFC348' }}>{inProgressScenesCount}</strong>
         </div>
       </div>
 
@@ -792,7 +865,7 @@ export default function EpisodesScenes() {
                                 return (
                                   <tr key={sc.id}>
                                     <td>
-                                      <strong style={{ color: '#f07842', fontSize: '12px' }}>{sc.sceneNumber}</strong>
+                                      <strong style={{ color: '#EFC348', fontSize: '12px' }}>{sc.sceneNumber}</strong>
                                     </td>
                                     <td>
                                       <div style={{ fontWeight: 700, color: '#f4f0eb' }}>{sc.heading}</div>
@@ -870,7 +943,7 @@ export default function EpisodesScenes() {
 
             {filteredEpisodes.length === 0 && (
               <div className="empty-state">
-                <Tv size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+                <Tv size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
                 <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
                   No episodes found
                 </strong>
@@ -912,7 +985,7 @@ export default function EpisodesScenes() {
                   return (
                     <tr key={sc.id}>
                       <td>
-                        <strong style={{ color: '#f07842', fontSize: '12px' }}>{sc.sceneNumber}</strong>
+                        <strong style={{ color: '#EFC348', fontSize: '12px' }}>{sc.sceneNumber}</strong>
                       </td>
                       <td>
                         <div style={{ fontWeight: 750, color: '#f4f0eb' }}>{sc.heading}</div>
@@ -984,7 +1057,7 @@ export default function EpisodesScenes() {
 
             {filteredScenes.length === 0 && (
               <div className="empty-state">
-                <Layers size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+                <Layers size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
                 <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
                   No scenes found in stripboard
                 </strong>
@@ -1768,7 +1841,7 @@ export default function EpisodesScenes() {
             <div className="detail-section">
               <h4>Script Beat & Action</h4>
               {detailModalScene.description ? (
-                <p style={{ fontSize: '11px', lineHeight: '1.7', color: '#f4f0eb', margin: '0 0 12px', background: '#202020', padding: '12px 14px', borderRadius: '8px', borderLeft: '3px solid #e3652e' }}>
+                <p style={{ fontSize: '11px', lineHeight: '1.7', color: '#f4f0eb', margin: '0 0 12px', background: '#202020', padding: '12px 14px', borderRadius: '8px', borderLeft: '3px solid #EFC348' }}>
                   {detailModalScene.description}
                 </p>
               ) : (
