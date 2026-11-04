@@ -79,24 +79,24 @@ export default function PostProductionMedia() {
       const items = extractPageItems(tasksRes);
       if (items.length > 0) {
         const mapped = items.map(item => ({
-        id: item.id,
-        title: item.name || 'Untitled Milestone',
-        project: item.projectRef || 'General',
-        stage: item.description || 'Color Grading (DI)',
-        status: normalizePostProductionStatusToFrontend(item.status),
-        targetDeliveryDate: item.dueAt || '',
-        supervisor: item.assigneeName || 'Unassigned',
-        leadArtist: item.assigneeName || 'Unassigned',
-        facility: '—',
-        progress: item.status === 'COMPLETED' ? 100 : 0,
-        reelsCount: '—',
-        qcStatus: 'Not specified',
-        platform: '—',
-        tone: item.status === 'COMPLETED' ? 'green' : 'orange',
-        image: item.image || resolvePostProductionPicture(item),
-        startedAt: item.startedAt,
-        active: item.active
-      }));
+          id: item.id,
+          title: item.name || 'Untitled Milestone',
+          project: item.projectRef || 'General',
+          stage: item.description || 'Color Grading (DI)',
+          status: normalizePostProductionStatusToFrontend(item.status),
+          targetDeliveryDate: item.dueAt || '',
+          supervisor: item.assigneeName || 'Unassigned',
+          leadArtist: item.assigneeName || 'Unassigned',
+          facility: '—',
+          progress: item.status === 'COMPLETED' ? 100 : 0,
+          reelsCount: '—',
+          qcStatus: 'Not specified',
+          platform: '—',
+          tone: item.status === 'COMPLETED' ? 'green' : 'orange',
+          image: item.image || resolvePostProductionPicture(item),
+          startedAt: item.startedAt,
+          active: item.active
+        }));
         setPostTasks(mapped);
       } else {
         setPostTasks([]);
@@ -105,22 +105,22 @@ export default function PostProductionMedia() {
       const assetItems = extractPageItems(assetsRes);
       if (assetItems.length > 0) {
         const mappedAssets = assetItems.map(item => ({
-        id: item.id,
-        title: item.name || 'Master Deliverable',
-        project: item.projectRef || 'General',
-        assetType: item.assetType || 'Master Cut',
-        status: normalizeMediaStatusToFrontend(item.status),
-        storageLocation: item.storageReference || '—',
-        codecFormat: item.format || '—',
-        fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : '0 GB',
-        duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : '—',
-        resolution: '—',
-        platform: '—',
-        uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
-        image: item.image || resolveMediaAssetPicture(item),
-        notes: item.notes,
-        active: item.active
-      }));
+          id: item.id,
+          title: item.name || 'Master Deliverable',
+          project: item.projectRef || 'General',
+          assetType: item.assetType || 'Master Cut',
+          status: normalizeMediaStatusToFrontend(item.status),
+          storageLocation: item.storageReference || '—',
+          codecFormat: item.format || '—',
+          fileSize: item.sizeBytes ? (item.sizeBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB' : '0 GB',
+          duration: item.durationSeconds ? Math.floor(item.durationSeconds / 60) + ' mins' : '—',
+          resolution: '—',
+          platform: '—',
+          uploadDate: item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().split('T')[0],
+          image: item.image || resolveMediaAssetPicture(item),
+          notes: item.notes,
+          active: item.active
+        }));
         setMediaAssets(mappedAssets);
       } else {
         setMediaAssets([]);
@@ -556,40 +556,73 @@ export default function PostProductionMedia() {
         ::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 6px; }
         ::-webkit-scrollbar-thumb:hover { background: #e3652e; }
 
+        .production-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 22px;
+          align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 0 20px 20px !important;
+        }
+
         .prod-card, .prod-list-card {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
                       border-color 0.24s ease, 
                       box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .prod-card {
-          overflow: hidden;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          padding: 16px 18px 16px 18px !important;
           padding-top: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.25s ease, 
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          position: relative;
         }
+        .prod-card:hover {
+          transform: translateY(-4px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+        }
+
         .prod-card-poster-wrap {
           position: relative;
           width: calc(100% + 36px);
-          margin: 0 -18px 14px -18px;
-          height: 156px;
+          margin: 0 -18px 0 -18px !important;
+          height: 160px;
           overflow: hidden;
-          background: #111;
+          background: #11100f;
+          border-top-left-radius: 13px;
+          border-top-right-radius: 13px;
         }
         .prod-card-poster-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center 35%;
+          object-position: center 30%;
           transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
-          filter: brightness(0.88) contrast(1.08);
+          filter: brightness(0.86) contrast(1.08);
           display: block;
         }
         .prod-card:hover .prod-card-poster-img {
-          transform: scale(1.08);
+          transform: scale(1.06);
           filter: brightness(1.02) contrast(1.15);
         }
         .prod-card-poster-gradient {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(25,25,25,0.15) 45%, #191919 100%);
+          background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(20,19,18,0.25) 45%, #181716 100%);
           pointer-events: none;
         }
         .prod-card-poster-badges {
@@ -601,6 +634,37 @@ export default function PostProductionMedia() {
           justify-content: space-between;
           align-items: center;
           z-index: 2;
+          pointer-events: none;
+        }
+        .prod-card-poster-badges > * {
+          pointer-events: auto;
+        }
+
+        .prod-list-card {
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 12px !important;
+          padding: 14px 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 16px !important;
+          flex-wrap: wrap !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.24s ease, 
+                      box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .prod-list-card:hover {
+          transform: translateY(-3px) translateX(2px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+        }
+        .prod-list-card:hover strong,
+        .prod-list-card:hover h3 {
+          color: #ffffff !important;
         }
 
         .list-poster-thumb {
@@ -636,8 +700,8 @@ export default function PostProductionMedia() {
         }
         .prod-list-card:hover .list-poster-thumb {
           transform: scale(1.06);
-          border-color: rgba(227, 101, 46, 0.6);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(227, 101, 46, 0.25);
+          border-color: rgba(240, 120, 66, 0.6);
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(240, 120, 66, 0.25);
         }
         .prod-list-card:hover .list-poster-img {
           transform: scale(1.1);
@@ -666,30 +730,17 @@ export default function PostProductionMedia() {
         }
         .table-wrap tr:hover .table-poster-thumb {
           transform: scale(1.12);
-          border-color: #e3652e;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(227, 101, 46, 0.3);
+          border-color: #f07842;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(240, 120, 66, 0.3);
         }
         .table-wrap tr:hover .table-poster-img {
           transform: scale(1.1);
           filter: brightness(1.05) contrast(1.15);
         }
-        .prod-card:hover {
-          transform: translateY(-5px);
-          border-color: #e3652e !important;
-          box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 25px rgba(227, 101, 46, 0.12) !important;
-        }
-        .prod-list-card:hover {
-          transform: translateY(-3px) translateX(2px);
-          border-color: #e3652e !important;
-          box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 20px rgba(227, 101, 46, 0.1) !important;
-        }
+
         .prod-card:hover .project-icon, .prod-list-card:hover .project-icon {
           transform: scale(1.1) rotate(2deg);
-          box-shadow: 0 4px 14px rgba(227, 101, 46, 0.35);
+          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.35);
         }
         .prod-card .project-icon, .prod-list-card .project-icon {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
@@ -703,33 +754,51 @@ export default function PostProductionMedia() {
           transition: color 0.18s ease;
         }
 
-        .prod-card-actions .icon-button,
-        .table-wrap .icon-button {
-          transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
-          border-radius: 7px;
+        .prod-card-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .prod-card-actions .icon-button {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #201e1c;
+          border: 1px solid #36322e;
+          color: #a89f91;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .prod-card-actions .icon-button:hover,
         .table-wrap .icon-button:hover {
-          transform: scale(1.15);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
+        .prod-card-actions .action-view:hover,
         .prod-card-actions .icon-button[title*="View"]:hover,
+        .prod-card-actions .icon-button[title*="Inspect"]:hover,
         .table-wrap .icon-button[title*="View"]:hover,
         .table-wrap .icon-button[title*="Inspect"]:hover {
-          color: #70d5e2 !important;
-          background: rgba(112, 213, 226, 0.16) !important;
-          box-shadow: 0 0 12px rgba(112, 213, 226, 0.25);
+          color: #38bdf8 !important;
+          border-color: #0284c7 !important;
+          background: rgba(14, 165, 233, 0.15) !important;
         }
+        .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover,
         .table-wrap .icon-button[title*="Edit"]:hover {
           color: #f07842 !important;
-          background: rgba(227, 101, 46, 0.18) !important;
-          box-shadow: 0 0 12px rgba(227, 101, 46, 0.28);
+          border-color: #ea580c !important;
+          background: rgba(234, 88, 12, 0.15) !important;
         }
+        .prod-card-actions .action-delete:hover,
         .prod-card-actions .icon-button[title*="Delete"]:hover,
         .table-wrap .icon-button[title*="Delete"]:hover {
-          color: #ff6b6b !important;
-          background: rgba(220, 60, 60, 0.2) !important;
-          box-shadow: 0 0 12px rgba(220, 60, 60, 0.35);
+          color: #ef4444 !important;
+          border-color: #dc2626 !important;
+          background: rgba(239, 68, 68, 0.15) !important;
         }
 
         .mini-stat {
@@ -1357,13 +1426,13 @@ export default function PostProductionMedia() {
                     </div>
 
                     <div className="prod-card-actions" style={{ flexShrink: 0 }}>
-                      <button className="icon-button" onClick={() => setDetailItem(t)} title="Inspect Post Details">
+                      <button className="icon-button action-view" onClick={() => setDetailItem(t)} title="Inspect Post Details">
                         <Eye size={16} />
                       </button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(t)} title="Edit Task">
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(t)} title="Edit Task">
                         <Edit3 size={16} />
                       </button>
-                      <button className="icon-button" onClick={() => setDeleteTarget(t)} title="Delete Task" style={{ color: '#dc6464' }}>
+                      <button className="icon-button action-delete" onClick={() => setDeleteTarget(t)} title="Delete Task" style={{ color: '#dc6464' }}>
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -1434,13 +1503,13 @@ export default function PostProductionMedia() {
                     </div>
 
                     <div className="prod-card-actions" style={{ flexShrink: 0 }}>
-                      <button className="icon-button" onClick={() => setDetailItem(a)} title="Inspect Asset Details">
+                      <button className="icon-button action-view" onClick={() => setDetailItem(a)} title="Inspect Asset Details">
                         <Eye size={16} />
                       </button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(a)} title="Edit Asset">
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(a)} title="Edit Asset">
                         <Edit3 size={16} />
                       </button>
-                      <button className="icon-button" onClick={() => setDeleteTarget(a)} title="Delete Asset" style={{ color: '#dc6464' }}>
+                      <button className="icon-button action-delete" onClick={() => setDeleteTarget(a)} title="Delete Asset" style={{ color: '#dc6464' }}>
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -1624,7 +1693,7 @@ export default function PostProductionMedia() {
               >
                 <Plus size={16} /> {activeTab === 'pipeline' ? 'Create Post Milestone' : 'Ingest Media Asset'}
               </button>
-              
+
             </div>
 
           </div>
