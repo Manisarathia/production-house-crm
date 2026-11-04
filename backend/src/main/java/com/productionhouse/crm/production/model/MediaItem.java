@@ -45,9 +45,4 @@ public class MediaItem {
 	@OneToMany(mappedBy = "mediaItem", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Episode> episodes = new ArrayList<>();
 
-	@JsonIgnore
-	@JsonIgnoreProperties("mediaItem")
-	@OneToMany(mappedBy = "mediaItem", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ProjectCastCrew> castCrewMembers = new ArrayList<>();
-
 }
