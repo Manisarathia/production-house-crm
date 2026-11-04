@@ -351,102 +351,297 @@ export default function CastCrewManagement() {
           background: #e3652e;
         }
 
-        /* Movie-poster-style member cards: large photo with details underneath */
-        .cast-crew-poster-card { overflow: hidden; padding: 18px !important; display: flex; flex-direction: column; }
-        .cast-crew-poster-wrap {
-          width: calc(100% + 36px); margin: -18px -18px 14px -18px;
-          aspect-ratio: 16 / 11; overflow: hidden; background: #222;
-          border-radius: 11px 11px 0 0; display: flex;
-          align-items: center; justify-content: center;
+        /* Production Grid & Card Alignments */
+        .production-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 22px;
+          align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 0 20px 20px !important;
         }
-        .cast-crew-poster-img { display: block; width: 100%; height: 100%; object-fit: cover; }
-        .cast-crew-poster-placeholder { color: #777; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .cast-crew-poster-card .prod-card-foot { margin-top: auto; }
-
-        .cast-crew-poster-card { gap: 14px; min-width: 0; }
-        .cast-crew-poster-card .cast-crew-poster-wrap { flex-shrink: 0; margin-bottom: 0; }
-        .cast-crew-poster-card .prod-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; margin: 0; }
-        .cast-crew-poster-card .prod-card-title-group { flex: 1 1 auto; min-width: 0; }
-        .cast-crew-poster-card .prod-card-title-group > div { min-width: 0; }
-        .cast-crew-poster-card .prod-card-title-group h3 { margin: 0 0 5px; overflow-wrap: anywhere; line-height: 1.35; }
-        .cast-crew-poster-card .prod-card-title-group span { display: block; line-height: 1.4; overflow-wrap: anywhere; }
-        .cast-crew-poster-card .prod-card-top > .status-pill { flex-shrink: 0; white-space: nowrap; }
-        .cast-crew-poster-card .member-role-box { min-height: 64px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
-        .cast-crew-poster-card .member-role-box strong { font-size: 12px !important; line-height: 1.4; overflow-wrap: anywhere; }
-        .cast-crew-poster-card .prod-meta-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; min-height: 32px; }
-        .cast-crew-poster-card .prod-meta-tags > * { max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; }
-        .cast-crew-poster-card .prod-finance-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin: 0; padding: 12px; box-sizing: border-box; }
-        .cast-crew-poster-card .prod-finance-item { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-        .cast-crew-poster-card .prod-finance-item span { line-height: 1.4; overflow-wrap: anywhere; }
-        .cast-crew-poster-card .prod-finance-item strong { line-height: 1.3; overflow-wrap: anywhere; }
-        .cast-crew-poster-card .prod-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; min-width: 0; }
-        .cast-crew-poster-card .prod-foot-crew { flex: 1 1 auto; min-width: 0; }
-        .cast-crew-poster-card .prod-foot-crew strong { font-size: 12px !important; overflow-wrap: anywhere; line-height: 1.35; }
-        .cast-crew-poster-card .prod-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .cast-crew-poster-card .prod-card-actions .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; }
-
 
         .prod-card, .prod-list-card {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
                       border-color 0.24s ease, 
                       box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .prod-card {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          padding: 16px 18px 16px 18px !important;
+          padding-top: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.25s ease, 
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          position: relative;
+        }
         .prod-card:hover {
-          transform: translateY(-5px);
-          border-color: #e3652e !important;
-          box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 25px rgba(227, 101, 46, 0.12) !important;
+          transform: translateY(-4px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 24px rgba(240, 120, 66, 0.12) !important;
         }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px);
-          border-color: #e3652e !important;
+          border-color: #f07842 !important;
           box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 20px rgba(227, 101, 46, 0.1) !important;
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 20px rgba(240, 120, 66, 0.1) !important;
         }
         .prod-list-card:hover h3 {
           color: #ffffff !important;
         }
+
+        /* Movie-poster-style member cards: large photo with details underneath */
+        .cast-crew-poster-card {
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          min-width: 0;
+        }
+        .cast-crew-poster-wrap {
+          position: relative;
+          width: calc(100% + 36px);
+          margin: 0 -18px 0 -18px !important;
+          aspect-ratio: 16 / 11;
+          min-height: 220px;
+          overflow: hidden;
+          background: #11100f;
+          border-top-left-radius: 13px;
+          border-top-right-radius: 13px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .cast-crew-poster-img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .prod-card:hover .cast-crew-poster-img {
+          transform: scale(1.06);
+        }
+        .cast-crew-poster-placeholder {
+          color: #777;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .cast-crew-poster-card .prod-card-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          min-width: 0;
+          margin-top: 2px;
+        }
+        .cast-crew-poster-card .prod-card-title-group {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .cast-crew-poster-card .prod-card-title-group > div {
+          min-width: 0;
+        }
+        .cast-crew-poster-card .prod-card-title-group h3 {
+          margin: 0 0 4px;
+          font-size: 16px !important;
+          font-weight: 750;
+          color: #f4f0eb !important;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.35;
+          transition: color 0.18s ease;
+        }
+        .prod-card:hover .cast-crew-poster-card .prod-card-title-group h3,
+        .cast-crew-poster-card:hover .prod-card-title-group h3 {
+          color: #ffffff !important;
+        }
+        .cast-crew-poster-card .prod-card-title-group span {
+          display: block;
+          font-size: 11.5px !important;
+          color: #9c948c !important;
+          line-height: 1.4;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .cast-crew-poster-card .prod-card-top > .status-pill {
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .cast-crew-poster-card .member-role-box {
+          min-height: 58px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4px;
+          background: #1f1d1b !important;
+          border: 1px solid #2e2a26 !important;
+          border-radius: 9px !important;
+          padding: 8px 12px !important;
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .cast-crew-poster-card:hover .member-role-box {
+          background: #24211e !important;
+          border-color: #3d3731 !important;
+        }
+        .cast-crew-poster-card .member-role-box strong {
+          font-size: 12px !important;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+          color: #f4f0eb !important;
+        }
+
+        .cast-crew-poster-card .prod-meta-tags {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          margin: 0;
+          min-height: 28px;
+        }
+        .cast-crew-poster-card .prod-meta-tags > * {
+          max-width: 100%;
+          overflow-wrap: anywhere;
+          box-sizing: border-box;
+        }
+
+        .cast-crew-poster-card .prod-finance-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 12px;
+          margin: 0;
+          padding: 10px 12px;
+          box-sizing: border-box;
+          background: #181716;
+          border: 1px solid #282522;
+          border-radius: 9px;
+          transition: border-color 0.2s ease;
+        }
+        .cast-crew-poster-card:hover .prod-finance-row {
+          border-color: #38332e;
+        }
+        .cast-crew-poster-card .prod-finance-item {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+        .cast-crew-poster-card .prod-finance-item span {
+          font-size: 10.5px;
+          color: #8c8278;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+        .cast-crew-poster-card .prod-finance-item strong {
+          font-size: 12.5px;
+          line-height: 1.3;
+          overflow-wrap: anywhere;
+        }
+
+        .cast-crew-poster-card .prod-card-foot {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #262320;
+          margin-top: auto !important;
+          min-width: 0;
+        }
+        .cast-crew-poster-card .prod-foot-crew {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .cast-crew-poster-card .prod-foot-crew span {
+          font-size: 10.5px;
+          color: #8c8278;
+        }
+        .cast-crew-poster-card .prod-foot-crew strong {
+          font-size: 11.5px !important;
+          overflow-wrap: anywhere;
+          line-height: 1.35;
+          color: #ded7d0;
+        }
+
         .prod-card:hover .avatar, .prod-list-card:hover .avatar {
           transform: scale(1.1) rotate(2deg);
-          box-shadow: 0 4px 14px rgba(227, 101, 46, 0.35);
+          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.35);
         }
         .prod-card .avatar, .prod-list-card .avatar {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
         }
-        .prod-card:hover .prod-card-title-group h3 {
-          color: #ffffff;
-          transition: color 0.18s ease;
+
+        .prod-card-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
         }
-        .prod-card-actions .icon-button,
-        .table-wrap .icon-button {
-          transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
-          border-radius: 7px;
+        .prod-card-actions .icon-button {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #201e1c;
+          border: 1px solid #36322e;
+          color: #a89f91;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          padding: 0;
         }
-        .prod-card-actions .icon-button:hover,
-        .table-wrap .icon-button:hover {
-          transform: scale(1.15);
+        .prod-card-actions .icon-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
+        .prod-card-actions .action-view:hover,
         .prod-card-actions .icon-button[title*="View"]:hover,
+        .prod-card-actions .icon-button[title*="Profile"]:hover,
         .table-wrap .icon-button[title*="View"]:hover,
         .table-wrap .icon-button[title*="Profile"]:hover {
-          color: #70d5e2 !important;
-          background: rgba(112, 213, 226, 0.16) !important;
-          box-shadow: 0 0 12px rgba(112, 213, 226, 0.25);
+          color: #38bdf8 !important;
+          border-color: #0284c7 !important;
+          background: rgba(14, 165, 233, 0.15) !important;
         }
+        .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover,
         .table-wrap .icon-button[title*="Edit"]:hover {
           color: #f07842 !important;
-          background: rgba(227, 101, 46, 0.18) !important;
-          box-shadow: 0 0 12px rgba(227, 101, 46, 0.28);
+          border-color: #ea580c !important;
+          background: rgba(234, 88, 12, 0.15) !important;
         }
+        .prod-card-actions .action-delete:hover,
         .prod-card-actions .icon-button[title*="Delete"]:hover,
         .table-wrap .icon-button[title*="Delete"]:hover {
-          color: #ff6b6b !important;
-          background: rgba(220, 60, 60, 0.2) !important;
-          box-shadow: 0 0 12px rgba(220, 60, 60, 0.35);
+          color: #ef4444 !important;
+          border-color: #dc2626 !important;
+          background: rgba(239, 68, 68, 0.15) !important;
         }
+
         .mini-stat {
           transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
                       border-color 0.22s ease, 
@@ -774,21 +969,21 @@ export default function CastCrewManagement() {
 
                     <div className="prod-card-actions">
                       <button
-                        className="icon-button"
+                        className="icon-button action-view"
                         onClick={() => setDetailModalMember(member)}
                         title="View Full Profile"
                       >
                         <Eye size={16} />
                       </button>
                       <button
-                        className="icon-button"
+                        className="icon-button action-edit"
                         onClick={() => handleOpenEdit(member)}
                         title="Edit Member"
                       >
                         <Edit3 size={16} />
                       </button>
                       <button
-                        className="icon-button"
+                        className="icon-button action-delete"
                         onClick={() => setDeleteTargetMember(member)}
                         title="Delete Member"
                         style={{ color: '#dc6464' }}
@@ -1254,13 +1449,13 @@ export default function CastCrewManagement() {
                     {countryCodes.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
                   </select>
                   <input
-                  value={formData.phone}
-                  onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="10-digit mobile number"
-                  required
-                />
+                    value={formData.phone}
+                    onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    required
+                  />
                 </div>
                 {fieldErrors.phone && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{fieldErrors.phone}</span>}
               </label>
@@ -1478,13 +1673,13 @@ export default function CastCrewManagement() {
                     {countryCodes.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
                   </select>
                   <input
-                  value={formData.phone}
-                  onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="10-digit mobile number"
-                  required
-                />
+                    value={formData.phone}
+                    onChange={e => { setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    required
+                  />
                 </div>
                 {fieldErrors.phone && <span role="alert" style={{ color: "#ff8585", fontSize: 12, display: "block", marginTop: 6 }}>{fieldErrors.phone}</span>}
               </label>
