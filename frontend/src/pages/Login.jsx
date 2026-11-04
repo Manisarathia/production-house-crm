@@ -11,14 +11,13 @@ import {
 } from 'lucide-react';
 
 import Login1 from '../assets/Login1.jpg';
+import Login2 from '../assets/Login2.jpg';
 
-import Login2 from '../assets/Login1.jpg';
 import { authApi } from '../api/systemAdministrationApi.js';
 
-import '../css/Login.css'
+import './Login.css';
 
 export default function Login() {
-
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -29,7 +28,6 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
     setError('');
 
@@ -41,10 +39,9 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
-
       const response = await authApi.login({
         email: email.trim(),
-        password
+        password,
       });
 
       localStorage.removeItem('token');
@@ -78,196 +75,283 @@ export default function Login() {
       navigate('/', { replace: true });
 
     } catch (loginError) {
-
       setError(
-        loginError.message ||
-        'Unable to sign in. Please try again.'
+        loginError.message || 'Unable to sign in. Please try again.'
       );
-
     } finally {
-
       setIsSubmitting(false);
-
     }
-
   };
 
-
   return (
-  <main className="login-screen">
+    <main className="login-screen">
 
-    {/* LEFT SIDE IMAGE */}
-    <section
-      className="login-visual"
-      style={{ backgroundImage: `url(${Login1})` }}
-    >
-      <div className="login-image-overlay"></div>
+      {/* LEFT SIDE - BACKGROUND IMAGE */}
 
-      <div className="login-brand">
-        <div className="login-brand-icon">
-          <Clapperboard size={25} />
-        </div>
+      <section
+        className="login-visual"
+        style={{
+          backgroundImage: `url(${Login1})`,
+        }}
+      >
+        <div className="login-image-overlay"></div>
 
-        <div>
-          <strong>LOOPSTREAM</strong>
-          <span>PRODUCTION CRM</span>
-        </div>
-      </div>
-
-      <div className="login-hero-copy">
-        <div className="login-kicker">
-          <i />
-          YOUR PRODUCTION, IN SYNC
-        </div>
-
-        <h1>
-          LOOPSTREAM
-          <br />
-          Frame <em>Every Story.</em>
-        </h1>
-
-        <p>
-          Make every frame count.
-          Manage your entire production workflow
-          with one powerful workspace.
-        </p>
-
-        <div className="login-feature-list">
-          <span><CircleCheck size={18} /> Production at a glance</span>
-          <span><CircleCheck size={18} /> Teams & resources together</span>
-          <span><CircleCheck size={18} /> Budgets under control</span>
-        </div>
-      </div>
-
-      <div className="login-visual-footer">
-        <span>BUILT FOR STORYTELLERS</span>
-        <span>PLAN · PRODUCE · DELIVER</span>
-      </div>
-    </section>
-
-
-    {/* RIGHT SIDE IMAGE + LOGIN FORM */}
-    <section
-      className="login-panel"
-      style={{ backgroundImage: `url(${Login2})` }}
-    >
-      <div className="login-panel-overlay"></div>
-
-      <div className="login-form-wrap">
-
-        <div className="login-mobile-brand">
+        <div className="login-brand">
           <div className="login-brand-icon">
-            <Clapperboard size={22} />
+            <Clapperboard size={25} />
           </div>
-          <strong>LOOPSTREAM</strong>
+
+          <div>
+            <strong>LOOPSTREAM</strong>
+            <span>PRODUCTION CRM</span>
+          </div>
         </div>
 
-        <div className="login-welcome">
-          <span className="login-small-label">WELCOME BACK</span>
+        <div className="login-hero-copy">
 
-          <h2 className="singtext">
-            Sign in to your
+          <div className="login-kicker">
+            <i />
+            YOUR PRODUCTION, IN SYNC
+          </div>
+
+          <h1>
+            LOOPSTREAM
             <br />
-            workspace<span>.</span>
-          </h2>
+            Frame <em>Every Story.</em>
+          </h1>
 
-          <p>Enter your details to continue to your dashboard.</p>
+          <p>
+            Make every frame count.
+            Manage your entire production workflow
+            with one powerful workspace.
+          </p>
+
+          <div className="login-feature-list">
+            <span>
+              <CircleCheck size={18} />
+              Production at a glance
+            </span>
+
+            <span>
+              <CircleCheck size={18} />
+              Teams & resources together
+            </span>
+
+            <span>
+              <CircleCheck size={18} />
+              Budgets under control
+            </span>
+          </div>
+
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <div className="login-visual-footer">
+          <span>BUILT FOR STORYTELLERS</span>
+          <span>PLAN · PRODUCE · DELIVER</span>
+        </div>
 
-          <label htmlFor="email">Work email</label>
+      </section>
 
-          <div className="login-input-group">
-            <input
-              id="email"
-              type="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="username"
-            />
+
+      {/* RIGHT SIDE - LOGIN FORM */}
+
+      <section
+        className="login-panel"
+        style={{
+          backgroundImage: `url(${Login2})`,
+        }}
+      >
+
+        <div className="login-panel-overlay"></div>
+
+        <div className="login-form-wrap">
+
+          {/* MOBILE BRAND */}
+
+          <div className="login-mobile-brand">
+            <div className="login-brand-icon">
+              <Clapperboard size={22} />
+            </div>
+
+            <strong>LOOPSTREAM</strong>
           </div>
 
-          <div className="password-label">
-            <label htmlFor="password">Password</label>
 
-            <button
-              type="button"
-              onClick={() =>
-                setError(
-                  'Contact your workspace administrator to reset your password.'
-                )
-              }
-            >
-              Forgot password?
-            </button>
+          {/* WELCOME */}
+
+          <div className="login-welcome">
+
+            <span className="login-small-label">
+              WELCOME BACK
+            </span>
+
+            <h2 className="singtext">
+              Sign in to your
+              <br />
+              workspace<span>.</span>
+            </h2>
+
+            <p>
+              Enter your details to continue to your dashboard.
+            </p>
+
           </div>
 
-          <div className="password-field">
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
 
-            <button
-              type="button"
-              aria-label="Toggle password visibility"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-            </button>
-          </div>
+          {/* LOGIN FORM */}
 
-          <label className="remember-row">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            />
-            <span>Keep me signed in on this device</span>
-          </label>
-
-          {error && <div className="login-error">{error}</div>}
-
-          <button
-            className="login-submit"
-            type="submit"
-            disabled={isSubmitting}
+          <form
+            className="login-form"
+            onSubmit={handleSubmit}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in to dashboard'}
-            <ArrowRight size={19} />
-          </button>
 
-        </form>
+            {/* EMAIL */}
 
-        <p className="login-switch">
-          New to Loopstream?
-          <Link to="/register">Create an account</Link>
-        </p>
+            <label htmlFor="email">
+              Work email
+            </label>
 
-        <div className="login-secure-note">
-          <ShieldCheck size={19} />
-          <span>
-            Your workspace is protected.
-            Sign in to access your production data.
-          </span>
+            <div className="login-input-group">
+              <input
+                id="email"
+                type="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+              />
+            </div>
+
+
+            {/* PASSWORD */}
+
+            <div className="password-label">
+
+              <label htmlFor="password">
+                Password
+              </label>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setError(
+                    'Contact your workspace administrator to reset your password.'
+                  )
+                }
+              >
+                Forgot password?
+              </button>
+
+            </div>
+
+            <div className="password-field">
+
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+
+              <button
+                type="button"
+                aria-label="Toggle password visibility"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword
+                  ? <EyeOff size={19} />
+                  : <Eye size={19} />
+                }
+              </button>
+
+            </div>
+
+
+            {/* REMEMBER ME */}
+
+            <label className="remember-row">
+
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+
+              <span>
+                Keep me signed in on this device
+              </span>
+
+            </label>
+
+
+            {/* ERROR MESSAGE */}
+
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
+
+
+            {/* SUBMIT BUTTON */}
+
+            <button
+              className="login-submit"
+              type="submit"
+              disabled={isSubmitting}
+            >
+
+              {isSubmitting
+                ? 'Signing in...'
+                : 'Sign in to dashboard'
+              }
+
+              <ArrowRight size={19} />
+
+            </button>
+
+          </form>
+
+
+          {/* REGISTER */}
+
+          <p className="login-switch">
+            New to Loopstream?
+
+            <Link to="/register">
+              Create an account
+            </Link>
+          </p>
+
+
+          {/* SECURITY */}
+
+          <div className="login-secure-note">
+
+            <ShieldCheck size={19} />
+
+            <span>
+              Your workspace is protected.
+              Sign in to access your production data.
+            </span>
+
+          </div>
+
+
+          {/* COPYRIGHT */}
+
+          <p className="login-copyright">
+            &copy; 2026 LOOPSTREAM CRM
+            <span>·</span>
+            Made for teams that make stories.
+          </p>
+
         </div>
 
-        <p className="login-copyright">
-          &copy; 2026 LOOPSTREAM CRM
-          <span>·</span>
-          Made for teams that make stories.
-        </p>
+      </section>
 
-      </div>
-    </section>
-
-  </main>
-);
-
+    </main>
+  );
 }
