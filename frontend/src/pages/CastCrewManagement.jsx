@@ -165,6 +165,7 @@ export default function CastCrewManagement() {
       mediaItemId: member.mediaItemId || '',
       memberImage: member.memberImage || ''
     });
+    setDetailModalMember(null);
     setEditModalMember(member);
   };
 
