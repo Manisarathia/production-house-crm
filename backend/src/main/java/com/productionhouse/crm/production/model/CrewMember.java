@@ -34,7 +34,6 @@ public class CrewMember {
     private Integer daysBooked;
     @Column(columnDefinition = "TEXT")
     private String dietaryNotes;
-    private String tone;
 
     @Lob
     @Column(name = "member_image", columnDefinition = "LONGTEXT")

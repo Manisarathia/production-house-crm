@@ -161,7 +161,6 @@ export default function CastCrewManagement() {
       agent: member.agent || 'Direct',
       daysBooked: member.daysBooked || 0,
       dietaryNotes: member.dietaryNotes || 'Standard',
-      tone: member.tone || 'blue',
       mediaItemId: member.mediaItemId || '',
       memberImage: member.memberImage || ''
     });

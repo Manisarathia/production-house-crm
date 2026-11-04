@@ -54,7 +54,6 @@ public class CrewMemberService {
 		crewMember.setAgent(crewMemberRequest.agent);
 		crewMember.setDaysBooked(crewMemberRequest.daysBooked);
 		crewMember.setDietaryNotes(crewMemberRequest.dietaryNotes);
-		crewMember.setTone(crewMemberRequest.tone);
         if (crewMemberRequest.memberImage == null || crewMemberRequest.memberImage.isBlank())
             throw new IllegalArgumentException("Member Image is required");
         String image = crewMemberRequest.memberImage.trim();
