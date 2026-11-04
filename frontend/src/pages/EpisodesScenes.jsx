@@ -52,7 +52,7 @@ export default function EpisodesScenes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [settingFilter, setSettingFilter] = useState('ALL'); 
+  const [settingFilter, setSettingFilter] = useState('ALL');
 
   const [expandedEpisodes, setExpandedEpisodes] = useState({ 'EP-401': true, 'EP-403': true });
 
@@ -180,47 +180,47 @@ export default function EpisodesScenes() {
 
   const handleCreateEpisodeSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!episodeForm.title.trim() || !episodeForm.mediaItemId) { setApiError('Select a Movie / Web Series before saving the episode.'); return; }
+      e.preventDefault();
+      if (!episodeForm.title.trim() || !episodeForm.mediaItemId) { setApiError('Select a Movie / Web Series before saving the episode.'); return; }
 
-    await create('episodes', {
-      ...episodeForm,
-      episodeNumber: Number(episodeForm.episodeNumber),
-      scenesCount: Number(episodeForm.scenesCount),
-      scenesCompleted: Number(episodeForm.scenesCompleted)
-    });
+      await create('episodes', {
+        ...episodeForm,
+        episodeNumber: Number(episodeForm.episodeNumber),
+        scenesCount: Number(episodeForm.scenesCount),
+        scenesCompleted: Number(episodeForm.scenesCompleted)
+      });
 
-    await reload();
-    setCreateEpisodeModalOpen(false);
-  
+      await reload();
+      setCreateEpisodeModalOpen(false);
+
     } catch (error) { setApiError(error.message); }
   };
 
   const handleEditEpisodeSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!editEpisodeModalItem || !episodeForm.title.trim()) return;
+      e.preventDefault();
+      if (!editEpisodeModalItem || !episodeForm.title.trim()) return;
 
-    await update('episodes', editEpisodeModalItem.id, {
-      ...episodeForm,
-      episodeNumber: Number(episodeForm.episodeNumber),
-      scenesCount: Number(episodeForm.scenesCount),
-      scenesCompleted: Number(episodeForm.scenesCompleted)
-    });
+      await update('episodes', editEpisodeModalItem.id, {
+        ...episodeForm,
+        episodeNumber: Number(episodeForm.episodeNumber),
+        scenesCount: Number(episodeForm.scenesCount),
+        scenesCompleted: Number(episodeForm.scenesCompleted)
+      });
 
-    await reload();
-    setEditEpisodeModalItem(null);
-  
+      await reload();
+      setEditEpisodeModalItem(null);
+
     } catch (error) { setApiError(error.message); }
   };
 
   const handleConfirmDeleteEpisode = async () => {
     try {
-    if (!deleteTargetEpisode) return;
-    await remove('episodes', deleteTargetEpisode.id);
-    await reload();
-    setDeleteTargetEpisode(null);
-  
+      if (!deleteTargetEpisode) return;
+      await remove('episodes', deleteTargetEpisode.id);
+      await reload();
+      setDeleteTargetEpisode(null);
+
     } catch (error) { setApiError(error.message); }
   };
 
@@ -258,54 +258,54 @@ export default function EpisodesScenes() {
 
   const handleCreateSceneSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!sceneForm.heading.trim()) return;
+      e.preventDefault();
+      if (!sceneForm.heading.trim()) return;
 
-    await create('scenes', sceneForm);
-    await reload();
+      await create('scenes', sceneForm);
+      await reload();
 
-    if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
-      const ep = episodes.find(e => e.id === sceneForm.episodeId);
-      if (ep) {
-        await update('episodes', ep.id, {
-          ...ep,
-          scenesCount: (Number(ep.scenesCount) || 0) + 1,
-          scenesCompleted: sceneForm.status === 'Shot / Done' ? (Number(ep.scenesCompleted) || 0) + 1 : (Number(ep.scenesCompleted) || 0)
-        });
-        await reload();
+      if (sceneForm.episodeId && sceneForm.episodeId !== 'FEATURE') {
+        const ep = episodes.find(e => e.id === sceneForm.episodeId);
+        if (ep) {
+          await update('episodes', ep.id, {
+            ...ep,
+            scenesCount: (Number(ep.scenesCount) || 0) + 1,
+            scenesCompleted: sceneForm.status === 'Shot / Done' ? (Number(ep.scenesCompleted) || 0) + 1 : (Number(ep.scenesCompleted) || 0)
+          });
+          await reload();
+        }
       }
-    }
 
-    setCreateSceneModalOpen(false);
-  
+      setCreateSceneModalOpen(false);
+
     } catch (error) { setApiError(error.message); }
   };
 
   const handleEditSceneSubmit = async (e) => {
     try {
-    e.preventDefault();
-    if (!editSceneModalItem || !sceneForm.heading.trim()) return;
+      e.preventDefault();
+      if (!editSceneModalItem || !sceneForm.heading.trim()) return;
 
-    const updatedScene = await update('scenes', editSceneModalItem.id, sceneForm);
-    await reload();
-    setEditSceneModalItem(null);
-    if (detailModalScene && detailModalScene.id === editSceneModalItem.id) {
-      setDetailModalScene(updatedScene);
-    }
-  
+      const updatedScene = await update('scenes', editSceneModalItem.id, sceneForm);
+      await reload();
+      setEditSceneModalItem(null);
+      if (detailModalScene && detailModalScene.id === editSceneModalItem.id) {
+        setDetailModalScene(updatedScene);
+      }
+
     } catch (error) { setApiError(error.message); }
   };
 
   const handleConfirmDeleteScene = async () => {
     try {
-    if (!deleteTargetScene) return;
-    await remove('scenes', deleteTargetScene.id);
-    await reload();
-    setDeleteTargetScene(null);
-    if (detailModalScene && detailModalScene.id === deleteTargetScene.id) {
-      setDetailModalScene(null);
-    }
-  
+      if (!deleteTargetScene) return;
+      await remove('scenes', deleteTargetScene.id);
+      await reload();
+      setDeleteTargetScene(null);
+      if (detailModalScene && detailModalScene.id === deleteTargetScene.id) {
+        setDetailModalScene(null);
+      }
+
     } catch (error) { setApiError(error.message); }
   };
 
@@ -529,7 +529,7 @@ export default function EpisodesScenes() {
           <p>Plan episode arcs, script sluglines, shooting stripboards, and scene camera calls.</p>
         </div>
         <div className="heading-actions">
-          <button className="btn btn-light" onClick={() => handleOpenCreateEpisode()}>
+          <button className="btn btn-primary" onClick={() => handleOpenCreateEpisode()}>
             <Tv size={17} /> Add Episode
           </button>
           <button className="btn btn-primary" onClick={() => handleOpenCreateScene()}>
