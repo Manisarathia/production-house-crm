@@ -252,6 +252,7 @@ export default function EpisodesScenes() {
       equipment: sc.equipment,
       description: sc.description || ''
     });
+    setDetailModalScene(null);
     setEditSceneModalItem(sc);
   };
 
