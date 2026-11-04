@@ -404,21 +404,37 @@ export default function MoviesWebSeries() {
           background: rgba(14, 165, 233, 0.15) !important;
         }
         .prod-card-actions .action-edit:hover,
-        .prod-card-actions .icon-button[title*="Edit"]:hover {
+        .prod-card-actions .icon-button[title*="Edit"]:hover,
+        .table-wrap .icon-button[title*="Edit"]:hover,
+        .table-wrap .action-edit:hover,
+        .icon-button[title*="Edit"]:hover,
+        .icon-button[title*="Edit"]:focus,
+        .action-edit:hover,
+        .action-edit:focus {
           color: #EFC348 !important;
           border-color: #DEA737 !important;
           background: rgba(239, 195, 72, 0.15) !important;
         }
         .prod-card-actions .action-delete:hover,
-        .prod-card-actions .icon-button[title*="Delete"]:hover {
+        .prod-card-actions .icon-button[title*="Delete"]:hover,
+        .table-wrap .icon-button[title*="Delete"]:hover,
+        .table-wrap .action-delete:hover,
+        .icon-button[title*="Delete"]:hover,
+        .action-delete:hover {
           color: #ef4444 !important;
           border-color: #dc2626 !important;
           background: rgba(239, 68, 68, 0.15) !important;
         }
 
         /* Cinema Gold Theme Enhancements */
+        .btn-primary,
+        button.btn-primary,
+        .btn.btn-primary,
         .heading-actions .btn-primary,
-        form.modal-card .btn-primary {
+        .empty-state .btn-primary,
+        .modal-card .btn-primary,
+        .modal-actions .btn-primary,
+        .detail-modal .btn-primary {
           background: #EFC348 !important;
           border-color: #EFC348 !important;
           color: #000000 !important;
@@ -426,8 +442,14 @@ export default function MoviesWebSeries() {
           box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
           transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
         }
+        .btn-primary:hover,
+        button.btn-primary:hover,
+        .btn.btn-primary:hover,
         .heading-actions .btn-primary:hover,
-        form.modal-card .btn-primary:hover {
+        .empty-state .btn-primary:hover,
+        .modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover,
+        .detail-modal .btn-primary:hover {
           background: #F9D558 !important;
           border-color: #F9D558 !important;
           color: #000000 !important;
@@ -456,6 +478,9 @@ export default function MoviesWebSeries() {
           font-weight: 750 !important;
         }
       /* Modal Form Control Focus & Hover - Cinema Gold */
+        input:hover,
+        select:hover,
+        textarea:hover,
         .modal-card input:hover,
         .modal-card select:hover,
         .modal-card textarea:hover,
@@ -471,18 +496,36 @@ export default function MoviesWebSeries() {
           border-color: rgba(239, 195, 72, 0.5) !important;
         }
 
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible,
         .modal-card input:focus,
+        .modal-card input:focus-visible,
         .modal-card select:focus,
+        .modal-card select:focus-visible,
         .modal-card textarea:focus,
+        .modal-card textarea:focus-visible,
         .form-grid input:focus,
+        .form-grid input:focus-visible,
         .form-grid select:focus,
+        .form-grid select:focus-visible,
         .form-grid textarea:focus,
+        .form-grid textarea:focus-visible,
         .form-grid-2 input:focus,
+        .form-grid-2 input:focus-visible,
         .form-grid-2 select:focus,
+        .form-grid-2 select:focus-visible,
         .form-grid-2 textarea:focus,
+        .form-grid-2 textarea:focus-visible,
         .form-grid-3 input:focus,
+        .form-grid-3 input:focus-visible,
         .form-grid-3 select:focus,
-        .form-grid-3 textarea:focus {
+        .form-grid-3 select:focus-visible,
+        .form-grid-3 textarea:focus,
+        .form-grid-3 textarea:focus-visible {
           border-color: #EFC348 !important;
           box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
@@ -620,9 +663,9 @@ export default function MoviesWebSeries() {
                     <td>{t.seasons}</td>
                     <td>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                        <button className="icon-button" onClick={() => setDetailModalTitle(t)}><Eye size={16} /></button>
-                        <button className="icon-button" onClick={() => handleOpenEdit(t)}><Edit3 size={16} /></button>
-                        <button className="icon-button" onClick={() => handlePurgeTitle(t.id)} style={{ color: '#ff6b6b' }}><Trash2 size={16} /></button>
+                        <button className="icon-button action-view" title="View Title" onClick={() => setDetailModalTitle(t)}><Eye size={16} /></button>
+                        <button className="icon-button action-edit" title="Edit Title" onClick={() => handleOpenEdit(t)}><Edit3 size={16} /></button>
+                        <button className="icon-button action-delete" title="Delete Title" onClick={() => handlePurgeTitle(t.id)} style={{ color: '#ff6b6b' }}><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>

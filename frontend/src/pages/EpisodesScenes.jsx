@@ -382,14 +382,27 @@ export default function EpisodesScenes() {
           background: rgba(112, 213, 226, 0.16) !important;
           box-shadow: 0 0 12px rgba(112, 213, 226, 0.25);
         }
-        .table-wrap .icon-button[title*="Edit"]:hover {
+        .icon-button[title*="Edit"]:hover,
+        .icon-button[title*="Edit"]:focus,
+        .action-edit:hover,
+        .action-edit:focus,
+        .prod-card-actions .action-edit:hover,
+        .prod-card-actions .icon-button[title*="Edit"]:hover,
+        .table-wrap .icon-button[title*="Edit"]:hover,
+        .table-wrap .action-edit:hover {
           color: #EFC348 !important;
           border-color: #DEA737 !important;
           background: rgba(239, 195, 72, 0.15) !important;
-          box-shadow: 0 0 12px rgba(239, 195, 72, 0.28);
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.28) !important;
         }
-        .table-wrap .icon-button[title*="Delete"]:hover {
+        .icon-button[title*="Delete"]:hover,
+        .action-delete:hover,
+        .prod-card-actions .action-delete:hover,
+        .prod-card-actions .icon-button[title*="Delete"]:hover,
+        .table-wrap .icon-button[title*="Delete"]:hover,
+        .table-wrap .action-delete:hover {
           color: #ff6b6b !important;
+          border-color: #dc2626 !important;
           background: rgba(220, 60, 60, 0.2) !important;
           box-shadow: 0 0 12px rgba(220, 60, 60, 0.35);
         }
@@ -430,7 +443,7 @@ export default function EpisodesScenes() {
           transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
         .table-wrap tbody tr:hover td {
-          background: #231c18 !important;
+          background: #201e18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
           box-shadow: inset 3px 0 0 #EFC348;
@@ -482,6 +495,12 @@ export default function EpisodesScenes() {
           background: #EFC348 !important;
           color: #000000 !important;
           font-weight: 750 !important;
+        }
+
+        .status-pill.orange {
+          background: rgba(239, 195, 72, 0.16) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
         }
 
         .badge-tag.platform {
@@ -554,10 +573,20 @@ export default function EpisodesScenes() {
         .modal-card h2 { font-size: 18px !important; }
         .modal-card label, .form-grid label { font-size: 11.5px !important; }
         .modal-card input, .modal-card select, .modal-card textarea { font-size: 12.5px !important; }
-        .detail-section h4 { font-size: 12.5px !important; }
+        .detail-section h4,
+        h4,
+        .modal-card h4,
+        .detail-modal h4 {
+          font-size: 12.5px !important;
+          color: #EFC348 !important;
+          font-weight: 800 !important;
+        }
         .detail-item span { font-size: 10.5px !important; }
         .detail-item strong { font-size: 13px !important; }
       /* Modal Form Control Focus & Hover - Cinema Gold */
+        input:hover,
+        select:hover,
+        textarea:hover,
         .modal-card input:hover,
         .modal-card select:hover,
         .modal-card textarea:hover,
@@ -573,18 +602,36 @@ export default function EpisodesScenes() {
           border-color: rgba(239, 195, 72, 0.5) !important;
         }
 
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible,
         .modal-card input:focus,
+        .modal-card input:focus-visible,
         .modal-card select:focus,
+        .modal-card select:focus-visible,
         .modal-card textarea:focus,
+        .modal-card textarea:focus-visible,
         .form-grid input:focus,
+        .form-grid input:focus-visible,
         .form-grid select:focus,
+        .form-grid select:focus-visible,
         .form-grid textarea:focus,
+        .form-grid textarea:focus-visible,
         .form-grid-2 input:focus,
+        .form-grid-2 input:focus-visible,
         .form-grid-2 select:focus,
+        .form-grid-2 select:focus-visible,
         .form-grid-2 textarea:focus,
+        .form-grid-2 textarea:focus-visible,
         .form-grid-3 input:focus,
+        .form-grid-3 input:focus-visible,
         .form-grid-3 select:focus,
-        .form-grid-3 textarea:focus {
+        .form-grid-3 select:focus-visible,
+        .form-grid-3 textarea:focus,
+        .form-grid-3 textarea:focus-visible {
           border-color: #EFC348 !important;
           box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
@@ -811,14 +858,14 @@ export default function EpisodesScenes() {
                           <Plus size={14} /> Add Scene
                         </button>
                         <button
-                          className="icon-button"
+                          className="icon-button action-edit"
                           onClick={() => handleOpenEditEpisode(ep)}
                           title="Edit Episode"
                         >
                           <Edit3 size={16} />
                         </button>
                         <button
-                          className="icon-button"
+                          className="icon-button action-delete"
                           onClick={() => setDeleteTargetEpisode(ep)}
                           title="Delete Episode"
                           style={{ color: '#dc6464' }}
@@ -894,21 +941,21 @@ export default function EpisodesScenes() {
                                     <td>
                                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                                         <button
-                                          className="icon-button"
+                                          className="icon-button action-view"
                                           onClick={() => setDetailModalScene(sc)}
                                           title="View Breakdown"
                                         >
                                           <Eye size={15} />
                                         </button>
                                         <button
-                                          className="icon-button"
+                                          className="icon-button action-edit"
                                           onClick={() => handleOpenEditScene(sc)}
                                           title="Edit Scene"
                                         >
                                           <Edit3 size={15} />
                                         </button>
                                         <button
-                                          className="icon-button"
+                                          className="icon-button action-delete"
                                           onClick={() => setDeleteTargetScene(sc)}
                                           title="Delete Scene"
                                           style={{ color: '#dc6464' }}
@@ -1026,21 +1073,21 @@ export default function EpisodesScenes() {
                       <td>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                           <button
-                            className="icon-button"
+                            className="icon-button action-view"
                             onClick={() => setDetailModalScene(sc)}
                             title="View Scene Breakdown"
                           >
                             <Eye size={16} />
                           </button>
                           <button
-                            className="icon-button"
+                            className="icon-button action-edit"
                             onClick={() => handleOpenEditScene(sc)}
                             title="Edit Scene"
                           >
                             <Edit3 size={16} />
                           </button>
                           <button
-                            className="icon-button"
+                            className="icon-button action-delete"
                             onClick={() => setDeleteTargetScene(sc)}
                             title="Delete Scene"
                             style={{ color: '#dc6464' }}
@@ -1839,7 +1886,7 @@ export default function EpisodesScenes() {
 
             {/* Action Description */}
             <div className="detail-section">
-              <h4>Script Beat & Action</h4>
+              <h4 style={{ color: '#EFC348' }}>Script Beat & Action</h4>
               {detailModalScene.description ? (
                 <p style={{ fontSize: '11px', lineHeight: '1.7', color: '#f4f0eb', margin: '0 0 12px', background: '#202020', padding: '12px 14px', borderRadius: '8px', borderLeft: '3px solid #EFC348' }}>
                   {detailModalScene.description}
@@ -1877,7 +1924,7 @@ export default function EpisodesScenes() {
 
             {/* Location & Cast */}
             <div className="detail-section">
-              <h4>Set Location & Cast Call</h4>
+              <h4 style={{ color: '#EFC348' }}>Set Location & Cast Call</h4>
               <div className="detail-grid">
                 <div className="detail-item">
                   <span>Shoot Location</span>
@@ -1892,7 +1939,7 @@ export default function EpisodesScenes() {
 
             {/* Equipment */}
             <div className="detail-section">
-              <h4>Special Camera, Grip & FX Requirements</h4>
+              <h4 style={{ color: '#EFC348' }}>Special Camera, Grip & FX Requirements</h4>
               <div style={{ background: '#202020', padding: '10px 12px', borderRadius: '8px', border: '1px solid #2d2d2d' }}>
                 <span style={{ fontSize: '9px', color: '#8a96a8', display: 'block', marginBottom: '3px' }}>
                   PACKAGE SPECIFICATIONS:

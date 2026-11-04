@@ -628,9 +628,14 @@ export default function CastCrewManagement() {
           border-color: #0284c7 !important;
           background: rgba(14, 165, 233, 0.15) !important;
         }
+        .icon-button[title*="Edit"]:hover,
+        .icon-button[title*="Edit"]:focus,
+        .action-edit:hover,
+        .action-edit:focus,
         .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover,
-        .table-wrap .icon-button[title*="Edit"]:hover {
+        .table-wrap .icon-button[title*="Edit"]:hover,
+        .table-wrap .action-edit:hover {
           color: #EFC348 !important;
           border-color: #DEA737 !important;
           background: rgba(239, 195, 72, 0.15) !important;
@@ -680,7 +685,7 @@ export default function CastCrewManagement() {
           transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
         .table-wrap tbody tr:hover td {
-          background: #231c18 !important;
+          background: #201e18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
           box-shadow: inset 3px 0 0 #EFC348;
@@ -696,10 +701,16 @@ export default function CastCrewManagement() {
           filter: brightness(1.2);
           cursor: default;
         }
+        .btn-primary,
+        button.btn-primary,
+        .btn.btn-primary,
         .heading-actions .btn-primary,
         .empty-state .btn-primary,
+        .empty-state button,
         form.modal-card .btn-primary,
-        .modal-actions .btn-primary {
+        .modal-card .btn-primary,
+        .modal-actions .btn-primary,
+        .detail-modal .btn-primary {
           background: #EFC348 !important;
           border-color: #EFC348 !important;
           color: #000000 !important;
@@ -707,10 +718,16 @@ export default function CastCrewManagement() {
           box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
           transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
         }
+        .btn-primary:hover,
+        button.btn-primary:hover,
+        .btn.btn-primary:hover,
         .heading-actions .btn-primary:hover,
         .empty-state .btn-primary:hover,
+        .empty-state button:hover,
         form.modal-card .btn-primary:hover,
-        .modal-actions .btn-primary:hover {
+        .modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover,
+        .detail-modal .btn-primary:hover {
           background: #F9D558 !important;
           border-color: #F9D558 !important;
           color: #000000 !important;
@@ -787,10 +804,42 @@ export default function CastCrewManagement() {
         .modal-card h2 { font-size: 18px !important; }
         .modal-card label, .form-grid label { font-size: 11.5px !important; }
         .modal-card input, .modal-card select, .modal-card textarea { font-size: 12.5px !important; }
-        .detail-section h4 { font-size: 12.5px !important; }
+        .detail-section h4 { font-size: 12.5px !important; color: #EFC348 !important; }
         .detail-item span { font-size: 10.5px !important; }
         .detail-item strong { font-size: 13px !important; }
-      /* Modal Form Control Focus & Hover - Cinema Gold */
+      
+        .detail-section h4,
+        h4,
+        .modal-card h4,
+        .detail-modal h4 {
+          color: #EFC348 !important;
+          font-weight: 800 !important;
+        }
+
+        .badge-tag.platform {
+          background: rgba(38, 30, 15, 0.9) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+          font-weight: 700 !important;
+        }
+
+        .avatar-orange {
+          background: rgba(239, 195, 72, 0.18) !important;
+          color: #EFC348 !important;
+          border: 1px solid rgba(239, 195, 72, 0.4) !important;
+        }
+
+        .status-pill.orange,
+        .status-pill[class*="orange"] {
+          background: rgba(239, 195, 72, 0.16) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+        }
+
+        /* Modal Form Control Focus & Hover - Cinema Gold */
+        input:hover,
+        select:hover,
+        textarea:hover,
         .modal-card input:hover,
         .modal-card select:hover,
         .modal-card textarea:hover,
@@ -806,18 +855,36 @@ export default function CastCrewManagement() {
           border-color: rgba(239, 195, 72, 0.5) !important;
         }
 
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible,
         .modal-card input:focus,
+        .modal-card input:focus-visible,
         .modal-card select:focus,
+        .modal-card select:focus-visible,
         .modal-card textarea:focus,
+        .modal-card textarea:focus-visible,
         .form-grid input:focus,
+        .form-grid input:focus-visible,
         .form-grid select:focus,
+        .form-grid select:focus-visible,
         .form-grid textarea:focus,
+        .form-grid textarea:focus-visible,
         .form-grid-2 input:focus,
+        .form-grid-2 input:focus-visible,
         .form-grid-2 select:focus,
+        .form-grid-2 select:focus-visible,
         .form-grid-2 textarea:focus,
+        .form-grid-2 textarea:focus-visible,
         .form-grid-3 input:focus,
+        .form-grid-3 input:focus-visible,
         .form-grid-3 select:focus,
-        .form-grid-3 textarea:focus {
+        .form-grid-3 select:focus-visible,
+        .form-grid-3 textarea:focus,
+        .form-grid-3 textarea:focus-visible {
           border-color: #EFC348 !important;
           box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
@@ -1267,7 +1334,7 @@ export default function CastCrewManagement() {
             <p style={{ margin: 0 }}>Try clearing filters or add a new actor or technical crew member to the roster.</p>
             <button
               className="btn btn-primary"
-              style={{ marginTop: '16px' }}
+              style={{ marginTop: '16px', background: '#EFC348', borderColor: '#EFC348', color: '#000000', fontWeight: 750 }}
               onClick={handleOpenCreate}
             >
               <UserPlus size={16} /> Add Member
@@ -1783,7 +1850,7 @@ export default function CastCrewManagement() {
             </div>
 
             <div className="detail-section">
-              <h4>Role & Production Assignment</h4>
+              <h4 style={{ color: '#EFC348' }}>Role & Production Assignment</h4>
               <div className="detail-grid">
                 <div className="detail-item">
                   <span>Assigned Role</span>
@@ -1807,7 +1874,7 @@ export default function CastCrewManagement() {
             </div>
 
             <div className="detail-section">
-              <h4>Financial Agreement & Legal Terms</h4>
+              <h4 style={{ color: '#EFC348' }}>Financial Agreement & Legal Terms</h4>
               <div className="detail-grid">
                 <div className="detail-item">
                   <span>Contractual Compensation</span>
@@ -1833,7 +1900,7 @@ export default function CastCrewManagement() {
             </div>
 
             <div className="detail-section">
-              <h4>Logistics & Emergency Contacts</h4>
+              <h4 style={{ color: '#EFC348' }}>Logistics & Emergency Contacts</h4>
               <div className="detail-grid">
                 <div className="detail-item">
                   <span>Email</span>
@@ -1849,7 +1916,7 @@ export default function CastCrewManagement() {
                 </div>
                 <div className="detail-item">
                   <span>Dietary & Health Notes</span>
-                  <strong style={{ color: '#ffad76' }}>{detailModalMember.dietaryNotes || 'None'}</strong>
+                  <strong style={{ color: '#EFC348' }}>{detailModalMember.dietaryNotes || 'None'}</strong>
                 </div>
               </div>
             </div>
