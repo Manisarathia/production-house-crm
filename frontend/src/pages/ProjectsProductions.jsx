@@ -148,7 +148,7 @@ export default function ProjectsProductions() {
       stage: formData.stage,
       startDate: formData.startDate || null,
       endDate: formData.endDate || null,
-      posterUrl: formData.posterUrl 
+      posterUrl: formData.posterUrl
     };
 
     try {
@@ -160,7 +160,7 @@ export default function ProjectsProductions() {
 
       if (response.ok) {
         setEditModalProject(null);
-        await fetchProjectsFromServer(); 
+        await fetchProjectsFromServer();
       } else {
         const errorData = await response.json();
         setValidationError(errorData.message || "Server rejected update validation layout.");
@@ -170,8 +170,8 @@ export default function ProjectsProductions() {
     }
   };
 
- 
-const handleDeleteProject = (id) => {
+
+  const handleDeleteProject = (id) => {
     const project = projects.find(item => item.id === id);
     if (!project) return;
     setDeleteError('');
@@ -179,46 +179,46 @@ const handleDeleteProject = (id) => {
   };
 
   const confirmDeleteProject = async () => {
-  if (!deleteTargetProject || deleting) return;
+    if (!deleteTargetProject || deleting) return;
 
-  setDeleting(true);
-  setDeleteError("");
+    setDeleting(true);
+    setDeleteError("");
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/${deleteTargetProject.id}`,
-      { method: "DELETE" }
-    );
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/${deleteTargetProject.id}`,
+        { method: "DELETE" }
+      );
 
-    const result = await response.json().catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      if (response.status === 409) {
-        setDeleteError(
+      if (!response.ok) {
+        if (response.status === 409) {
+          setDeleteError(
+            result.error ||
+            "Project deletion failed because a linked record could not be removed. No records were deleted."
+          );
+          return;
+        }
+
+        throw new Error(
           result.error ||
-          "Project deletion failed because a linked record could not be removed. No records were deleted."
+          result.message ||
+          `Delete failed (HTTP ${response.status})`
         );
-        return;
       }
 
-      throw new Error(
-        result.error ||
-        result.message ||
-        `Delete failed (HTTP ${response.status})`
+      setDeleteTargetProject(null);
+      await fetchProjectsFromServer();
+
+    } catch (error) {
+      setDeleteError(
+        error.message || "Unable to delete this project."
       );
+    } finally {
+      setDeleting(false);
     }
-
-    setDeleteTargetProject(null);
-    await fetchProjectsFromServer();
-
-  } catch (error) {
-    setDeleteError(
-      error.message || "Unable to delete this project."
-    );
-  } finally {
-    setDeleting(false);
-  }
-};
+  };
 
 
   const handleOpenEdit = (project) => {
@@ -235,6 +235,278 @@ const handleDeleteProject = (id) => {
 
   return (
     <>
+      <style>{`
+        .production-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 22px;
+          align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 0 20px 20px !important;
+        }
+
+        .prod-card, .prod-list-card {
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.24s ease, 
+                      box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .prod-card {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          padding: 16px 18px 16px 18px !important;
+          padding-top: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.25s ease, 
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          position: relative;
+        }
+        .prod-card:hover {
+          transform: translateY(-4px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+        }
+
+        .prod-list-card {
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 12px !important;
+          padding: 14px 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 16px !important;
+          flex-wrap: wrap !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.24s ease, 
+                      box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .prod-list-card:hover {
+          transform: translateY(-3px) translateX(2px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+        }
+        .prod-list-card:hover strong {
+          color: #ffffff !important;
+        }
+
+        .prod-card-poster-wrap {
+          position: relative;
+          width: calc(100% + 36px);
+          margin: 0 -18px 0 -18px !important;
+          aspect-ratio: 16 / 11;
+          min-height: 220px;
+          overflow: hidden;
+          background: #11100f;
+          border-top-left-radius: 13px;
+          border-top-right-radius: 13px;
+        }
+        .prod-card-poster-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+          display: block;
+        }
+        .prod-card:hover .prod-card-poster-img {
+          transform: scale(1.06);
+        }
+        .prod-card-poster-gradient {
+          display: none;
+        }
+        .prod-card-poster-badges {
+          position: absolute;
+          top: 12px;
+          left: 14px;
+          right: 14px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .prod-card-poster-badges > * {
+          pointer-events: auto;
+        }
+        .badge-tag.platform {
+          background: rgba(42, 28, 22, 0.9);
+          backdrop-filter: blur(8px);
+          border: 1px solid #4a2b1b;
+          color: #f07842;
+          font-weight: 700;
+        }
+        .status-pill.blue {
+          background: rgba(14, 165, 233, 0.2);
+          border: 1px solid rgba(14, 165, 233, 0.5);
+          color: #38bdf8;
+          backdrop-filter: blur(8px);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .prod-card-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: 2px;
+        }
+        .prod-card-title-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+        }
+        .prod-card-title-group h3 {
+          margin: 0;
+          font-size: 16px !important;
+          font-weight: 750;
+          color: #f4f0eb;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          transition: color 0.18s ease;
+        }
+        .prod-card:hover .prod-card-title-group h3 {
+          color: #ffffff !important;
+        }
+        .prod-card-title-group span {
+          font-size: 11.5px !important;
+          color: #9c948c;
+          display: block;
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .project-icon.blue {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 10px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+          background: rgba(14, 165, 233, 0.15) !important;
+          border: 1px solid rgba(14, 165, 233, 0.35) !important;
+          color: #38bdf8 !important;
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.2s ease !important;
+        }
+        .prod-card:hover .project-icon.blue {
+          transform: scale(1.08);
+          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.3);
+          background: rgba(240, 120, 66, 0.2) !important;
+          border-color: rgba(240, 120, 66, 0.5) !important;
+          color: #f07842 !important;
+        }
+
+        .prod-progress-block {
+          background: #1f1d1b;
+          border: 1px solid #2e2a26;
+          border-radius: 9px;
+          padding: 10px 12px;
+          transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .prod-card:hover .prod-progress-block {
+          background: #24211e;
+          border-color: #3d3731;
+        }
+        .prod-progress-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 6px;
+          font-size: 11px;
+          color: #9c948c;
+        }
+        .prod-progress-head strong {
+          color: #f07842;
+          font-size: 11.5px;
+        }
+        .progress-track {
+          width: 100%;
+          height: 6px;
+          background: #141312;
+          border-radius: 999px;
+          overflow: hidden;
+        }
+        .progress-fill.blue {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #ea580c, #f07842);
+          transition: width 0.3s ease;
+        }
+
+        .prod-card-foot {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 12px;
+          border-top: 1px solid #262320;
+          margin-top: auto !important;
+        }
+        .prod-card-foot span {
+          font-size: 11px;
+          color: #8c8278;
+        }
+
+        .prod-card-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .prod-card-actions .icon-button {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #201e1c;
+          border: 1px solid #36322e;
+          color: #a89f91;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .prod-card-actions .icon-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .prod-card-actions .action-view:hover,
+        .prod-card-actions .icon-button[title*="View"]:hover {
+          color: #38bdf8 !important;
+          border-color: #0284c7 !important;
+          background: rgba(14, 165, 233, 0.15) !important;
+        }
+        .prod-card-actions .action-edit:hover,
+        .prod-card-actions .icon-button[title*="Edit"]:hover {
+          color: #f07842 !important;
+          border-color: #ea580c !important;
+          background: rgba(234, 88, 12, 0.15) !important;
+        }
+        .prod-card-actions .action-delete:hover,
+        .prod-card-actions .icon-button[title*="Delete"]:hover {
+          color: #ef4444 !important;
+          border-color: #dc2626 !important;
+          background: rgba(239, 68, 68, 0.15) !important;
+        }
+      `}</style>
+
       <div className="page-heading">
         <div>
           <div className="eyebrow"><span className="live-dot" /> PROJECTS & PRODUCTION MANAGEMENT</div>
@@ -309,16 +581,16 @@ const handleDeleteProject = (id) => {
                       </div>
                     </div>
                   </div>
-                  <div className="prod-progress-block" style={{ marginTop: '15px' }}>
+                  <div className="prod-progress-block">
                     <div className="prod-progress-head"><span>Timeline Progression</span><strong>{p.progress}%</strong></div>
                     <div className="progress-track"><div className="progress-fill blue" style={{ width: `${p.progress}%` }} /></div>
                   </div>
-                  <div className="prod-card-foot" style={{ marginTop: 'auto' }}>
+                  <div className="prod-card-foot">
                     <span>{p.startDate ? `Start: ${p.startDate}` : 'Start: TBD'}</span>
                     <div className="prod-card-actions">
-                      <button className="icon-button" onClick={() => setDetailModalProject(p)} title="View Details"><Eye size={16} /></button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(p)} title="Edit"><Edit3 size={16} /></button>
-                      <button className="icon-button" onClick={() => handleDeleteProject(p.id)} title="Delete" style={{ color: '#dc6464' }}><Trash2 size={16} /></button>
+                      <button className="icon-button action-view" onClick={() => setDetailModalProject(p)} title="View Details"><Eye size={16} /></button>
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(p)} title="Edit"><Edit3 size={16} /></button>
+                      <button className="icon-button action-delete" onClick={() => handleDeleteProject(p.id)} title="Delete" style={{ color: '#dc6464' }}><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
@@ -330,7 +602,7 @@ const handleDeleteProject = (id) => {
         {!loading && viewMode === 'list' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '16px 20px' }}>
             {filteredProjects.map(p => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', background: '#191919', border: '1px solid #303030', borderRadius: '10px', flexWrap: 'wrap' }}>
+              <div key={p.id} className="prod-list-card">
                 {p.posterUrl ? (
                   <img src={p.posterUrl} alt={p.name} style={{ width: '64px', height: '76px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
                 ) : (
@@ -346,10 +618,10 @@ const handleDeleteProject = (id) => {
                   <div>End: {p.endDate || 'Ongoing'}</div>
                   <div style={{ marginTop: '6px' }}>Progress: {p.progress}%</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-                  <button className="icon-button" onClick={() => setDetailModalProject(p)} title="View Details"><Eye size={16} /></button>
-                  <button className="icon-button" onClick={() => handleOpenEdit(p)} title="Edit"><Edit3 size={16} /></button>
-                  <button className="icon-button" onClick={() => handleDeleteProject(p.id)} title="Delete" style={{ color: '#dc6464' }}><Trash2 size={16} /></button>
+                <div className="prod-card-actions" style={{ marginLeft: 'auto' }}>
+                  <button className="icon-button action-view" onClick={() => setDetailModalProject(p)} title="View Details"><Eye size={16} /></button>
+                  <button className="icon-button action-edit" onClick={() => handleOpenEdit(p)} title="Edit"><Edit3 size={16} /></button>
+                  <button className="icon-button action-delete" onClick={() => handleDeleteProject(p.id)} title="Delete" style={{ color: '#dc6464' }}><Trash2 size={16} /></button>
                 </div>
               </div>
             ))}

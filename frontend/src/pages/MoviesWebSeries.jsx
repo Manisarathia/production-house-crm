@@ -237,47 +237,184 @@ export default function MoviesWebSeries() {
       <style>{`
         .production-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 24px;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 22px;
           align-items: stretch;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 0 20px 20px !important;
+        }
+
+        .prod-card, .prod-list-card {
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.24s ease, 
+                      box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .prod-card {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          overflow: hidden;
-          background: #191919;
-          border: 1px solid #303030;
-          border-radius: 12px;
-          box-sizing: border-box;
-          padding: 18px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 13px !important;
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          padding: 16px 18px 16px 18px !important;
+          padding-top: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.25s ease, 
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          position: relative;
         }
+        .prod-card:hover {
+          transform: translateY(-4px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+        }
+
+        .prod-list-card {
+          background: #181716 !important;
+          border: 1px solid #2b2825 !important;
+          border-radius: 12px !important;
+          padding: 14px 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 16px !important;
+          flex-wrap: wrap !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+          transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                      border-color 0.24s ease, 
+                      box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .prod-list-card:hover {
+          transform: translateY(-3px) translateX(2px) !important;
+          border-color: #f07842 !important;
+          box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
+                      0 0 0 1px rgba(240, 120, 66, 0.35), 
+                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+        }
+        .prod-list-card:hover strong {
+          color: #ffffff !important;
+        }
+
         .prod-card-poster-wrap {
           position: relative;
           width: calc(100% + 36px);
-          margin: -18px -18px 14px -18px !important;
+          margin: 0 -18px 0 -18px !important;
           aspect-ratio: 16 / 11;
+          min-height: 220px;
           overflow: hidden;
-          background: #111;
-          border-top-left-radius: 11px;
-          border-top-right-radius: 11px;
+          background: #11100f;
+          border-top-left-radius: 13px;
+          border-top-right-radius: 13px;
         }
         .prod-card-poster-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center;
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
           display: block;
         }
-        .prod-card-foot {
-          margin-top: auto !important;
+        .prod-card:hover .prod-card-poster-img {
+          transform: scale(1.06);
+        }
+
+        .prod-card-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding-top: 14px;
-          border-top: 1px solid #2a2a2a;
+          gap: 12px;
+          margin-top: 2px;
         }
-}
+        .prod-card-title-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+        }
+        .prod-card-title-group h3 {
+          margin: 0;
+          font-size: 16px !important;
+          font-weight: 750;
+          color: #f4f0eb !important;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          transition: color 0.18s ease;
+        }
+        .prod-card:hover .prod-card-title-group h3 {
+          color: #ffffff !important;
+        }
+        .prod-card-title-group span {
+          font-size: 11.5px !important;
+          color: #9c948c !important;
+          display: block;
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
+        .prod-card-foot {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 12px;
+          border-top: 1px solid #262320;
+          margin-top: auto !important;
+        }
+        .prod-card-foot span {
+          font-size: 11px;
+          color: #8c8278;
+        }
+
+        .prod-card-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .prod-card-actions .icon-button {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #201e1c;
+          border: 1px solid #36322e;
+          color: #a89f91;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .prod-card-actions .icon-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .prod-card-actions .action-view:hover,
+        .prod-card-actions .icon-button[title*="View"]:hover {
+          color: #38bdf8 !important;
+          border-color: #0284c7 !important;
+          background: rgba(14, 165, 233, 0.15) !important;
+        }
+        .prod-card-actions .action-edit:hover,
+        .prod-card-actions .icon-button[title*="Edit"]:hover {
+          color: #f07842 !important;
+          border-color: #ea580c !important;
+          background: rgba(234, 88, 12, 0.15) !important;
+        }
+        .prod-card-actions .action-delete:hover,
+        .prod-card-actions .icon-button[title*="Delete"]:hover {
+          color: #ef4444 !important;
+          border-color: #dc2626 !important;
+          background: rgba(239, 68, 68, 0.15) !important;
+        }
       `}</style>
 
       <div className="page-heading">
@@ -352,9 +489,9 @@ export default function MoviesWebSeries() {
                   <div className="prod-card-foot">
                     <span>Project: {t.associatedProject}</span>
                     <div className="prod-card-actions">
-                      <button className="icon-button" onClick={() => setDetailModalTitle(t)} title="View Details"><Eye size={16} /></button>
-                      <button className="icon-button" onClick={() => handleOpenEdit(t)} title="Edit"><Edit3 size={16} /></button>
-                      <button className="icon-button" onClick={() => handlePurgeTitle(t.id)} style={{ color: '#ff6b6b' }} title="Delete"><Trash2 size={16} /></button>
+                      <button className="icon-button action-view" onClick={() => setDetailModalTitle(t)} title="View Details"><Eye size={16} /></button>
+                      <button className="icon-button action-edit" onClick={() => handleOpenEdit(t)} title="Edit"><Edit3 size={16} /></button>
+                      <button className="icon-button action-delete" onClick={() => handlePurgeTitle(t.id)} style={{ color: "#ff6b6b" }} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
@@ -366,7 +503,7 @@ export default function MoviesWebSeries() {
         {!loading && viewMode === 'list' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '16px 20px' }}>
             {filteredTitles.map(t => (
-              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', background: '#191919', border: '1px solid #303030', borderRadius: '10px', flexWrap: 'wrap' }}>
+              <div key={t.id} className="prod-list-card">
                 {t.posterUrl ? (
                   <img src={t.posterUrl} alt={t.title} style={{ width: '64px', height: '76px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
                 ) : (
@@ -381,10 +518,10 @@ export default function MoviesWebSeries() {
                   <div>Project: {t.associatedProject}</div>
                   <div style={{ marginTop: '5px' }}>Release: {t.targetReleaseDate}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-                  <button className="icon-button" onClick={() => setDetailModalTitle(t)} title="View Details"><Eye size={16} /></button>
-                  <button className="icon-button" onClick={() => handleOpenEdit(t)} title="Edit"><Edit3 size={16} /></button>
-                  <button className="icon-button" onClick={() => handlePurgeTitle(t.id)} title="Delete" style={{ color: '#ff6b6b' }}><Trash2 size={16} /></button>
+                <div className="prod-card-actions" style={{ marginLeft: 'auto' }}>
+                  <button className="icon-button action-view" onClick={() => setDetailModalTitle(t)} title="View Details"><Eye size={16} /></button>
+                  <button className="icon-button action-edit" onClick={() => handleOpenEdit(t)} title="Edit"><Edit3 size={16} /></button>
+                  <button className="icon-button action-delete" onClick={() => handlePurgeTitle(t.id)} title="Delete" style={{ color: '#ff6b6b' }}><Trash2 size={16} /></button>
                 </div>
               </div>
             ))}
