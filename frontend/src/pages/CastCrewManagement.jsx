@@ -348,7 +348,7 @@ export default function CastCrewManagement() {
           border-radius: 6px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: #e3652e;
+          background: #EFC348;
         }
 
         /* Production Grid & Card Alignments */
@@ -386,17 +386,17 @@ export default function CastCrewManagement() {
         }
         .prod-card:hover {
           transform: translateY(-4px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 24px rgba(239, 195, 72, 0.12) !important;
         }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px);
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 20px rgba(239, 195, 72, 0.1) !important;
         }
         .prod-list-card:hover h3 {
           color: #ffffff !important;
@@ -588,7 +588,7 @@ export default function CastCrewManagement() {
 
         .prod-card:hover .avatar, .prod-list-card:hover .avatar {
           transform: scale(1.1) rotate(2deg);
-          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.35);
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35);
         }
         .prod-card .avatar, .prod-list-card .avatar {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
@@ -630,9 +630,9 @@ export default function CastCrewManagement() {
         .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover,
         .table-wrap .icon-button[title*="Edit"]:hover {
-          color: #f07842 !important;
-          border-color: #ea580c !important;
-          background: rgba(234, 88, 12, 0.15) !important;
+          color: #EFC348 !important;
+          border-color: #DEA737 !important;
+          background: rgba(239, 195, 72, 0.15) !important;
         }
         .prod-card-actions .action-delete:hover,
         .prod-card-actions .icon-button[title*="Delete"]:hover,
@@ -649,24 +649,31 @@ export default function CastCrewManagement() {
         }
         .mini-stat:hover {
           transform: translateY(-3px);
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
           box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 
-                      0 0 16px rgba(227, 101, 46, 0.12) !important;
+                      0 0 16px rgba(239, 195, 72, 0.12) !important;
         }
         .filter-tab-pill {
           transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
         }
         .filter-tab-pill:hover {
           transform: translateY(-2px);
-          border-color: #e3652e !important;
+          border-color: #EFC348 !important;
           color: #ffffff !important;
-          background: rgba(227, 101, 46, 0.12) !important;
+          background: rgba(239, 195, 72, 0.12) !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
+        .filter-tab-pill.active {
+          background: rgba(239, 195, 72, 0.16) !important;
+          color: #EFC348 !important;
+          border-color: #EFC348 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.18) !important;
+        }
         .filter-tab-pill.active:hover {
-          background: #3a2117 !important;
-          color: #f07842 !important;
-          box-shadow: 0 4px 14px rgba(227, 101, 46, 0.4);
+          background: rgba(239, 195, 72, 0.25) !important;
+          color: #EFC348 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.4);
         }
         .table-wrap tbody tr {
           transition: background-color 0.2s ease, box-shadow 0.2s ease;
@@ -675,7 +682,7 @@ export default function CastCrewManagement() {
           background: #231c18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
-          box-shadow: inset 3px 0 0 #e3652e;
+          box-shadow: inset 3px 0 0 #EFC348;
         }
         .table-wrap tbody tr:hover strong {
           color: #ffffff;
@@ -688,12 +695,32 @@ export default function CastCrewManagement() {
           filter: brightness(1.2);
           cursor: default;
         }
-        .heading-actions .btn-primary {
-          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        .heading-actions .btn-primary,
+        .empty-state .btn-primary,
+        form.modal-card .btn-primary,
+        .modal-actions .btn-primary {
+          background: #EFC348 !important;
+          border-color: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
         }
-        .heading-actions .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 22px rgba(227, 101, 46, 0.45);
+        .heading-actions .btn-primary:hover,
+        .empty-state .btn-primary:hover,
+        form.modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover {
+          background: #F9D558 !important;
+          border-color: #F9D558 !important;
+          color: #000000 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 22px rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .segmented button.chosen {
+          background: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
         }
         .segmented button {
           transition: transform 0.15s ease, color 0.15s ease, background-color 0.15s ease;
@@ -710,11 +737,11 @@ export default function CastCrewManagement() {
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .table-search:hover {
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
         }
         .table-search:focus-within {
-          border-color: #e3652e !important;
-          box-shadow: 0 0 0 2px rgba(227, 101, 46, 0.25) !important;
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 2px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
         }
         .table-search input,
@@ -762,7 +789,40 @@ export default function CastCrewManagement() {
         .detail-section h4 { font-size: 12.5px !important; }
         .detail-item span { font-size: 10.5px !important; }
         .detail-item strong { font-size: 13px !important; }
-      `}</style>
+      /* Modal Form Control Focus & Hover - Cinema Gold */
+        .modal-card input:hover,
+        .modal-card select:hover,
+        .modal-card textarea:hover,
+        .form-grid input:hover,
+        .form-grid select:hover,
+        .form-grid textarea:hover,
+        .form-grid-2 input:hover,
+        .form-grid-2 select:hover,
+        .form-grid-2 textarea:hover,
+        .form-grid-3 input:hover,
+        .form-grid-3 select:hover,
+        .form-grid-3 textarea:hover {
+          border-color: rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .modal-card input:focus,
+        .modal-card select:focus,
+        .modal-card textarea:focus,
+        .form-grid input:focus,
+        .form-grid select:focus,
+        .form-grid textarea:focus,
+        .form-grid-2 input:focus,
+        .form-grid-2 select:focus,
+        .form-grid-2 textarea:focus,
+        .form-grid-3 input:focus,
+        .form-grid-3 select:focus,
+        .form-grid-3 textarea:focus {
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
+          outline: none !important;
+        }
+
+            `}</style>
 
       {apiError && <div role="alert" style={{ padding: 12, marginBottom: 12, background: '#43211e', color: '#fff' }}>{apiError}</div>}
       {/* Top Heading */}
@@ -793,7 +853,7 @@ export default function CastCrewManagement() {
         </div>
         <div className="mini-stat">
           <span>Currently On Set</span>
-          <strong style={{ color: '#f07842' }}>{onSetCount}</strong>
+          <strong style={{ color: '#EFC348' }}>{onSetCount}</strong>
         </div>
         <div className="mini-stat">
           <span>Contracts Executed</span>
@@ -1199,7 +1259,7 @@ export default function CastCrewManagement() {
 
         {filteredList.length === 0 && (
           <div className="empty-state">
-            <Users size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+            <Users size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
             <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
               No talent or crew records found
             </strong>
