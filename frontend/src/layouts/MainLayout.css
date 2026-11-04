@@ -53,20 +53,20 @@
     font-size: 9px;
     letter-spacing: 1.8px;
     font-weight: 800;
-    color: #a7a09a;
+    color: #EFC348;
     margin-top: 3px;
 }
 
 .brand-mark {
     width: 42px;
     height: 42px;
-    background: #e3652e;
+    background: #EFC348;
     color: #fff;
     border-radius: 13px;
     display: grid;
     place-items: center;
-    box-shadow: 0 6px 22px #e3652e35;
-    flex-shrink: 0;
+    box-shadow:2px 3px 8px rgba(0, 0, 0, 0.9),
+    0px 0px 20px rgba(239, 195, 72, 0.8);
 }
 
 /* =====================================
@@ -79,7 +79,7 @@
     flex: 1;
     min-height: 0;
     scrollbar-width: thin;
-    scrollbar-color: #393939 transparent;
+    scrollbar-color: #EFC348 transparent;
 }
 
 .nav-list::-webkit-scrollbar {
@@ -87,7 +87,7 @@
 }
 
 .nav-list::-webkit-scrollbar-thumb {
-    background: #393939;
+    background: #EFC348;
     border-radius: 10px;
 }
 
@@ -99,7 +99,7 @@
     font-size: 9px;
     letter-spacing: 1.35px;
     font-weight: 800;
-    color: #a7a09a;
+    color: #EFC348;
     padding: 0 12px;
     margin: 0 0 9px;
 }
@@ -133,14 +133,21 @@
 }
 
 .nav-item.active {
-    background: #40251a;
-    color: #ffad82;
-    border-left-color: #e3652e;
-    font-weight: 750;
+  background: #EFC348;
+  color: #000000;
+  border-left-color: #664b03;
+  font-weight: 750;
+
+  box-shadow:
+    0px 6px 15px rgba(0, 0, 0, 0.45),
+    0px 0px 25px rgba(239, 195, 72, 0.6);
+
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .nav-item:focus-visible {
-    outline: 2px solid #e3652e;
+    outline: 2px solid #EFC348;
     outline-offset: 2px;
 }
 
@@ -167,7 +174,7 @@
     width: 23px;
     height: 23px;
     border-radius: 7px;
-    background: #3a2117;
+    background: #EFC348;
     color: #f07136;
     display: grid;
     place-items: center;
@@ -219,7 +226,7 @@
 }
 
 .avatar-blue {
-    background: #4b291b;
+    background: #EFC348;
     color: #ff9a68;
 }
 
@@ -256,7 +263,7 @@
 }
 
 .logout-button:hover {
-    background: #3a2117;
+    background: #EFC348;
 }
 
 /* =====================================
@@ -279,7 +286,7 @@
     height: 70px;
     min-height: 70px;
     background: #151515;
-    border-bottom: 1px solid #2b2b2b;
+    border-bottom: 1px solid #EFC348;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -287,13 +294,13 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 6px 20px #00000010;
+    box-shadow: 0 6px 20px #EFC348;
     gap: 15px;
 }
 
 .breadcrumb {
-    font-size: 11px;
-    color: #a7a09a;
+    font-size: 16px;
+    color: #EFC348;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -301,7 +308,7 @@
 
 .breadcrumb span {
     padding: 0 10px;
-    color: #77716c;
+    color: #EFC348;
 }
 
 .breadcrumb strong {
@@ -327,10 +334,10 @@
     align-items: center;
     gap: 8px;
     padding: 0 10px;
-    border: 1px solid #303030;
+    border: 1px solid #EFC348;
     border-radius: 8px;
     color: #aaa39d;
-    background: #191919;
+    background: #EFC348;
 }
 
 .global-search input {
@@ -341,6 +348,7 @@
     font-size: 11px;
     background: transparent;
     color: #f4f0eb;
+    
 }
 
 .global-search input::placeholder {
@@ -350,11 +358,11 @@
 .global-search kbd {
     white-space: nowrap;
     font-size: 9px;
-    border: 1px solid #393939;
+    border: 1px solid #EFC348;
     background: #252525;
     border-radius: 4px;
     padding: 3px;
-    color: #aaa39d;
+    color: #EFC348;
 }
 
 /* HEADER BUTTONS */
@@ -362,7 +370,7 @@
 .icon-button {
     border: 0;
     background: transparent;
-    color: #aaa39d;
+    color: #EFC348;
     display: grid;
     place-items: center;
     border-radius: 7px;
@@ -371,8 +379,8 @@
 }
 
 .icon-button:hover {
-    background: #332016;
-    color: #f07842;
+    background: #EFC348;
+    color: #060606;
 }
 
 .notification {
@@ -387,9 +395,9 @@
     height: 16px;
     padding: 0 4px;
     background: #f97373;
-    border: 2px solid #151515;
+    border: 2px solid #EFC348;
     border-radius: 999px;
-    color: #151515;
+    color: #EFC348;
     display: grid;
     place-items: center;
     font-size: 9px;
@@ -406,9 +414,9 @@
     border-radius: 50%;
     font-weight: 750;
     flex-shrink: 0;
-    background: #4b291b;
-    color: #ff9a68;
-    font-size: 10px;
+    background: #EFC348;
+    color: #000000;
+    font-size: 15px;
 }
 
 /* =====================================
@@ -432,8 +440,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 34px;
-    border-top: 1px solid #2b2b2b;
-    color: #a7a09a;
+    border-top: 1px solid #EFC348;
+    color: #EFC348;
     font-size: 10px;
     background: #151515;
     gap: 12px;

@@ -44,7 +44,6 @@ const NAVIGATION_GROUPS = [
       { label: 'Dashboard', path: '/', icon: LayoutDashboard },
       { label: 'Team & Users', path: '/team', icon: Users },
       { label: 'Departments', path: '/departments', icon: Building2 },
-      { label: 'Settings', path: '/settings', icon: Settings },
     ],
   },
   {
@@ -57,11 +56,24 @@ const NAVIGATION_GROUPS = [
     ],
   },
   {
+    title: 'PRODUCTION OPERATIONS',
+    items: [
+      { label: 'Production Schedule', path: '/schedule', icon: Calendar },
+      { label: 'Task Management', path: '/tasks', icon: CheckSquare },
+      { label: 'Call Sheets', path: '/call-sheets', icon: FileText },
+      { label: ' Locations & Shooting Permits', path: '/locations', icon: MapPin },
+      { label: 'Attendance', path: '/attendance', icon: Clock },
+      { label: 'Approvals', path: '/approvals', icon: CheckCircle2 },
+   ],
+  },
+  {
     title: 'MEDIA, AUDIO & LEGAL',
     items: [
       { label: 'Post-Production & Media', path: '/post-production-media', icon: HardDrive },
       { label: 'Singer & Dubbing', path: '/singer-dubbing', icon: Mic },
-      { label: 'Contracts & Rights', path: '/contracts-rights', icon: Scale },
+      { label: 'Final Delivery', path: '/delivery', icon: Send },
+      { label: 'OTT Publishing', path: '/ott-publishing', icon: PlayCircle },
+    
     ],
   },
   {
@@ -70,26 +82,18 @@ const NAVIGATION_GROUPS = [
       { label: 'Vendors & Equipment', path: '/vendors-equipment', icon: Truck },
       { label: 'Budget & Expenses', path: '/budget-expenses', icon: Wallet },
       { label: 'Invoices & Payments', path: '/invoices-payments', icon: Receipt },
+      { label: 'Contracts & Rights', path: '/contracts-rights', icon: Scale },
+
     ],
   },
-  {
-    title: 'PRODUCTION OPERATIONS',
-    items: [
-      { label: 'Production Schedule', path: '/schedule', icon: Calendar },
-      { label: 'Task Management', path: '/tasks', icon: CheckSquare },
-      { label: 'Attendance', path: '/attendance', icon: Clock },
-      { label: 'Call Sheets', path: '/call-sheets', icon: FileText },
-      { label: ' Locations & Shooting Permits', path: '/locations', icon: MapPin },
-      { label: 'Final Delivery', path: '/delivery', icon: Send },
-      { label: 'Approvals', path: '/approvals', icon: CheckCircle2 },
-      { label: 'OTT Publishing', path: '/ott-publishing', icon: PlayCircle },
-    ],
-  },
+  
   {
     title: 'INSIGHTS',
     items: [
       { label: 'Reports & Analytics', path: '/reports', icon: BarChart3 },
       { label: 'Notifications', path: '/notifications', icon: Bell },
+     { label: 'Settings', path: '/settings', icon: Settings },
+
     ],
   },
 ];
@@ -180,7 +184,7 @@ export default function MainLayout({ children }) {
             <Clapperboard size={22} />
           </div>
           <div>
-            <strong>LOOPSTREAM</strong>
+            <strong className="brand-name">LOOPSTREAM</strong>
             <span>PRODUCTION CRM</span>
           </div>
           <button

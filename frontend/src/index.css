@@ -338,7 +338,7 @@ a {
 
 .text-link,
 .full-width-link {
-  color: #ffad82 !important;
+  color: #EFC348 !important;
 }
 
 .more-button {
@@ -366,7 +366,7 @@ a {
 }
 
 .bar-progress {
-  background: var(--accent) !important;
+  background: #EFC348 !important;
 }
 
 .settings-tab {

@@ -7,6 +7,24 @@
     border-radius: 7px;
     padding: 6px
 }
+.brand-name {
+  font-size: 24px !important;
+  font-weight: 900;
+  letter-spacing: 2px;
+
+  color: #EFC348 !important;
+
+  text-shadow: 
+    2px 3px 8px rgba(0, 0, 0, 0.9),
+    0px 0px 20px rgba(239, 195, 72, 0.8);
+
+  transition: all 0.3s ease;
+}
+
+.brand-name:hover {
+  color: #FFD966 !important;
+  text-shadow: 0px 0px 25px rgba(239, 195, 72, 1);
+}
 
 .more-button:hover {
     background: #f1f5fb;
@@ -26,14 +44,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 25px
+    margin-bottom: 25px;
 }
 
 .eyebrow {
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.25px;
-    color: #8290a5;
+    color: #F9D558;
     margin-bottom: 10px
 }
 
@@ -337,7 +355,7 @@
     font-size: 14px;
     letter-spacing: -.2px;
     margin: 0;
-    color: #1d2a41
+    color: #f5f6f8
 }
 
 .panel-head p,
@@ -438,8 +456,8 @@
 }
 
 .bar-column>span {
-    font-size: 9px;
-    color: #94a0b1;
+    font-size: 15px;
+    color: #EFC348;
     position: relative;
     top: 1px
 }
@@ -915,7 +933,7 @@ tbody tr:hover {
 .mini-stat strong {
     font-size: 22px;
     letter-spacing: -.5px;
-    color: #f57600
+    color: #EFC348
 }
 
 .page-panel {
@@ -1743,7 +1761,7 @@ tbody tr:hover {
     --ff-border: #303030;
     --ff-text: #f4f0eb;
     --ff-muted: #aaa39d;
-    --ff-orange: #e3652e;
+    --ff-orange: #EFC348;
     --ff-orange-bright: #f07136
 }
 
@@ -1834,8 +1852,8 @@ body {
 }
 
 .more-button:hover {
-    background: #332016;
-    color: #f07842
+    background: #EFC348;
+    color: #080808
 }
 
 .avatar-blue {
@@ -1865,7 +1883,7 @@ body {
 
 .btn-light:hover {
     background: #2b2b2b;
-    border-color: #e3652e
+    border-color: #F9D558
 }
 
 .page-heading .eyebrow {
@@ -1874,36 +1892,41 @@ body {
 
 .stat-icon.blue,
 .department-icon.blue {
-    background: #3a2117;
-    color: #f07842
+    background: #EFC348;
+box-shadow: 0 8px 25px #EFC348(179, 124, 23, 0.35);
+    color: #000000
 }
 
 .stat-icon.violet,
 .department-icon.purple {
-    background: #292033;
-    color: #bba0ff
+   background: #EFC348;
+box-shadow: 0 8px 25px #EFC348(179, 124, 23, 0.35);
+    color: #000000
 }
 
 .stat-icon.cyan,
 .department-icon.cyan {
-    background: #183034;
-    color: #70d5e2
+   background: #EFC348;
+box-shadow: 0 8px 25px #EFC348(179, 124, 23, 0.35);
+    color: #000000
 }
 
 .stat-icon.orange,
 .department-icon.orange {
-    background: #3a2117;
-    color: #f07842
+   background: #EFC348;
+box-shadow: 0 8px 25px #EFC348(179, 124, 23, 0.35);
+    color: #000000
 }
 
 .stat-change.up {
-    color: #67d7a3;
-    background: #173326
+   background: #EFC348;
+box-shadow: 0 8px 25px #EFC348(179, 124, 23, 0.35);
+    color: #000000
 }
 
 .stat-change.down {
-    color: #ffad76;
-    background: #382419
+    color: #EFC348;
+    background: #EFC348
 }
 
 .stat-trend-month {
@@ -1915,42 +1938,42 @@ body {
 }
 
 .stat-trend-bar {
-    background: #e3652e
+    background: #EFC348
 }
 
 .stat-trend-bar.unavailable {
-    background: #666
+    background:#EFC348
 }
 
 .chart-legend,
 .chart-legend span,
 .footer-label {
-    color: #aaa39d
+    color: #EFC348
 }
 
 .legend-blue {
-    background: #e3652e
+    background: #EFC348
 }
 
 .legend-gray {
-    background: #414141
+    background: #EFC348
 }
 
 .bar-chart {
-    border-color: #303030;
-    background: repeating-linear-gradient(to bottom, transparent 0, transparent 37px, #292929 38px, #292929 39px)
+    border-color: #EFC348;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 37px, #EFC348 38px, #EFC348 39px)
 }
 
 .bar-remaining {
-    background: #353535
+    background: #EFC348
 }
 
 .bar-progress {
-    background: #e3652e
+    background: #EFC348
 }
 
 .sparkline i {
-    background: #f07136
+    background: #EFC348
 }
 
 .sparkline.violet i {
@@ -1958,17 +1981,18 @@ body {
 }
 
 .sparkline.cyan i {
-    background: #65cad8
+    background: #EFC348
 }
 
 .sparkline.orange i {
-    background: #f5a16c
+    background: #EFC348
 }
 
 .date-box.blue,
 .deadline-tag.blue {
-    background: #332016;
-    color: #f07842
+    background: #EFC348;
+color: #000000;
+box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.55);
 }
 
 .date-box.purple,
@@ -2162,7 +2186,7 @@ body {
     pointer-events: none;
     background-image: linear-gradient(#5d514a 1px, transparent 1px), linear-gradient(90deg, #5d514a 1px, transparent 1px);
     background-size: 48px 48px;
-    mask-image: linear-gradient(to bottom, black, transparent 90%)
+    mask-image: linear-gradient(to bottom, rgb(0, 0, 0), transparent 100%)
 }
 
 .login-brand,
@@ -2425,14 +2449,14 @@ body {
     color: #e3652e
 }
 
-.login-visual-footer {
+/* .login-visual-footer {
     display: flex;
     justify-content: space-between;
     color: #83786f;
     font-size: 8px;
     letter-spacing: 1.5px;
     font-weight: 800
-}
+} */
 
 .login-panel {
     display: flex;
@@ -2750,10 +2774,10 @@ body {
         grid-template-columns: 1fr
     }
 
-    .login-visual {
+    /* .login-visual {
         min-height: auto;
         padding: 26px 28px 20px
-    }
+    } */
 
     .login-hero-copy {
         margin: 55px 0 18px;

@@ -1,0 +1,649 @@
+/* ==================================
+   DASHBOARD BACKGROUND
+================================== */
+
+.dashboard-page {
+  min-height: 30vh;
+  width: 100%;
+
+  padding: 25px;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  position: relative;
+}
+
+
+/* ==================================
+   DASHBOARD CONTENT
+================================== */
+
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+}
+
+
+/* ==================================
+   PAGE HEADING
+================================== */
+
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 30px;
+  font-weight: 900;
+
+  color: #EFC348;
+
+  letter-spacing: 1px;
+
+  text-shadow:
+    2px 3px 8px rgba(0, 0, 0, 0.8),
+    0px 0px 20px rgba(239, 195, 72, 0.6);
+}
+
+.page-heading p {
+  color: #263238;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* ==================================
+   EYEBROW
+================================== */
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #664b03;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+
+  margin-bottom: 10px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+
+  background: #22A06B;
+
+  border-radius: 50%;
+
+  box-shadow: 0 0 12px #22A06B;
+}
+
+
+/* ==================================
+   NEW PRODUCTION BUTTON
+================================== */
+
+.new-product-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  background: #EFC348;
+  color: #000000;
+
+  padding: 13px 24px;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0px 10px 25px rgba(0, 0, 0, 0.55),
+    0px 0px 25px rgba(239, 195, 72, 0.5);
+
+  transition: all 0.3s ease;
+}
+
+.new-product-btn:hover {
+  background: #D9A927;
+
+  transform: translateY(-4px);
+
+  box-shadow:
+    0px 15px 35px rgba(0, 0, 0, 0.7),
+    0px 0px 30px rgba(239, 195, 72, 0.8);
+}
+
+.new-product-btn:active {
+  transform: scale(0.96);
+}
+
+
+/* ==================================
+   STAT GRID
+================================== */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+}
+
+
+/* ==================================
+   STAT CARDS
+================================== */
+
+.dashboard-page .stat-card {
+  background: rgba(255, 255, 255, 0.92);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(239, 195, 72, 0.5);
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  box-shadow:
+    0px 10px 25px rgba(0, 0, 0, 0.18),
+    0px 0px 15px rgba(239, 195, 72, 0.25);
+
+  transition: all 0.3s ease;
+}
+
+.dashboard-page .stat-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0px 15px 35px rgba(0, 0, 0, 0.3),
+    0px 0px 20px rgba(239, 195, 72, 0.5);
+}
+
+
+/* ==================================
+   DASHBOARD GRID
+================================== */
+
+.dashboard-grid {
+  display: grid;
+
+  grid-template-columns: 1.6fr 1fr;
+
+  gap: 22px;
+
+  align-items: start;
+}
+
+.dashboard-column {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+
+/* ==================================
+   PANELS
+================================== */
+
+.dashboard-page .panel {
+  background: rgba(255, 255, 255, 0.93);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(239, 195, 72, 0.4);
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  box-shadow:
+    0px 10px 30px rgba(0, 0, 0, 0.2),
+    0px 0px 18px rgba(239, 195, 72, 0.25);
+
+  transition: all 0.3s ease;
+}
+
+.dashboard-page .panel:hover {
+  box-shadow:
+    0px 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ==================================
+   PANEL HEADER
+================================== */
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 22px;
+}
+
+.panel-head h2 {
+  font-size: 18px;
+  font-weight: 800;
+
+  color: #263238;
+}
+
+.panel-head p {
+  font-size: 12px;
+
+  color: #718096;
+
+  margin-top: 5px;
+}
+
+
+/* ==================================
+   TEXT LINKS
+================================== */
+
+.text-link,
+.full-width-link {
+  color: #8C650D;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
+}
+
+.text-link:hover,
+.full-width-link:hover {
+  color: #000000;
+}
+
+
+/* ==================================
+   BAR CHART
+================================== */
+
+.bar-chart {
+  display: flex;
+
+  justify-content: space-around;
+  align-items: flex-end;
+
+  gap: 15px;
+
+  min-height: 180px;
+  padding: 15px 5px;
+}
+
+.bar-column {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 10px;
+
+  flex: 1;
+}
+
+.bar-stack {
+  width: 35px;
+  height: 130px;
+
+  background: #F1E7CB;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: flex-end;
+
+  overflow: hidden;
+}
+
+.bar-progress {
+  width: 100%;
+
+  background: linear-gradient(
+    180deg,
+    #F9D558,
+    #B37C17
+  );
+
+  border-radius: 8px;
+
+  transition: height 0.5s ease;
+}
+
+.bar-column span {
+  font-size: 11px;
+
+  font-weight: 700;
+
+  color: #718096;
+}
+
+
+/* ==================================
+   CHART FOOTER
+================================== */
+
+.chart-footer {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  border-top: 1px solid #E5EAE8;
+
+  padding-top: 15px;
+
+  margin-top: 15px;
+}
+
+.footer-label {
+  display: block;
+
+  color: #718096;
+
+  font-size: 12px;
+
+  margin-bottom: 5px;
+}
+
+.chart-footer strong {
+  font-size: 20px;
+
+  color: #263238;
+}
+
+
+/* ==================================
+   ACTIVE PROJECTS
+================================== */
+
+.active-project-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.active-project-item {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  background: rgba(239, 195, 72, 0.12);
+
+  border-radius: 10px;
+
+  transition: 0.3s ease;
+}
+
+.active-project-item:hover {
+  background: rgba(239, 195, 72, 0.25);
+
+  transform: translateX(4px);
+}
+
+.project-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #EFC348;
+
+  color: #000000;
+}
+
+.active-project-copy {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.active-project-copy strong {
+  color: #263238;
+
+  font-size: 13px;
+}
+
+.active-project-copy span,
+.active-project-date {
+  color: #718096;
+
+  font-size: 11px;
+}
+
+
+/* ==================================
+   DEADLINE LIST
+================================== */
+
+.deadline-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.deadline-item {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  background: rgba(239, 195, 72, 0.10);
+
+  border-radius: 10px;
+}
+
+.date-box {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #EFC348;
+  color: #000000;
+
+  flex-shrink: 0;
+}
+
+.date-box strong {
+  font-size: 15px;
+}
+
+.date-box span {
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.deadline-copy {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.deadline-copy strong {
+  color: #263238;
+
+  font-size: 12px;
+}
+
+.deadline-copy span {
+  color: #718096;
+
+  font-size: 11px;
+}
+
+
+/* ==================================
+   DEADLINE TAGS
+================================== */
+
+.deadline-tag {
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.deadline-tag.blue {
+  background: #DCEAFB;
+  color: #2862A0;
+}
+
+.deadline-tag.red {
+  background: #FCE1DF;
+  color: #D9534F;
+}
+
+.deadline-tag.purple {
+  background: #EDE3FA;
+  color: #8055B5;
+}
+
+
+/* ==================================
+   FULL WIDTH LINK
+================================== */
+
+.full-width-link {
+  display: flex;
+
+  justify-content: space-between;
+
+  width: 100%;
+
+  padding-top: 18px;
+
+  margin-top: 15px;
+
+  border-top: 1px solid #E5EAE8;
+}
+
+
+/* ==================================
+   EMPTY STATE
+================================== */
+
+.dashboard-page .empty-state {
+  color: #718096;
+
+  font-size: 13px;
+
+  padding: 20px;
+
+  text-align: center;
+}
+
+
+/* ==================================
+   RESPONSIVE DESIGN
+================================== */
+
+@media (max-width: 1100px) {
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .dashboard-page {
+    padding: 15px;
+
+    background-attachment: scroll;
+  }
+
+  .page-heading {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .page-title {
+    font-size: 23px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-head {
+    flex-wrap: wrap;
+  }
+
+  .bar-stack {
+    width: 25px;
+  }
+
+  .new-product-btn {
+    width: 100%;
+  }
+
+}
