@@ -270,10 +270,10 @@ export default function ProjectsProductions() {
         }
         .prod-card:hover {
           transform: translateY(-4px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 24px rgba(239, 195, 72, 0.12) !important;
         }
 
         .prod-list-card {
@@ -293,10 +293,10 @@ export default function ProjectsProductions() {
         }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 20px rgba(239, 195, 72, 0.1) !important;
         }
         .prod-list-card:hover strong {
           color: #ffffff !important;
@@ -342,10 +342,10 @@ export default function ProjectsProductions() {
           pointer-events: auto;
         }
         .badge-tag.platform {
-          background: rgba(42, 28, 22, 0.9);
+          background: rgba(38, 30, 15, 0.9);
           backdrop-filter: blur(8px);
-          border: 1px solid #4a2b1b;
-          color: #f07842;
+          border: 1px solid #5a4515;
+          color: #EFC348;
           font-weight: 700;
         }
         .status-pill.blue {
@@ -409,10 +409,10 @@ export default function ProjectsProductions() {
         }
         .prod-card:hover .project-icon.blue {
           transform: scale(1.08);
-          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.3);
-          background: rgba(240, 120, 66, 0.2) !important;
-          border-color: rgba(240, 120, 66, 0.5) !important;
-          color: #f07842 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.3);
+          background: rgba(239, 195, 72, 0.2) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
+          color: #EFC348 !important;
         }
 
         .prod-progress-block {
@@ -435,7 +435,7 @@ export default function ProjectsProductions() {
           color: #9c948c;
         }
         .prod-progress-head strong {
-          color: #f07842;
+          color: #EFC348;
           font-size: 11.5px;
         }
         .progress-track {
@@ -448,7 +448,7 @@ export default function ProjectsProductions() {
         .progress-fill.blue {
           height: 100%;
           border-radius: 999px;
-          background: linear-gradient(90deg, #ea580c, #f07842);
+          background: linear-gradient(90deg, #DEA737, #EFC348);
           transition: width 0.3s ease;
         }
 
@@ -495,9 +495,9 @@ export default function ProjectsProductions() {
         }
         .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover {
-          color: #f07842 !important;
-          border-color: #ea580c !important;
-          background: rgba(234, 88, 12, 0.15) !important;
+          color: #EFC348 !important;
+          border-color: #DEA737 !important;
+          background: rgba(239, 195, 72, 0.15) !important;
         }
         .prod-card-actions .action-delete:hover,
         .prod-card-actions .icon-button[title*="Delete"]:hover {
@@ -505,7 +505,80 @@ export default function ProjectsProductions() {
           border-color: #dc2626 !important;
           background: rgba(239, 68, 68, 0.15) !important;
         }
-      `}</style>
+
+        /* Cinema Gold Theme Enhancements */
+        .heading-actions .btn-primary,
+        form.modal-card .btn-primary {
+          background: #EFC348 !important;
+          border-color: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
+        }
+        .heading-actions .btn-primary:hover,
+        form.modal-card .btn-primary:hover {
+          background: #F9D558 !important;
+          border-color: #F9D558 !important;
+          color: #000000 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 22px rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .filter-tab-pill {
+          transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+        }
+        .filter-tab-pill:hover {
+          border-color: #EFC348 !important;
+          color: #f4f0eb !important;
+        }
+        .filter-tab-pill.active {
+          background: rgba(239, 195, 72, 0.16) !important;
+          color: #EFC348 !important;
+          border-color: #EFC348 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.18) !important;
+        }
+
+        .segmented button.chosen {
+          background: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+        }
+      /* Modal Form Control Focus & Hover - Cinema Gold */
+        .modal-card input:hover,
+        .modal-card select:hover,
+        .modal-card textarea:hover,
+        .form-grid input:hover,
+        .form-grid select:hover,
+        .form-grid textarea:hover,
+        .form-grid-2 input:hover,
+        .form-grid-2 select:hover,
+        .form-grid-2 textarea:hover,
+        .form-grid-3 input:hover,
+        .form-grid-3 select:hover,
+        .form-grid-3 textarea:hover {
+          border-color: rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .modal-card input:focus,
+        .modal-card select:focus,
+        .modal-card textarea:focus,
+        .form-grid input:focus,
+        .form-grid select:focus,
+        .form-grid textarea:focus,
+        .form-grid-2 input:focus,
+        .form-grid-2 select:focus,
+        .form-grid-2 textarea:focus,
+        .form-grid-3 input:focus,
+        .form-grid-3 select:focus,
+        .form-grid-3 textarea:focus {
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
+          outline: none !important;
+        }
+
+            `}</style>
 
       <div className="page-heading">
         <div>
@@ -665,7 +738,7 @@ export default function ProjectsProductions() {
 
         {!loading && filteredProjects.length === 0 && (
           <div className="empty-state">
-            <Film size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+            <Film size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
             <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>No production records resolved</strong>
             <p style={{ margin: 0 }}>The database register layer contains no records matching this query framework selection.</p>
           </div>
