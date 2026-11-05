@@ -71,7 +71,7 @@
 }
 
 .login-small-label {
-  color: #B37C17;
+  color: #EFC348;
   font-weight: 800;
   letter-spacing: 3px;
 }
@@ -106,7 +106,7 @@
 .login-submit {
   width: 100%;
   min-height: 65px;
-  background: linear-gradient(120deg, #F9D558, #DEA737);
+  background: linear-gradient(120deg, #F9D558, #EFC348);
   color: #000;
   border: none;
   border-radius: 15px;
@@ -116,19 +116,19 @@
   justify-content: center;
   align-items: center;
   gap: 15px;
-  box-shadow: 0 12px 28px rgba(179, 124, 23, 0.35);
+  box-shadow: 0 12px 28px rgba(239, 195, 72, 0.35);
   cursor: pointer;
   transition: 0.3s ease;
 }
 
 .login-submit:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 35px rgba(179, 124, 23, 0.45);
+  box-shadow: 0 16px 35px rgba(239, 195, 72, 0.45);
 }
 
 .login-switch a,
 .password-label button {
-  color: #B37C17;
+  color: #EFC348;
   font-weight: 800;
 }
 
@@ -281,7 +281,7 @@
   background: linear-gradient(
     135deg,
     #F9D558,
-    #DEA737
+    #EFC348
   );
 
   color: #000000;
@@ -497,7 +497,7 @@
     180deg,
     transparent,
     #EFC348,
-    #B37C17,
+    #EFC348,
     transparent
   );
 
@@ -530,7 +530,7 @@
 .login-small-label {
   display: inline-block;
 
-  color: #A47A16;
+  color: #EFC348;
 
   font-size: 11px;
 
@@ -727,7 +727,7 @@
 
   border: none;
 
-  color: #A47A16;
+  color: #EFC348;
 
   font-size: 12px;
 
@@ -772,7 +772,7 @@
 }
 
 .password-field > button:hover {
-  color: #B37C17;
+  color: #EFC348;
 }
 
 
@@ -795,7 +795,7 @@
   width: 17px;
   height: 17px;
 
-  accent-color: #D9A927;
+  accent-color: #EFC348;
 
   cursor: pointer;
 }
@@ -856,7 +856,7 @@
     135deg,
     #F9D558,
     #EFC348,
-    #D9A927
+    #EFC348
   );
 
   color: #000000;
@@ -868,28 +868,19 @@
   cursor: pointer;
 
   box-shadow:
-    0 10px 25px rgba(179, 124, 23, 0.35),
+    0 10px 25px rgba(239, 195, 72, 0.35),
     0 5px 15px rgba(0, 0, 0, 0.15);
 
   transition: all 0.3s ease;
 }
 
-.login-submit:hover:not(:disabled) {
-  transform: translateY(-4px);
-
-  background: linear-gradient(
-    135deg,
-    #FFD966,
-    #EFC348
-  );
-
-  box-shadow:
-    0 15px 35px rgba(179, 124, 23, 0.5),
-    0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
+.login-submit:hover:not(:disabled),
 .login-submit:active {
-  transform: scale(0.98);
+  transform: none;
+  background: linear-gradient(135deg, #F9D558, #EFC348, #EFC348);
+  box-shadow:
+    0 10px 25px rgba(239, 195, 72, 0.35),
+    0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .login-submit:disabled {
@@ -914,7 +905,7 @@
 }
 
 .login-switch a {
-  color: #A47A16;
+  color: #EFC348;
 
   font-weight: 900;
 
@@ -1003,7 +994,7 @@
 }
 
 .login-secure-note svg {
-  color: #A47A16;
+  color: #EFC348;
 
   flex-shrink: 0;
 }
@@ -1039,6 +1030,81 @@
   margin: 0 5px;
 
   color: #EFC348;
+}
+
+/* Authentication pages keep a single dashboard-gold accent, overriding legacy orange rules. */
+.login-screen .login-brand-icon,
+.login-screen .login-submit {
+  background: #EFC348 !important;
+  border-color: #EFC348 !important;
+}
+
+.login-screen .login-kicker i {
+  background: #EFC348 !important;
+}
+
+.login-screen .login-small-label,
+.login-screen .login-welcome h2 span,
+.login-screen .login-hero-copy h1 em,
+.login-screen .login-kicker i,
+.login-screen .login-feature-list svg,
+.login-screen .login-form > label,
+.login-screen .password-label label,
+.login-screen .register-password-control > label,
+.login-screen .password-label button,
+.login-screen .login-switch a,
+.login-screen .login-secure-note svg,
+.login-screen .login-copyright span,
+.login-screen .login-secure-note,
+.login-screen .remember-row input {
+  color: #EFC348 !important;
+  accent-color: #EFC348;
+}
+
+.login-screen .login-input-group,
+.login-screen .password-field,
+.login-screen .register-form > input {
+  background: transparent !important;
+  border-color: #EFC348 !important;
+}
+
+.login-screen .login-input-group input,
+.login-screen .password-field input,
+.login-screen .register-form > input,
+.login-screen .login-input-group input::placeholder,
+.login-screen .password-field input::placeholder,
+.login-screen .register-form > input::placeholder {
+  color: #EFC348 !important;
+}
+
+.login-screen .login-input-group:hover,
+.login-screen .password-field:hover,
+.login-screen .register-form > input:hover,
+.login-screen .login-input-group:focus-within,
+.login-screen .password-field:focus-within,
+.login-screen .register-form > input:focus {
+  border-color: #EFC348 !important;
+  box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.24) !important;
+  transform: none;
+}
+
+.login-screen .password-field > button,
+.login-screen .password-field > button:hover {
+  color: #EFC348 !important;
+}
+
+.login-screen input[type='password']::-ms-reveal {
+  display: none;
+}
+
+.login-screen .login-submit,
+.login-screen .login-submit:hover:not(:disabled),
+.login-screen .login-submit:active {
+  transform: none !important;
+  background: #EFC348 !important;
+  color: #000000 !important;
+  box-shadow: 0 10px 25px rgba(239, 195, 72, 0.35) !important;
+  transition: none;
 }
 
 
@@ -1138,7 +1204,7 @@
 
     letter-spacing: 1.5px;
 
-    color: #A47A16;
+    color: #EFC348;
   }
 
   .login-welcome h2 {

@@ -5,7 +5,6 @@ import PageHeader from '../components/PageHeader';
 import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import { formatDate, getId, isPastDate, labelize } from '../utils/helpers';
-import { taskDummyData } from '../data/dummyData';
 import { DeleteActionButton, EditActionButton } from '../components/RecordActionButtons';
 import "../css/TaskPage.css"
 const COLUMNS = ['todo', 'in-progress', 'done'];
@@ -21,7 +20,7 @@ const FIELDS = [
 ];
 
 export default function TasksPage() {
-  const { items, loading, error, save, remove } = useResource(taskApi, taskDummyData);
+  const { items, loading, error, save, remove } = useResource(taskApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
 
   const moveForward = (task) => {

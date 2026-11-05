@@ -151,6 +151,37 @@ a {
   color: #ffa3a3 !important;
 }
 
+/* Golden button theme, scoped to the specified production-operation modules only. */
+.gold-action-page {
+  --accent: #EFC348;
+  --accent-hover: #D9A927;
+  --accent-soft: rgba(239, 195, 72, 0.15);
+}
+
+.gold-action-page .btn--primary,
+.gold-action-page .btn-primary {
+  background: #EFC348 !important;
+  border-color: #EFC348 !important;
+  color: #080808 !important;
+  box-shadow: 0 2px 8px rgba(239, 195, 72, 0.28);
+}
+
+.gold-action-page .btn--primary:hover,
+.gold-action-page .btn-primary:hover {
+  background: #D9A927 !important;
+  border-color: #D9A927 !important;
+  box-shadow: 0 4px 12px rgba(239, 195, 72, 0.38);
+}
+
+.gold-action-page .btn--link {
+  color: #EFC348 !important;
+}
+
+.gold-action-page .btn--link:hover {
+  background: rgba(239, 195, 72, 0.15) !important;
+  color: #D9A927 !important;
+}
+
 /* One consistent, accessible edit/delete control throughout the CRM. */
 .record-action {
   display: inline-grid;

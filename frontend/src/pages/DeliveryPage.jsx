@@ -11,7 +11,6 @@ import StatusDonut from '../components/StatusDonut';
 import ProgressBar from '../components/ProgressBar';
 import { formatDate, getId, labelize, percent, todayString } from '../utils/helpers';
 import { getDeliveryStatus } from '../utils/delivery';
-import { deliveryDummyData } from '../data/dummyData';
 
 const STATUSES = ['pending', 'in-progress', 'delivered', 'delayed'];
 const TYPES = ['master', 'subtitles', 'audio-stems', 'trailer', 'poster', 'metadata'];
@@ -28,7 +27,7 @@ const FIELDS = [
 ];
 
 export default function DeliveryPage() {
-  const { items, loading, error, save, remove } = useResource(deliveryApi, deliveryDummyData);
+  const { items, loading, error, save, remove } = useResource(deliveryApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [actionError, setActionError] = useState('');

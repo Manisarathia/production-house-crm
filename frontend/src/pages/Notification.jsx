@@ -6,7 +6,6 @@ import SummaryStrip from '../components/SummaryStrip';
 import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import { formatDateTime, getId, labelize } from '../utils/helpers';
-import { notificationDummyData } from '../data/dummyData';
 import { DeleteActionButton } from '../components/RecordActionButtons';
 import '../css/NotificationPage.css';
 
@@ -21,7 +20,7 @@ const FIELDS = [
 ];
 
 export default function NotificationsPage() {
-  const { items, loading, error, save, remove, reload } = useResource(notificationApi, notificationDummyData);
+  const { items, loading, error, save, remove, reload } = useResource(notificationApi, [], '', { backendOnly: true });
   const [creating, setCreating] = useState(false);
   const [onlyUnread, setOnlyUnread] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');

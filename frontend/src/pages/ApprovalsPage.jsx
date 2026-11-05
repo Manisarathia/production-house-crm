@@ -8,7 +8,6 @@ import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import StatusDonut from '../components/StatusDonut';
 import { formatDate, getId, labelize, todayString } from '../utils/helpers';
-import { approvalDummyData } from '../data/dummyData';
 import '../css/ApprovelPage.css';
 
 const STAGES = ['director', 'producer', 'studio-head'];
@@ -50,7 +49,7 @@ function StageTrack({ stage, status }) {
 }
 
 export default function ApprovalsPage() {
-  const { items, loading, error, save, remove } = useResource(approvalApi, approvalDummyData);
+  const { items, loading, error, save, remove } = useResource(approvalApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
   const [rejecting, setRejecting] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');

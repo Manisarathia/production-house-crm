@@ -45,8 +45,8 @@
 
 .report-chart-switcher__button.is-active {
   color: #080808;
-  background: #EFC348;
-  border-color:#d50606;
+  background: #FFD700;
+  border-color: #FFD700;
   transform: translateX(-3px);
 }
 

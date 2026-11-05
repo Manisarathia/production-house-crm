@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getId } from '../utils/helpers';
 
-export default function useResource(api, fallbackItems = [], customKey = '') {
+const EMPTY_ITEMS = [];
+
+export default function useResource(api, fallbackItems = [], customKey = '', options = {}) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isBackendConnected, setIsBackendConnected] = useState(false);
@@ -9,11 +11,13 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
 
   const resourceKey = customKey || api?.path || 'default';
   const storageKey = `crm_mock_${resourceKey.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const backendOnly = options.backendOnly === true;
+  const fallbackSource = backendOnly ? EMPTY_ITEMS : fallbackItems;
 
   const getFallbackList = useCallback(() => {
-    const raw = typeof fallbackItems === 'function' ? fallbackItems() : fallbackItems;
+    const raw = typeof fallbackSource === 'function' ? fallbackSource() : fallbackSource;
     return Array.isArray(raw) ? raw : [];
-  }, [fallbackItems]);
+  }, [fallbackSource]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,6 +54,12 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
 
       setIsBackendConnected(false);
 
+      if (backendOnly) {
+        setItems([]);
+        setError('Unable to load data from the backend.');
+        return;
+      }
+
       let initialData = null;
       try {
         const cached = localStorage.getItem(storageKey);
@@ -77,7 +87,7 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
     } finally {
       setLoading(false);
     }
-  }, [api, getFallbackList, storageKey]);
+  }, [api, backendOnly, getFallbackList, storageKey]);
 
   useEffect(() => {
     load();
@@ -96,6 +106,11 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
       } catch (err) {
         console.warn('Backend save failed, falling back to local state:', err);
       }
+    }
+
+    if (backendOnly) {
+      setError('Unable to save because the backend is unavailable.');
+      return;
     }
 
     // Local state update when backend is offline
@@ -133,6 +148,11 @@ export default function useResource(api, fallbackItems = [], customKey = '') {
       } catch (err) {
         console.warn('Backend remove failed, falling back to local state:', err);
       }
+    }
+
+    if (backendOnly) {
+      setError('Unable to delete because the backend is unavailable.');
+      return;
     }
 
     // Local state delete when backend is offline

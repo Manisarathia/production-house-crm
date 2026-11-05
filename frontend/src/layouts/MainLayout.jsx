@@ -34,7 +34,18 @@ import {
 import './MainLayout.css';
 import { notificationApi } from '../api';
 import useResource from '../hooks/useResource';
-import { notificationDummyData } from '../data/dummyData';
+
+const GOLD_BUTTON_PATHS = new Set([
+  '/schedule',
+  '/tasks',
+  '/locations',
+  '/attendance',
+  '/approvals',
+  '/delivery',
+  '/ott-publishing',
+  '/reports',
+  '/notifications',
+]);
 import { authApi } from '../api/systemAdministrationApi.js';
 
 const NAVIGATION_GROUPS = [
@@ -131,7 +142,9 @@ export default function MainLayout({ children }) {
   const navigate = useNavigate();
   const { items: notifications, reload: reloadNotifications } = useResource(
     notificationApi,
-    notificationDummyData
+    [],
+    '',
+    { backendOnly: true }
   );
 
   const userEmail = sessionStorage.getItem('frameflow-user')
@@ -278,7 +291,7 @@ export default function MainLayout({ children }) {
           </div>
         </header>
 
-        <main className="page-content">
+        <main className={`page-content${GOLD_BUTTON_PATHS.has(location.pathname) ? ' gold-action-page' : ''}`}>
           {children || <Outlet />}
         </main>
 

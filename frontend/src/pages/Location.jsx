@@ -6,7 +6,6 @@ import DataTable from '../components/DataTable';
 import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import { daysFromToday, formatDate, getId } from '../utils/helpers';
-import { locationDummyData } from '../data/dummyData';
 
 const FIELDS = [
   { name: 'name', label: 'Location name', required: true },
@@ -41,7 +40,7 @@ const COLUMNS = [
 ];
 
 export default function Location() {
-  const { items, loading, error, save, remove } = useResource(locationApi, locationDummyData);
+  const { items, loading, error, save, remove } = useResource(locationApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
 
   return (

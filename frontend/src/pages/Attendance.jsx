@@ -8,7 +8,6 @@ import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import StatusDonut from '../components/StatusDonut';
 import { formatDate, getId, todayString, toInputDate } from '../utils/helpers';
-import { attendanceDummyData } from '../data/dummyData';
 
 const FIELDS = [
   { name: 'crewMember', label: 'Crew member', required: true },
@@ -32,7 +31,7 @@ const COLUMNS = [
 ];
 
 export default function AttendancePage() {
-  const { items, loading, error, save, remove } = useResource(attendanceApi, attendanceDummyData);
+  const { items, loading, error, save, remove } = useResource(attendanceApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
   const [date, setDate] = useState(todayString());
 

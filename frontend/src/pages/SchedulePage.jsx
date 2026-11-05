@@ -8,7 +8,6 @@ import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import StatusDonut from '../components/StatusDonut';
 import { formatDate, getId, labelize } from '../utils/helpers';
-import { scheduleDummyData } from '../data/dummyData';
 
 const STATUSES = ['scheduled', 'in-progress', 'completed', 'delayed'];
 
@@ -23,7 +22,7 @@ const FIELDS = [
 ];
 
 export default function SchedulePage() {
-  const { items, loading, error, save, remove } = useResource(scheduleApi, scheduleDummyData);
+  const { items, loading, error, save, remove } = useResource(scheduleApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null); // null = closed, {} = new record
   const [statusFilter, setStatusFilter] = useState('all');
 

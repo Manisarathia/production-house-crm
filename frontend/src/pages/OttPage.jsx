@@ -8,7 +8,6 @@ import FormModal from '../components/FormModal';
 import StatusBadge from '../components/StatusBadge';
 import StatusDonut from '../components/StatusDonut';
 import { formatDate, getId, isPastDate, labelize, todayString } from '../utils/helpers';
-import { ottDummyData } from '../data/dummyData';
 
 const STATUSES = ['draft', 'in-review', 'scheduled', 'published', 'failed'];
 const PLATFORMS = ['Sun NXT', 'Prime Video', 'Netflix', 'Disney+ Hotstar', 'Aha', 'Other'];
@@ -35,7 +34,7 @@ const FIELDS = [
 ];
 
 export default function OttPage() {
-  const { items, loading, error, save, remove } = useResource(ottApi, ottDummyData);
+  const { items, loading, error, save, remove } = useResource(ottApi, [], '', { backendOnly: true });
   const [editing, setEditing] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [platformFilter, setPlatformFilter] = useState('all');

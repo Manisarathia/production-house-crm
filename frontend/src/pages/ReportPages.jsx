@@ -9,14 +9,6 @@ import StatusDonut from '../components/StatusDonut';
 import ProgressBar from '../components/ProgressBar';
 import { formatDate, downloadCsv, percent, todayString } from '../utils/helpers';
 import { getDeliveryStatus } from '../utils/delivery';
-import {
-  approvalDummyData,
-  attendanceDummyData,
-  deliveryDummyData,
-  ottDummyData,
-  scheduleDummyData,
-  taskDummyData,
-} from '../data/dummyData';
 import '../css/ReportsPage.css';
 
 const countWhere = (list, test) => list.filter(test).length;
@@ -26,12 +18,12 @@ const donutData = (list, statuses, getStatus = (item) => item.status) =>
 
 export default function ReportsPage() {
   const [selectedChart, setSelectedChart] = useState('schedule');
-  const schedules = useResource(scheduleApi, scheduleDummyData);
-  const tasks = useResource(taskApi, taskDummyData);
-  const attendance = useResource(attendanceApi, attendanceDummyData);
-  const deliveries = useResource(deliveryApi, deliveryDummyData);
-  const approvals = useResource(approvalApi, approvalDummyData);
-  const ott = useResource(ottApi, ottDummyData);
+  const schedules = useResource(scheduleApi, [], '', { backendOnly: true });
+  const tasks = useResource(taskApi, [], '', { backendOnly: true });
+  const attendance = useResource(attendanceApi, [], '', { backendOnly: true });
+  const deliveries = useResource(deliveryApi, [], '', { backendOnly: true });
+  const approvals = useResource(approvalApi, [], '', { backendOnly: true });
+  const ott = useResource(ottApi, [], '', { backendOnly: true });
 
   const sources = [schedules, tasks, attendance, deliveries, approvals, ott];
   const loading = sources.some((source) => source.loading);
