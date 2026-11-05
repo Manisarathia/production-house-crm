@@ -12,7 +12,7 @@
 }
 
 .field span {
-  color: var(--ink-soft);
+  color:#EFC348;
   font-size: 12px;
   font-weight: 600;
 }
@@ -39,8 +39,8 @@
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: #EFC348;
+  box-shadow: 0 0 0 3px #EFC348;
 }
 
 .field textarea {

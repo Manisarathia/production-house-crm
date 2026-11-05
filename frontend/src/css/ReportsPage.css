@@ -26,7 +26,7 @@
   font-weight: 700;
   text-align: left;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid ;
   border-radius: 8px;
   cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
@@ -34,26 +34,26 @@
 
 .report-chart-switcher__button:hover,
 .report-chart-switcher__button:focus-visible {
-  color: var(--ink);
-  border-color: var(--accent);
+  color: #EFC348;
+  border-color: #EFC348;
 }
 
 .report-chart-switcher__button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid #EFC348;
   outline-offset: 2px;
 }
 
 .report-chart-switcher__button.is-active {
-  color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
+  color: #080808;
+  background: #EFC348;
+  border-color:#d50606;
   transform: translateX(-3px);
 }
 
 .report-heading {
   font-size: 16px;
   margin: 16px 0 12px;
-  color: var(--ink-soft);
+  color: #EFC348;
   letter-spacing: 0.3px;
 }
 

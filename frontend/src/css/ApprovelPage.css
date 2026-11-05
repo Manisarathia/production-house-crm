@@ -11,7 +11,7 @@
   padding: 3px 10px;
   border-radius: 6px;
   font-size: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid #EFC348;
   color: var(--ink-soft);
   background: var(--surface-raised);
   white-space: nowrap;
@@ -24,7 +24,7 @@
 }
 
 .stages__step--current {
-  color: #ffad82;
+  color: #EFC348;
   border-color: var(--accent);
   background: #40251a;
   font-weight: 600;
@@ -32,6 +32,6 @@
 
 .stages__step--rejected {
   color: #ff9b89;
-  border-color: #65342d;
+  border-color: #EFC348;
   background: #452522;
 }

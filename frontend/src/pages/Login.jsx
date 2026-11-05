@@ -15,7 +15,7 @@ import Login2 from '../assets/Login2.jpg';
 
 import { authApi } from '../api/systemAdministrationApi.js';
 
-import './Login.css';
+import '../css/Login.css';
 
 export default function Login() {
   const navigate = useNavigate();
