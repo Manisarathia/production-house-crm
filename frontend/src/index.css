@@ -182,6 +182,19 @@ a {
   color: #D9A927 !important;
 }
 
+.gold-action-page .settings-tab.selected,
+.gold-action-page .segmented button.chosen {
+  background: rgba(239, 195, 72, 0.16) !important;
+  border-color: #EFC348 !important;
+  color: #EFC348 !important;
+}
+
+.gold-action-page .settings-tab:hover,
+.gold-action-page .segmented button:hover {
+  border-color: #EFC348 !important;
+  color: #EFC348 !important;
+}
+
 /* One consistent, accessible edit/delete control throughout the CRM. */
 .record-action {
   display: inline-grid;

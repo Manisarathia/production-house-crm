@@ -36,8 +36,15 @@ import { notificationApi } from '../api';
 import useResource from '../hooks/useResource';
 
 const GOLD_BUTTON_PATHS = new Set([
+  '/team',
+  '/departments',
+  '/settings',
+  '/vendors-equipment',
+  '/budget-expenses',
+  '/invoices-payments',
   '/schedule',
   '/tasks',
+  '/call-sheets',
   '/locations',
   '/attendance',
   '/approvals',

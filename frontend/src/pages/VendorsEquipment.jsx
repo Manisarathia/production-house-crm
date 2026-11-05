@@ -292,7 +292,7 @@ export default function VendorsEquipment() {
                     <h1>Vendors & Equipment</h1>
                 </div>
                 <div className="heading-actions" style={{ display: 'flex', gap: '10px' }}>
-                    <button style={{ background: "#e3652e" }} className="btn btn-light" onClick={() => { setSelectedVendorId(''); setShowEq(true); fetchVendors(); }}><Plus size={18} /> Add equipment</button>
+                    <button className="btn btn-primary" onClick={() => { setSelectedVendorId(''); setShowEq(true); fetchVendors(); }}><Plus size={18} /> Add equipment</button>
                     <button className="btn btn-primary" onClick={() => { setCategory(''); setShow(true); fetchDepartments(); }}><Plus size={18} /> Add vendor</button>
                 </div>
             </div>
