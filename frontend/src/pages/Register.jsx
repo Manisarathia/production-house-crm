@@ -71,7 +71,11 @@ export default function Register() {
         <div className="login-visual-footer"><span>BUILT FOR STORYTELLERS</span><span>PLAN &middot; PRODUCE &middot; DELIVER</span></div>
       </section>
 
-      <section className="login-panel">
+      <section
+        className="login-panel register-panel"
+        style={{ backgroundImage: `url(${Login1})` }}
+      >
+        <div className="login-panel-overlay" />
         <div className="login-form-wrap register-form-wrap">
           <div className="login-mobile-brand"><div className="login-brand-icon"><Clapperboard size={22} /></div><strong>LOOPSTREAM</strong></div>
           <div className="login-welcome">

@@ -99,8 +99,8 @@
 
 .login-input-group input:focus,
 .password-field input:focus {
-  border-color: #EFC348;
-  box-shadow: 0 0 0 4px rgba(239, 195, 72, 0.18);
+  border-color: #FFD700;
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.18);
 }
 
 .login-submit {
@@ -609,7 +609,7 @@
 
 .login-form > label,
 .password-label label {
-  color: #263238;
+  color: #EFC348;
 
   font-size: 13px;
 
@@ -632,7 +632,7 @@
 
   position: relative;
 
-  background: #FFFFFF;
+  background: transparent;
 
   border: 1.5px solid #E5EAE8;
 
@@ -648,7 +648,7 @@
 .login-input-group input,
 .password-field input {
   width: 100%;
-  height: 54px;
+  height: 46px;
 
   padding: 0 17px;
 
@@ -658,7 +658,7 @@
 
   background: transparent;
 
-  color: #171717;
+  color: #EFC348;
 
   font-size: 14px;
 
@@ -670,7 +670,7 @@
 
 .login-input-group input::placeholder,
 .password-field input::placeholder {
-  color: #A0A8B2;
+  color: rgba(239, 195, 72, 0.72);
 
   font-size: 13px;
 
@@ -682,15 +682,30 @@
 
 .login-input-group:focus-within,
 .password-field:focus-within {
-  border-color: #EFC348;
+  border-color: #FFD700;
 
-  background: #FFFFFF;
+  background: transparent;
 
   box-shadow:
-    0 0 0 4px rgba(239, 195, 72, 0.18),
+    0 0 0 4px rgba(255, 215, 0, 0.18),
     0 8px 22px rgba(0, 0, 0, 0.08);
 
   transform: translateY(-2px);
+}
+
+.login-input-group:hover,
+.password-field:hover,
+.register-form > input:hover {
+  border-color: #FFD700;
+}
+
+/* Override the app-wide orange keyboard-focus outline on authentication inputs. */
+.login-screen .login-input-group input:focus-visible,
+.login-screen .password-field input:focus-visible,
+.login-screen .register-form > input:focus-visible {
+  outline: none;
+  outline-offset: 0;
+  border-color: #FFD700;
 }
 
 
@@ -823,7 +838,7 @@
 
 .login-submit {
   width: 100%;
-  height: 55px;
+  height: 46px;
 
   display: flex;
   align-items: center;
@@ -911,9 +926,58 @@
 }
 
 .login-switch a:hover {
-  color: #000000;
+  color: #EFC348;
 
   text-decoration: underline;
+}
+
+/* Keep the registration form visually consistent with the sign-in form. */
+.register-form > label,
+.register-password-control > label {
+  color: #EFC348;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.register-form > input {
+  width: 100%;
+  height: 46px;
+  padding: 0 17px;
+  border: 1.5px solid #E5EAE8;
+  border-radius: 12px;
+  outline: none;
+  background: transparent;
+  color: #EFC348;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.register-form > input::placeholder {
+  color: rgba(239, 195, 72, 0.72);
+}
+
+.register-form > input:focus {
+  border-color: #FFD700;
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.18);
+}
+
+/* The registration panel uses the same image treatment as the visual side. */
+.register-panel {
+  background-size: cover;
+  background-position: center;
+}
+
+.register-panel .login-welcome h2 {
+  color: #FFFDF6;
+}
+
+.register-panel .login-welcome p,
+.register-panel .login-switch,
+.register-panel .login-secure-note span,
+.register-panel .login-copyright {
+  color: #F8F3E7;
 }
 
 
