@@ -554,7 +554,7 @@ export default function PostProductionMedia() {
         ::-webkit-scrollbar { width: 7px; height: 7px; }
         ::-webkit-scrollbar-track { background: #141414; }
         ::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 6px; }
-        ::-webkit-scrollbar-thumb:hover { background: #e3652e; }
+        ::-webkit-scrollbar-thumb:hover { background: #EFC348; }
 
         .production-grid {
           display: grid;
@@ -590,10 +590,10 @@ export default function PostProductionMedia() {
         }
         .prod-card:hover {
           transform: translateY(-4px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 24px rgba(239, 195, 72, 0.12) !important;
         }
 
         .prod-card-poster-wrap {
@@ -657,10 +657,10 @@ export default function PostProductionMedia() {
         }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 20px rgba(240, 120, 66, 0.1) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 20px rgba(239, 195, 72, 0.1) !important;
         }
         .prod-list-card:hover strong,
         .prod-list-card:hover h3 {
@@ -696,12 +696,11 @@ export default function PostProductionMedia() {
           justify-content: center;
           opacity: 0;
           transition: opacity 0.2s ease;
-          color: #f07842;
+          color: #EFC348;
         }
         .prod-list-card:hover .list-poster-thumb {
           transform: scale(1.06);
-          border-color: rgba(240, 120, 66, 0.6);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(240, 120, 66, 0.25);
+          border-color: rgba(239, 195, 72, 0.6); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(239, 195, 72, 0.25);
         }
         .prod-list-card:hover .list-poster-img {
           transform: scale(1.1);
@@ -730,8 +729,7 @@ export default function PostProductionMedia() {
         }
         .table-wrap tr:hover .table-poster-thumb {
           transform: scale(1.12);
-          border-color: #f07842;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(240, 120, 66, 0.3);
+          border-color: #EFC348; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(239, 195, 72, 0.3);
         }
         .table-wrap tr:hover .table-poster-img {
           transform: scale(1.1);
@@ -740,7 +738,7 @@ export default function PostProductionMedia() {
 
         .prod-card:hover .project-icon, .prod-list-card:hover .project-icon {
           transform: scale(1.1) rotate(2deg);
-          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.35);
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35);
         }
         .prod-card .project-icon, .prod-list-card .project-icon {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
@@ -788,10 +786,16 @@ export default function PostProductionMedia() {
         }
         .prod-card-actions .action-edit:hover,
         .prod-card-actions .icon-button[title*="Edit"]:hover,
-        .table-wrap .icon-button[title*="Edit"]:hover {
-          color: #f07842 !important;
-          border-color: #ea580c !important;
-          background: rgba(234, 88, 12, 0.15) !important;
+        .table-wrap .icon-button[title*="Edit"]:hover,
+        .table-wrap .action-edit:hover,
+        .icon-button[title*="Edit"]:hover,
+        .icon-button[title*="Edit"]:focus,
+        .action-edit:hover,
+        .action-edit:focus {
+          color: #EFC348 !important;
+          border-color: #DEA737 !important;
+          background: rgba(239, 195, 72, 0.15) !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.28) !important;
         }
         .prod-card-actions .action-delete:hover,
         .prod-card-actions .icon-button[title*="Delete"]:hover,
@@ -808,9 +812,9 @@ export default function PostProductionMedia() {
         }
         .mini-stat:hover {
           transform: translateY(-3px);
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
           box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 
-                      0 0 16px rgba(227, 101, 46, 0.12) !important;
+                      0 0 16px rgba(239, 195, 72, 0.12) !important;
         }
 
         .filter-tab-pill {
@@ -818,9 +822,9 @@ export default function PostProductionMedia() {
         }
         .filter-tab-pill:hover {
           transform: translateY(-2px);
-          border-color: #e3652e !important;
+          border-color: #EFC348 !important;
           color: #ffffff !important;
-          background: rgba(227, 101, 46, 0.12) !important;
+          background: rgba(239, 195, 72, 0.12) !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
 
@@ -828,10 +832,10 @@ export default function PostProductionMedia() {
           transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
         .table-wrap tbody tr:hover td {
-          background: #231c18 !important;
+          background: #201e18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
-          box-shadow: inset 3px 0 0 #e3652e;
+          box-shadow: inset 3px 0 0 #EFC348;
         }
 
         .table-search {
@@ -840,10 +844,10 @@ export default function PostProductionMedia() {
           box-shadow: none !important;
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .table-search:hover { border-color: rgba(227, 101, 46, 0.5) !important; }
+        .table-search:hover { border-color: rgba(239, 195, 72, 0.5) !important; }
         .table-search:focus-within {
-          border-color: #e3652e !important;
-          box-shadow: 0 0 0 2px rgba(227, 101, 46, 0.25) !important;
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 2px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
         }
         .table-search input,
@@ -854,6 +858,140 @@ export default function PostProductionMedia() {
           border: none !important;
           box-shadow: none !important;
           -webkit-appearance: none !important;
+        }
+
+        
+        .filter-tab-pill.active {
+          background: rgba(239, 195, 72, 0.16) !important;
+          color: #EFC348 !important;
+          border-color: #EFC348 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.18) !important;
+        }
+        .filter-tab-pill.active:hover {
+          background: rgba(239, 195, 72, 0.25) !important;
+          color: #EFC348 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.4);
+        }
+
+        /* Lead Artist & Crew Profile Avatars - Cinema Gold */
+        .prod-foot-crew .avatar,
+        .avatar.avatar-blue,
+        .prod-card .avatar,
+        .prod-list-card .avatar {
+          background: rgba(239, 195, 72, 0.18) !important;
+          color: #EFC348 !important;
+          border: 1px solid rgba(239, 195, 72, 0.45) !important;
+          font-weight: 750 !important;
+        }
+
+        /* Cinema Gold Theme Enhancements */
+        .btn-primary,
+        button.btn-primary,
+        .btn.btn-primary,
+        .heading-actions .btn-primary,
+        .empty-state .btn-primary,
+        .empty-state button,
+        form.modal-card .btn-primary,
+        .modal-card .btn-primary,
+        .modal-actions .btn-primary,
+        .detail-modal .btn-primary {
+          background: #EFC348 !important;
+          border-color: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
+        }
+        .btn-primary:hover,
+        button.btn-primary:hover,
+        .btn.btn-primary:hover,
+        .heading-actions .btn-primary:hover,
+        .empty-state .btn-primary:hover,
+        .empty-state button:hover,
+        form.modal-card .btn-primary:hover,
+        .modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover,
+        .detail-modal .btn-primary:hover {
+          background: #F9D558 !important;
+          border-color: #F9D558 !important;
+          color: #000000 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 22px rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .segmented button.chosen {
+          background: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+        }
+
+        .status-pill.orange,
+        .status-pill[class*="orange"] {
+          background: rgba(239, 195, 72, 0.16) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+        }
+
+        .badge-tag.platform {
+          background: rgba(38, 30, 15, 0.9) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+          font-weight: 700 !important;
+        }
+
+        /* Modal Form Control Focus & Hover - Cinema Gold */
+        input:hover,
+        select:hover,
+        textarea:hover,
+        .modal-card input:hover,
+        .modal-card select:hover,
+        .modal-card textarea:hover,
+        .form-grid input:hover,
+        .form-grid select:hover,
+        .form-grid textarea:hover,
+        .form-grid-2 input:hover,
+        .form-grid-2 select:hover,
+        .form-grid-2 textarea:hover,
+        .form-grid-3 input:hover,
+        .form-grid-3 select:hover,
+        .form-grid-3 textarea:hover {
+          border-color: rgba(239, 195, 72, 0.5) !important;
+        }
+
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible,
+        .modal-card input:focus,
+        .modal-card input:focus-visible,
+        .modal-card select:focus,
+        .modal-card select:focus-visible,
+        .modal-card textarea:focus,
+        .modal-card textarea:focus-visible,
+        .form-grid input:focus,
+        .form-grid input:focus-visible,
+        .form-grid select:focus,
+        .form-grid select:focus-visible,
+        .form-grid textarea:focus,
+        .form-grid textarea:focus-visible,
+        .form-grid-2 input:focus,
+        .form-grid-2 input:focus-visible,
+        .form-grid-2 select:focus,
+        .form-grid-2 select:focus-visible,
+        .form-grid-2 textarea:focus,
+        .form-grid-2 textarea:focus-visible,
+        .form-grid-3 input:focus,
+        .form-grid-3 input:focus-visible,
+        .form-grid-3 select:focus,
+        .form-grid-3 select:focus-visible,
+        .form-grid-3 textarea:focus,
+        .form-grid-3 textarea:focus-visible {
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
+          outline: none !important;
         }
 
         /* Typography sizing matching Projects & Productions */
@@ -885,7 +1023,14 @@ export default function PostProductionMedia() {
         .modal-card h2 { font-size: 18px !important; }
         .modal-card label, .form-grid label { font-size: 11.5px !important; }
         .modal-card input, .modal-card select, .modal-card textarea { font-size: 12.5px !important; }
-        .detail-section h4 { font-size: 12.5px !important; }
+        .detail-section h4,
+        h4,
+        .modal-card h4,
+        .detail-modal h4 {
+          font-size: 12.5px !important;
+          color: #EFC348 !important;
+          font-weight: 800 !important;
+        }
         .detail-item span { font-size: 10.5px !important; }
         .detail-item strong { font-size: 13px !important; }
       `}</style>
@@ -902,7 +1047,7 @@ export default function PostProductionMedia() {
           </p>
         </div>
         <div className="heading-actions">
-          <button className="btn btn-primary" onClick={handleOpenCreate}>
+          <button className="btn btn-primary" style={{ background: '#EFC348', borderColor: '#EFC348', color: '#000000', fontWeight: 750 }} onClick={handleOpenCreate}>
             <Plus size={18} /> {activeTab === 'pipeline' ? 'New Post Milestone' : 'Ingest Media Asset'}
           </button>
         </div>
@@ -919,7 +1064,7 @@ export default function PostProductionMedia() {
         </div>
         <div className="mini-stat">
           <span>In Active Post</span>
-          <strong style={{ color: '#f07842' }}>{inProgressTasks}</strong>
+          <strong style={{ color: '#EFC348' }}>{inProgressTasks}</strong>
         </div>
         <div className="mini-stat">
           <span>Master Media Assets</span>
@@ -1130,10 +1275,10 @@ export default function PostProductionMedia() {
                         <span
                           className="badge-tag platform"
                           style={{
-                            background: isKids ? 'rgba(234, 179, 8, 0.25)' : 'rgba(42, 28, 22, 0.9)',
+                            background: isKids ? 'rgba(239, 195, 72, 0.25)' : 'rgba(38, 30, 15, 0.9)',
                             backdropFilter: 'blur(8px)',
-                            border: isKids ? '1px solid #eab308' : '1px solid #4a2b1b',
-                            color: isKids ? '#facc15' : '#f07842',
+                            border: isKids ? '1px solid #EFC348' : '1px solid #5a4515',
+                            color: isKids ? '#F9D558' : '#EFC348',
                             fontWeight: 700
                           }}
                         >
@@ -1190,14 +1335,14 @@ export default function PostProductionMedia() {
                       </div>
                       <div className="prod-finance-item">
                         <span>Delivery Date</span>
-                        <strong style={{ color: '#f07842' }}>{t.targetDeliveryDate || 'TBD'}</strong>
+                        <strong style={{ color: '#EFC348' }}>{t.targetDeliveryDate || 'TBD'}</strong>
                       </div>
                     </div>
 
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px' }}>
+                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px', background: 'rgba(239, 195, 72, 0.18)', color: '#EFC348', border: '1px solid rgba(239, 195, 72, 0.45)', fontWeight: 750 }}>
                           {t.leadArtist ? t.leadArtist.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() : 'PP'}
                         </div>
                         <div>
@@ -1207,24 +1352,15 @@ export default function PostProductionMedia() {
                       </div>
 
                       <div className="prod-card-actions">
-                        <button
-                          className="icon-button"
-                          onClick={() => setDetailItem(t)}
-                          title="Inspect Post Details"
+                        <button className="icon-button action-view" onClick={() => setDetailItem(t)} title="Inspect Post Details"
                         >
                           <Eye size={16} />
                         </button>
-                        <button
-                          className="icon-button"
-                          onClick={() => handleOpenEdit(t)}
-                          title="Edit Task"
+                        <button className="icon-button action-edit" onClick={() => handleOpenEdit(t)} title="Edit Task"
                         >
                           <Edit3 size={16} />
                         </button>
-                        <button
-                          className="icon-button"
-                          onClick={() => setDeleteTarget(t)}
-                          title="Delete Task"
+                        <button className="icon-button action-delete" onClick={() => setDeleteTarget(t)} title="Delete Task"
                           style={{ color: '#dc6464' }}
                         >
                           <Trash2 size={16} />
@@ -1257,10 +1393,10 @@ export default function PostProductionMedia() {
                         <span
                           className="badge-tag platform"
                           style={{
-                            background: isKids ? 'rgba(234, 179, 8, 0.25)' : 'rgba(42, 28, 22, 0.9)',
+                            background: isKids ? 'rgba(239, 195, 72, 0.25)' : 'rgba(38, 30, 15, 0.9)',
                             backdropFilter: 'blur(8px)',
-                            border: isKids ? '1px solid #eab308' : '1px solid #4a2b1b',
-                            color: isKids ? '#facc15' : '#f07842',
+                            border: isKids ? '1px solid #EFC348' : '1px solid #5a4515',
+                            color: isKids ? '#F9D558' : '#EFC348',
                             fontWeight: 700
                           }}
                         >
@@ -1314,7 +1450,7 @@ export default function PostProductionMedia() {
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px' }}>
+                        <div className="avatar avatar-blue" style={{ width: '28px', height: '28px', fontSize: '9px', background: 'rgba(239, 195, 72, 0.18)', color: '#EFC348', border: '1px solid rgba(239, 195, 72, 0.45)', fontWeight: 750 }}>
                           <Server size={14} />
                         </div>
                         <div>
@@ -1324,24 +1460,15 @@ export default function PostProductionMedia() {
                       </div>
 
                       <div className="prod-card-actions">
-                        <button
-                          className="icon-button"
-                          onClick={() => setDetailItem(a)}
-                          title="Inspect Asset Details"
+                        <button className="icon-button action-view" onClick={() => setDetailItem(a)} title="Inspect Asset Details"
                         >
                           <Eye size={16} />
                         </button>
-                        <button
-                          className="icon-button"
-                          onClick={() => handleOpenEdit(a)}
-                          title="Edit Asset"
+                        <button className="icon-button action-edit" onClick={() => handleOpenEdit(a)} title="Edit Asset"
                         >
                           <Edit3 size={16} />
                         </button>
-                        <button
-                          className="icon-button"
-                          onClick={() => setDeleteTarget(a)}
-                          title="Delete Asset"
+                        <button className="icon-button action-delete" onClick={() => setDeleteTarget(a)} title="Delete Asset"
                           style={{ color: '#dc6464' }}
                         >
                           <Trash2 size={16} />
@@ -1397,9 +1524,9 @@ export default function PostProductionMedia() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: t.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: t.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: t.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: t.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                              border: t.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                              color: t.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1478,9 +1605,9 @@ export default function PostProductionMedia() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: a.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: a.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: a.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: a.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                              border: a.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                              color: a.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1574,9 +1701,9 @@ export default function PostProductionMedia() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: t.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: t.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: t.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: t.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                              border: t.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                              color: t.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1586,13 +1713,13 @@ export default function PostProductionMedia() {
                         <td><span className={`status-pill ${tone}`}>{t.qcStatus}</span></td>
                         <td>
                           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                            <button className="icon-button" onClick={() => setDetailItem(t)} title="Inspect Post Details">
+                            <button className="icon-button action-view" onClick={() => setDetailItem(t)} title="Inspect Post Details">
                               <Eye size={16} />
                             </button>
-                            <button className="icon-button" onClick={() => handleOpenEdit(t)} title="Edit Task">
+                            <button className="icon-button action-edit" onClick={() => handleOpenEdit(t)} title="Edit Task">
                               <Edit3 size={16} />
                             </button>
-                            <button className="icon-button" onClick={() => setDeleteTarget(t)} title="Delete Task" style={{ color: '#dc6464' }}>
+                            <button className="icon-button action-delete" onClick={() => setDeleteTarget(t)} title="Delete Task" style={{ color: '#dc6464' }}>
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -1646,9 +1773,9 @@ export default function PostProductionMedia() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: a.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: a.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: a.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: a.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                              border: a.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                              color: a.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1658,13 +1785,13 @@ export default function PostProductionMedia() {
                         <td><span className={`status-pill ${tone}`}>{a.status}</span></td>
                         <td>
                           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
-                            <button className="icon-button" onClick={() => setDetailItem(a)} title="Inspect Asset Details">
+                            <button className="icon-button action-view" onClick={() => setDetailItem(a)} title="Inspect Asset Details">
                               <Eye size={16} />
                             </button>
-                            <button className="icon-button" onClick={() => handleOpenEdit(a)} title="Edit Asset">
+                            <button className="icon-button action-edit" onClick={() => handleOpenEdit(a)} title="Edit Asset">
                               <Edit3 size={16} />
                             </button>
-                            <button className="icon-button" onClick={() => setDeleteTarget(a)} title="Delete Asset" style={{ color: '#dc6464' }}>
+                            <button className="icon-button action-delete" onClick={() => setDeleteTarget(a)} title="Delete Asset" style={{ color: '#dc6464' }}>
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -1681,7 +1808,7 @@ export default function PostProductionMedia() {
         {/* Empty Slate */}
         {((activeTab === 'pipeline' && filteredTasks.length === 0) || (activeTab === 'vault' && filteredAssets.length === 0)) && (
           <div className="empty-state">
-            <Cpu size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+            <Cpu size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
             <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
               No post-production records found
             </strong>
@@ -1796,7 +1923,7 @@ export default function PostProductionMedia() {
                       max="100"
                       value={taskFormData.progress}
                       onChange={e => setTaskFormData({ ...taskFormData, progress: e.target.value })}
-                      style={{ height: '38px', accentColor: '#e3652e' }}
+                      style={{ height: '38px', accentColor: '#EFC348' }}
                     />
                   </label>
                 </div>
@@ -2034,7 +2161,7 @@ export default function PostProductionMedia() {
                       max="100"
                       value={taskFormData.progress}
                       onChange={e => setTaskFormData({ ...taskFormData, progress: e.target.value })}
-                      style={{ height: '38px', accentColor: '#e3652e' }}
+                      style={{ height: '38px', accentColor: '#EFC348' }}
                     />
                   </label>
                   <label>
@@ -2195,9 +2322,9 @@ export default function PostProductionMedia() {
                     <strong
                       className="badge-tag platform"
                       style={{
-                        background: detailItem.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                        border: detailItem.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                        color: detailItem.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                        background: detailItem.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                        border: detailItem.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                        color: detailItem.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                         fontWeight: 650
                       }}
                     >
@@ -2228,7 +2355,7 @@ export default function PostProductionMedia() {
               {/* Checksum / Vault for assets */}
               {activeTab === 'vault' && (
                 <div className="detail-section">
-                  <h4>Cloud Storage Integrity</h4>
+                  <h4 style={{ color: '#EFC348' }}>Cloud Storage Integrity</h4>
                   <p style={{ fontSize: '12.5px', color: '#8a96a8', margin: '0 0 8px' }}>
                     Vault: <strong style={{ color: '#f4f0eb' }}>{detailItem.storageLocation}</strong>
                   </p>

@@ -591,7 +591,7 @@ export default function SingerDubbing() {
         ::-webkit-scrollbar { width: 7px; height: 7px; }
         ::-webkit-scrollbar-track { background: #141414; }
         ::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 6px; }
-        ::-webkit-scrollbar-thumb:hover { background: #e3652e; }
+        ::-webkit-scrollbar-thumb:hover { background: #EFC348; }
 
         .production-grid {
           display: grid;
@@ -627,10 +627,10 @@ export default function SingerDubbing() {
         }
         .prod-card:hover {
           transform: translateY(-4px) !important;
-          border-color: #f07842 !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 
-                      0 0 0 1px rgba(240, 120, 66, 0.35), 
-                      0 0 24px rgba(240, 120, 66, 0.12) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 24px rgba(239, 195, 72, 0.12) !important;
         }
 
         .prod-card-poster-wrap {
@@ -728,7 +728,7 @@ export default function SingerDubbing() {
         }
         .prod-card:hover .prod-card-play-btn {
           transform: scale(1.08);
-          box-shadow: 0 4px 14px rgba(240, 120, 66, 0.3);
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35);
         }
 
         .prod-meta-tags {
@@ -776,7 +776,7 @@ export default function SingerDubbing() {
         }
         .prod-audio-isrc {
           font-size: 11px;
-          color: #f07842;
+          color: #EFC348;
           font-weight: 700;
           font-family: monospace;
           letter-spacing: 0.5px;
@@ -794,8 +794,8 @@ export default function SingerDubbing() {
           transition: height 0.2s ease, background-color 0.2s ease;
         }
         .waveform-bar.active {
-          background: #f07842;
-          box-shadow: 0 0 5px rgba(240, 120, 66, 0.45);
+          background: #EFC348;
+          box-shadow: 0 0 5px rgba(239, 195, 72, 0.45);
         }
 
         .prod-finance-row {
@@ -905,11 +905,19 @@ export default function SingerDubbing() {
           color: #70d5e2 !important;
           box-shadow: 0 0 10px rgba(112, 213, 226, 0.28) !important;
         }
-        .prod-card-actions .action-edit:hover {
-          background: rgba(240, 120, 66, 0.16) !important;
-          border-color: #f07842 !important;
-          color: #f07842 !important;
-          box-shadow: 0 0 10px rgba(240, 120, 66, 0.28) !important;
+        .prod-card-actions .action-edit:hover,
+        .prod-card-actions .action-edit:focus,
+        .prod-card-actions .icon-button[title*="Edit"]:hover,
+        .table-wrap .icon-button[title*="Edit"]:hover,
+        .table-wrap .action-edit:hover,
+        .icon-button[title*="Edit"]:hover,
+        .icon-button[title*="Edit"]:focus,
+        .action-edit:hover,
+        .action-edit:focus {
+          color: #EFC348 !important;
+          border-color: #DEA737 !important;
+          background: rgba(239, 195, 72, 0.15) !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.28) !important;
         }
         .prod-card-actions .action-delete:hover {
           background: rgba(239, 68, 68, 0.18) !important;
@@ -947,12 +955,11 @@ export default function SingerDubbing() {
           justify-content: center;
           opacity: 0;
           transition: opacity 0.2s ease;
-          color: #f07842;
+          color: #EFC348;
         }
         .prod-list-card:hover .list-poster-thumb {
           transform: scale(1.06);
-          border-color: rgba(227, 101, 46, 0.6);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(227, 101, 46, 0.25);
+          border-color: rgba(239, 195, 72, 0.6); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(239, 195, 72, 0.25);
         }
         .prod-list-card:hover .list-poster-img {
           transform: scale(1.1);
@@ -981,8 +988,7 @@ export default function SingerDubbing() {
         }
         .table-wrap tr:hover .table-poster-thumb {
           transform: scale(1.12);
-          border-color: #e3652e;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(227, 101, 46, 0.3);
+          border-color: #EFC348; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(239, 195, 72, 0.3);
         }
         .table-wrap tr:hover .table-poster-img {
           transform: scale(1.1);
@@ -990,14 +996,14 @@ export default function SingerDubbing() {
         }
         .prod-list-card:hover {
           transform: translateY(-3px) translateX(2px);
-          border-color: #e3652e !important;
+          border-color: #EFC348 !important;
           box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.65), 
-                      0 0 0 1px rgba(227, 101, 46, 0.35), 
-                      0 0 20px rgba(227, 101, 46, 0.1) !important;
+                      0 0 0 1px rgba(239, 195, 72, 0.35), 
+                      0 0 20px rgba(239, 195, 72, 0.1) !important;
         }
         .prod-card:hover .project-icon, .prod-list-card:hover .project-icon {
           transform: scale(1.1) rotate(2deg);
-          box-shadow: 0 4px 14px rgba(227, 101, 46, 0.35);
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35);
         }
         .prod-card .project-icon, .prod-list-card .project-icon {
           transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease;
@@ -1023,12 +1029,7 @@ export default function SingerDubbing() {
           background: rgba(112, 213, 226, 0.16) !important;
           box-shadow: 0 0 12px rgba(112, 213, 226, 0.25);
         }
-        .prod-card-actions .icon-button[title*="Edit"]:hover,
-        .table-wrap .icon-button[title*="Edit"]:hover {
-          color: #f07842 !important;
-          background: rgba(227, 101, 46, 0.18) !important;
-          box-shadow: 0 0 12px rgba(227, 101, 46, 0.28);
-        }
+        /* unified above */
         .prod-card-actions .icon-button[title*="Delete"]:hover,
         .table-wrap .icon-button[title*="Delete"]:hover {
           color: #ff6b6b !important;
@@ -1043,9 +1044,9 @@ export default function SingerDubbing() {
         }
         .mini-stat:hover {
           transform: translateY(-3px);
-          border-color: rgba(227, 101, 46, 0.5) !important;
+          border-color: rgba(239, 195, 72, 0.5) !important;
           box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 
-                      0 0 16px rgba(227, 101, 46, 0.12) !important;
+                      0 0 16px rgba(239, 195, 72, 0.12) !important;
         }
 
         .filter-tab-pill {
@@ -1053,9 +1054,9 @@ export default function SingerDubbing() {
         }
         .filter-tab-pill:hover {
           transform: translateY(-2px);
-          border-color: #e3652e !important;
+          border-color: #EFC348 !important;
           color: #ffffff !important;
-          background: rgba(227, 101, 46, 0.12) !important;
+          background: rgba(239, 195, 72, 0.15) !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
 
@@ -1066,7 +1067,7 @@ export default function SingerDubbing() {
           background: #231c18 !important;
         }
         .table-wrap tbody tr:hover td:first-child {
-          box-shadow: inset 3px 0 0 #e3652e;
+          box-shadow: inset 3px 0 0 #EFC348;
         }
 
         .table-search {
@@ -1075,10 +1076,10 @@ export default function SingerDubbing() {
           box-shadow: none !important;
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .table-search:hover { border-color: rgba(227, 101, 46, 0.5) !important; }
+        .table-search:hover { border-color: rgba(239, 195, 72, 0.5) !important; }
         .table-search:focus-within {
-          border-color: #e3652e !important;
-          box-shadow: 0 0 0 2px rgba(227, 101, 46, 0.25) !important;
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 2px rgba(239, 195, 72, 0.25) !important;
           outline: none !important;
         }
         .table-search input,
@@ -1089,6 +1090,156 @@ export default function SingerDubbing() {
           border: none !important;
           box-shadow: none !important;
           -webkit-appearance: none !important;
+        }
+
+        /* Cinema Gold Theme Enhancements */
+        .btn-primary,
+        button.btn-primary,
+        .btn.btn-primary,
+        .heading-actions .btn-primary,
+        .empty-state .btn-primary,
+        .empty-state button,
+        form.modal-card .btn-primary,
+        .modal-card .btn-primary,
+        .modal-actions .btn-primary,
+        .detail-modal .btn-primary {
+          background: #EFC348 !important;
+          border-color: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.35) !important;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
+        }
+        .btn-primary:hover,
+        button.btn-primary:hover,
+        .btn.btn-primary:hover,
+        .heading-actions .btn-primary:hover,
+        .empty-state .btn-primary:hover,
+        .empty-state button:hover,
+        form.modal-card .btn-primary:hover,
+        .modal-card .btn-primary:hover,
+        .modal-actions .btn-primary:hover,
+        .detail-modal .btn-primary:hover {
+          background: #F9D558 !important;
+          border-color: #F9D558 !important;
+          color: #000000 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 22px rgba(239, 195, 72, 0.5) !important;
+        }
+
+        .segmented button.chosen {
+          background: #EFC348 !important;
+          color: #000000 !important;
+          font-weight: 750 !important;
+        }
+
+        .filter-tab-pill.active {
+          background: rgba(239, 195, 72, 0.16) !important;
+          color: #EFC348 !important;
+          border-color: #EFC348 !important;
+          font-weight: 750 !important;
+          box-shadow: 0 0 12px rgba(239, 195, 72, 0.18) !important;
+        }
+        .filter-tab-pill.active:hover {
+          background: rgba(239, 195, 72, 0.25) !important;
+          color: #EFC348 !important;
+          box-shadow: 0 4px 14px rgba(239, 195, 72, 0.4);
+        }
+
+        /* Profile & Studio Avatars - Cinema Gold */
+        .prod-foot-crew .avatar,
+        .avatar.avatar-blue,
+        .avatar,
+        .prod-card .avatar,
+        .prod-list-card .avatar {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 8px !important;
+          background: rgba(239, 195, 72, 0.18) !important;
+          color: #EFC348 !important;
+          border: 1px solid rgba(239, 195, 72, 0.45) !important;
+          font-weight: 750 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        }
+
+        .status-pill.orange,
+        .status-pill[class*="orange"] {
+          background: rgba(239, 195, 72, 0.16) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+        }
+
+        .badge-tag.platform {
+          background: rgba(38, 30, 15, 0.9) !important;
+          border: 1px solid #5a4515 !important;
+          color: #EFC348 !important;
+          font-weight: 700 !important;
+        }
+
+        /* Modal Form Control Focus & Hover - Cinema Gold */
+        input:hover,
+        select:hover,
+        textarea:hover,
+        .modal-card input:hover,
+        .modal-card select:hover,
+        .modal-card textarea:hover,
+        .form-grid input:hover,
+        .form-grid select:hover,
+        .form-grid textarea:hover,
+        .form-grid-2 input:hover,
+        .form-grid-2 select:hover,
+        .form-grid-2 textarea:hover,
+        .form-grid-3 input:hover,
+        .form-grid-3 select:hover,
+        .form-grid-3 textarea:hover {
+          border-color: rgba(239, 195, 72, 0.5) !important;
+        }
+
+        input:focus,
+        input:focus-visible,
+        select:focus,
+        select:focus-visible,
+        textarea:focus,
+        textarea:focus-visible,
+        .modal-card input:focus,
+        .modal-card input:focus-visible,
+        .modal-card select:focus,
+        .modal-card select:focus-visible,
+        .modal-card textarea:focus,
+        .modal-card textarea:focus-visible,
+        .form-grid input:focus,
+        .form-grid input:focus-visible,
+        .form-grid select:focus,
+        .form-grid select:focus-visible,
+        .form-grid textarea:focus,
+        .form-grid textarea:focus-visible,
+        .form-grid-2 input:focus,
+        .form-grid-2 input:focus-visible,
+        .form-grid-2 select:focus,
+        .form-grid-2 select:focus-visible,
+        .form-grid-2 textarea:focus,
+        .form-grid-2 textarea:focus-visible,
+        .form-grid-3 input:focus,
+        .form-grid-3 input:focus-visible,
+        .form-grid-3 select:focus,
+        .form-grid-3 select:focus-visible,
+        .form-grid-3 textarea:focus,
+        .form-grid-3 textarea:focus-visible {
+          border-color: #EFC348 !important;
+          box-shadow: 0 0 0 3px rgba(239, 195, 72, 0.25) !important;
+          outline: none !important;
+        }
+
+        .detail-section h4,
+        h4,
+        .modal-card h4,
+        .detail-modal h4 {
+          font-size: 12.5px !important;
+          color: #EFC348 !important;
+          font-weight: 800 !important;
         }
 
         /* Typography sizing matching Projects & Productions */
@@ -1154,7 +1305,7 @@ export default function SingerDubbing() {
         </div>
         <div className="mini-stat">
           <span>Dubbing Sessions</span>
-          <strong style={{ color: '#f07842' }}>{totalDubbingCount}</strong>
+          <strong style={{ color: '#EFC348' }}>{totalDubbingCount}</strong>
         </div>
         <div className="mini-stat">
           <span>Completed Dubs</span>
@@ -1298,7 +1449,7 @@ export default function SingerDubbing() {
                     type="button"
                     className={`filter-tab-pill ${isActive ? 'active' : ''}`}
                     onClick={() => setPlatformFilter(plat)}
-                    style={isPlatKids && isActive ? { background: 'rgba(234, 179, 8, 0.22)', color: '#facc15', borderColor: '#eab308' } : undefined}
+                    style={isPlatKids && isActive ? { background: 'rgba(239, 195, 72, 0.22)', color: '#F9D558', borderColor: '#EFC348' } : undefined}
                   >
                     {plat === 'ALL' ? 'All Platforms' : plat}
                   </button>
@@ -1353,10 +1504,10 @@ export default function SingerDubbing() {
                         <span
                           className="badge-tag platform"
                           style={{
-                            background: isKids ? 'rgba(234, 179, 8, 0.25)' : 'rgba(42, 28, 22, 0.9)',
+                            background: isKids ? 'rgba(239, 195, 72, 0.25)' : 'rgba(38, 30, 15, 0.9)',
                             backdropFilter: 'blur(8px)',
-                            border: isKids ? '1px solid #eab308' : '1px solid #4a2b1b',
-                            color: isKids ? '#facc15' : '#f07842',
+                            border: isKids ? '1px solid #EFC348' : '1px solid #5a4515',
+                            color: isKids ? '#F9D558' : '#EFC348',
                             fontWeight: 700
                           }}
                         >
@@ -1398,7 +1549,7 @@ export default function SingerDubbing() {
                         <span className="prod-audio-status">
                           {isPlaying ? (
                             <>
-                              <span className="live-dot" style={{ background: '#f07842', boxShadow: '0 0 8px #f07842' }} />
+                              <span className="live-dot" style={{ background: '#EFC348', boxShadow: '0 0 8px #EFC348' }} />
                               Simulated Audio Playing...
                             </>
                           ) : (
@@ -1437,7 +1588,7 @@ export default function SingerDubbing() {
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue">
+                        <div className="avatar avatar-blue" style={{ background: 'rgba(239, 195, 72, 0.18)', color: '#EFC348', border: '1px solid rgba(239, 195, 72, 0.45)' }}>
                           <Headphones size={15} />
                         </div>
                         <div>
@@ -1486,10 +1637,10 @@ export default function SingerDubbing() {
                         <span
                           className="badge-tag platform"
                           style={{
-                            background: isKids ? 'rgba(234, 179, 8, 0.25)' : 'rgba(42, 28, 22, 0.9)',
+                            background: isKids ? 'rgba(239, 195, 72, 0.25)' : 'rgba(38, 30, 15, 0.9)',
                             backdropFilter: 'blur(8px)',
-                            border: isKids ? '1px solid #eab308' : '1px solid #4a2b1b',
-                            color: isKids ? '#facc15' : '#f07842',
+                            border: isKids ? '1px solid #EFC348' : '1px solid #5a4515',
+                            color: isKids ? '#F9D558' : '#EFC348',
                             fontWeight: 700
                           }}
                         >
@@ -1533,7 +1684,7 @@ export default function SingerDubbing() {
                     <div className="prod-finance-row">
                       <div className="prod-finance-item">
                         <span>Session Slot</span>
-                        <strong style={{ color: '#f07842' }}>{d.sessionDate}</strong>
+                        <strong style={{ color: '#EFC348' }}>{d.sessionDate}</strong>
                       </div>
                       <div className="prod-finance-item">
                         <span>Dubbing Director</span>
@@ -1544,7 +1695,7 @@ export default function SingerDubbing() {
                     {/* Card Foot */}
                     <div className="prod-card-foot">
                       <div className="prod-foot-crew">
-                        <div className="avatar avatar-blue">
+                        <div className="avatar avatar-blue" style={{ background: 'rgba(239, 195, 72, 0.18)', color: '#EFC348', border: '1px solid rgba(239, 195, 72, 0.45)' }}>
                           <Volume2 size={15} />
                         </div>
                         <div>
@@ -1616,9 +1767,9 @@ export default function SingerDubbing() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: s.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: s.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: s.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: s.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                                border: s.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                                color: s.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1693,9 +1844,9 @@ export default function SingerDubbing() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: d.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: d.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: d.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: d.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                                border: d.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                                color: d.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1713,7 +1864,7 @@ export default function SingerDubbing() {
 
                     <div style={{ minWidth: '130px', flex: '0.8' }}>
                       <span style={{ display: 'block', fontSize: '10.5px', color: '#8a96a8' }}>SESSION DATE</span>
-                      <strong style={{ fontSize: '13px', color: '#f07842' }}>{d.sessionDate}</strong>
+                      <strong style={{ fontSize: '13px', color: '#EFC348' }}>{d.sessionDate}</strong>
                       <span style={{ fontSize: '11px', color: '#8a96a8' }}>{d.sessionTime}</span>
                     </div>
 
@@ -1785,9 +1936,9 @@ export default function SingerDubbing() {
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: s.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: s.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: s.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: s.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                                border: s.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                                color: s.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1850,16 +2001,16 @@ export default function SingerDubbing() {
                         <td><span className="badge-tag">{d.targetLanguage}</span></td>
                         <td><span style={{ color: '#ded7d0' }}>{d.dubbingDirector}</span></td>
                         <td className="date-cell">
-                          <strong style={{ color: '#f07842', display: 'block' }}>{d.sessionDate}</strong>
+                          <strong style={{ color: '#EFC348', display: 'block' }}>{d.sessionDate}</strong>
                           <span style={{ fontSize: '10.5px', color: '#8a96a8' }}>{d.sessionTime}</span>
                         </td>
                         <td>
                           <span
                             className="badge-tag platform"
                             style={{
-                              background: d.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                              border: d.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                              color: d.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                              background: d.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                                border: d.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                                color: d.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                               fontWeight: 650
                             }}
                           >
@@ -1892,7 +2043,7 @@ export default function SingerDubbing() {
         {/* Empty Slate */}
         {((activeTab === 'singers' && filteredSingers.length === 0) || (activeTab === 'dubbing' && filteredDubbing.length === 0)) && (
           <div className="empty-state">
-            <Mic size={36} style={{ color: '#e3652e', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+            <Mic size={36} style={{ color: '#EFC348', margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
             <strong style={{ display: 'block', color: '#f4f0eb', fontSize: '14px', marginBottom: '4px' }}>
               No audio records found
             </strong>
@@ -2437,9 +2588,9 @@ export default function SingerDubbing() {
                     <strong
                       className="badge-tag platform"
                       style={{
-                        background: detailItem.platform === 'LoopKids' ? 'rgba(234, 179, 8, 0.2)' : '#2a1c16',
-                        border: detailItem.platform === 'LoopKids' ? '1px solid rgba(234, 179, 8, 0.55)' : '1px solid #4a2b1b',
-                        color: detailItem.platform === 'LoopKids' ? '#facc15' : '#f07842',
+                        background: detailItem.platform === 'LoopKids' ? 'rgba(239, 195, 72, 0.2)' : 'rgba(38, 30, 15, 0.9)',
+                        border: detailItem.platform === 'LoopKids' ? '1px solid rgba(239, 195, 72, 0.55)' : '1px solid #5a4515',
+                        color: detailItem.platform === 'LoopKids' ? '#F9D558' : '#EFC348',
                         fontWeight: 650
                       }}
                     >
@@ -2467,7 +2618,7 @@ export default function SingerDubbing() {
                 </p>
                 {activeTab === 'singers' ? (
                   <p style={{ fontSize: '12.5px', color: '#8a96a8', margin: 0 }}>
-                    ISRC: <span style={{ color: '#f07842', fontFamily: 'monospace' }}>{detailItem.isrcCode}</span> · Duration: {detailItem.duration}
+                    ISRC: <span style={{ color: '#EFC348', fontFamily: 'monospace' }}>{detailItem.isrcCode}</span> · Duration: {detailItem.duration}
                   </p>
                 ) : (
                   <p style={{ fontSize: '12.5px', color: '#8a96a8', margin: 0 }}>

@@ -57,13 +57,13 @@ export default function MediaImagePicker({
               width: '26px',
               height: '26px',
               borderRadius: '6px',
-              background: 'rgba(240, 120, 66, 0.15)',
+              background: 'rgba(239, 195, 72, 0.16)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <ImageIcon size={15} color="#f07842" />
+            <ImageIcon size={15} color="#EFC348" />
           </div>
           <div>
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#f4f0eb', display: 'block' }}>
@@ -127,17 +127,17 @@ export default function MediaImagePicker({
             alignItems: 'center',
             gap: '7px',
             padding: '9px 15px',
-            background: 'rgba(240, 120, 66, 0.15)',
-            border: '1px solid #f07842',
+            background: 'rgba(239, 195, 72, 0.16)',
+            border: '1px solid #EFC348',
             borderRadius: '7px',
-            color: '#f07842',
+            color: '#EFC348',
             cursor: 'pointer',
             fontSize: '12px',
             fontWeight: 600,
             whiteSpace: 'nowrap'
           }}
         >
-          <Upload size={14} color="#f07842" /> Browse File
+          <Upload size={14} color="#EFC348" /> Browse File
         </button>
         <input
           ref={fileInputRef}
@@ -185,8 +185,8 @@ export default function MediaImagePicker({
                 <Check size={13} color="#67d7a3" /> Custom picture attached
               </span>
             ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#e09868' }}>
-                <Sparkles size={13} color="#f07842" /> Auto-matched poster / singer portrait active
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#EFC348' }}>
+                <Sparkles size={13} color="#EFC348" /> Auto-matched poster / singer portrait active
               </span>
             )}
             <span style={{ display: 'block', fontSize: '10px', color: '#7a746e', marginTop: '2px' }}>
